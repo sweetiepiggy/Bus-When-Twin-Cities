@@ -19,20 +19,24 @@
 
 package com.sweetiepiggy.buswhentwincities;
 
-import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import java.util.List;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.net.Uri;
+ import android.os.Bundle;
+ import android.support.v7.widget.RecyclerView;
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.ImageButton;
+ import android.widget.TextView;
+
+ import java.util.List;
 
 public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder> {
     private List<NexTrip> mNexTrips;
     private Context mCtxt;
 
-    public static class StopIdViewHolder extends RecyclerView.ViewHolder {
+    public class StopIdViewHolder extends RecyclerView.ViewHolder {
         public TextView mRouteTextView;
         public TextView mDirectionTextView;
         public TextView mDescriptionTextView;
@@ -48,6 +52,22 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
             mDepartureTextTextView = (TextView) v.findViewById(R.id.departure_text);
             mScheduledTextView = (TextView) v.findViewById(R.id.scheduled);
             mMapButton = (ImageButton) v.findViewById(R.id.map_button);
+            mMapButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        NexTrip nexTrip = mNexTrips.get(getAdapterPosition());
+                        String latitudeStr = Double.toString(nexTrip.getVehicleLatitude());
+                        String longitudeStr = Double.toString(nexTrip.getVehicleLongitude());
+                        Uri uri = Uri.parse("geo:" + latitudeStr + "," + longitudeStr + "?q="
+                                            + Uri.encode(latitudeStr + "," + longitudeStr + "("
+                                                         + mCtxt.getResources().getString(R.string.bus)
+                                                         + " " + nexTrip.getRoute()
+                                                         + nexTrip.getTerminal() + ")"));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent.setPackage("com.google.android.apps.maps");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mCtxt.startActivity(intent);
+                    }
+                });
         }
     }
 
@@ -71,8 +91,8 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
         holder.mDirectionTextView.setText(translateDirection(nexTrip.getRouteDirection()));
         holder.mDescriptionTextView.setText(nexTrip.getDescription());
         holder.mDepartureTextTextView.setText(translateDeparture(nexTrip.getDepartureText()));
-        // holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
-        holder.mMapButton.setVisibility(View.GONE);
+        holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
+        // holder.mMapButton.setVisibility(View.GONE);
         holder.mScheduledTextView.setText(mCtxt.getResources().getString(nexTrip.isActual()
                                                                          ? R.string.real_time
                                                                          : R.string.scheduled));

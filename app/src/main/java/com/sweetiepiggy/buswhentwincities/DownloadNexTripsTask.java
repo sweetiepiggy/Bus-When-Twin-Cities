@@ -207,9 +207,9 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
                 } else if (name.equals("VehicleHeading")) {
                     vehicleHeading = reader.nextDouble();
                 } else if (name.equals("VehicleLatitude")) {
-                    vehicleHeading = reader.nextDouble();
+                    vehicleLatitude = reader.nextDouble();
                 } else if (name.equals("VehicleLongitude")) {
-                    vehicleHeading = reader.nextDouble();
+                    vehicleLongitude = reader.nextDouble();
                 } else {
                     reader.skipValue();
                 }
