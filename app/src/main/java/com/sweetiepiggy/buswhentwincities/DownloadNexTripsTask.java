@@ -103,7 +103,7 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
             }
         } while (retry);
 
-        if (firstAlertMessage != null) {
+        if (mAlertMessage != null && firstAlertMessage != null) {
             mAlertMessage = firstAlertMessage;
         }
 
