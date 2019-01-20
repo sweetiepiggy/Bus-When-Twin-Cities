@@ -20,82 +20,82 @@
 package com.sweetiepiggy.buswhentwincities;
 
 public class NexTrip {
-	private boolean mActual;
-	private int mBlockNumber;
-	private String mDepartureText;
-	private String mDepartureTime;
-	private String mDescription;
-	private String mGate;
-	private String mRoute;
-	private String mRouteDirection;
-	private String mTerminal;
-	private double mVehicleHeading;
-	private double mVehicleLatitude;
-	private double mVehicleLongitude;
+    private boolean mActual;
+    private int mBlockNumber;
+    private String mDepartureText;
+    private String mDepartureTime;
+    private String mDescription;
+    private String mGate;
+    private String mRoute;
+    private String mRouteDirection;
+    private String mTerminal;
+    private double mVehicleHeading;
+    private double mVehicleLatitude;
+    private double mVehicleLongitude;
 
-	public NexTrip(boolean actual, int blockNumber, String departureText,
-				   String departureTime, String description, String gate,
-				   String route, String routeDirection, String terminal,
-				   double vehicleHeading, double vehicleLatitude,
-				   double vehicleLongitude) {
-		mActual = actual;
-		mBlockNumber = blockNumber;
-		mDepartureText = departureText;
-		mDepartureTime = departureTime;
-		mDescription = description;
-		mGate = gate;
-		mRoute = route;
-		mRouteDirection = routeDirection;
-		mTerminal = terminal;
-		mVehicleHeading = vehicleHeading;
-		mVehicleLatitude = vehicleLatitude;
-		mVehicleLongitude = vehicleLongitude;
-	}
+    public NexTrip(boolean actual, int blockNumber, String departureText,
+                   String departureTime, String description, String gate,
+                   String route, String routeDirection, String terminal,
+                   double vehicleHeading, double vehicleLatitude,
+                   double vehicleLongitude) {
+        mActual = actual;
+        mBlockNumber = blockNumber;
+        mDepartureText = departureText;
+        mDepartureTime = departureTime;
+        mDescription = description;
+        mGate = gate;
+        mRoute = route;
+        mRouteDirection = routeDirection;
+        mTerminal = terminal;
+        mVehicleHeading = vehicleHeading;
+        mVehicleLatitude = vehicleLatitude;
+        mVehicleLongitude = vehicleLongitude;
+    }
 
-	boolean isActual() {
-		return mActual;
-	}
+    boolean isActual() {
+        return mActual;
+    }
 
-	int getBlockNumber() {
-		return mBlockNumber;
-	}
-	String getDepartureText() {
-		return mDepartureText;
-	}
+    int getBlockNumber() {
+        return mBlockNumber;
+    }
+    String getDepartureText() {
+        return mDepartureText;
+    }
 
-	String getDepartureTime() {
-		return mDepartureTime;
-	}
+    String getDepartureTime() {
+        return mDepartureTime;
+    }
 
-	String getDescription() {
-		return mDescription;
-	}
+    String getDescription() {
+        return mDescription;
+    }
 
-	String getGate() {
-		return mGate;
-	}
+    String getGate() {
+        return mGate;
+    }
 
-	String getRoute() {
-		return mRoute;
-	}
+    String getRoute() {
+        return mRoute;
+    }
 
-	String getRouteDirection() {
-		return mRouteDirection;
-	}
+    String getRouteDirection() {
+        return mRouteDirection;
+    }
 
-	String getTerminal() {
-		return mTerminal;
-	}
+    String getTerminal() {
+        return mTerminal;
+    }
 
-	double getVehicleHeading() {
-		return mVehicleHeading;
-	}
+    double getVehicleHeading() {
+        return mVehicleHeading;
+    }
 
-	double getVehicleLatitude() {
-		return mVehicleLatitude;
-	}
+    double getVehicleLatitude() {
+        return mVehicleLatitude;
+    }
 
-	double getVehicleLongitude() {
-		return mVehicleLongitude;
-	}
+    double getVehicleLongitude() {
+        return mVehicleLongitude;
+    }
 }

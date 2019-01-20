@@ -28,7 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 public class AboutActivity extends AppCompatActivity {
-	private static final String EMAIL_ADDRESS = "sweetiepiggyapps@gmail.com";
+    private static final String EMAIL_ADDRESS = "sweetiepiggyapps@gmail.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +41,9 @@ public class AboutActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-				Intent intent = new Intent(Intent.ACTION_SENDTO,
-										   Uri.fromParts("mailto", EMAIL_ADDRESS, null));
-				startActivity(Intent.createChooser(intent, null));
+                Intent intent = new Intent(Intent.ACTION_SENDTO,
+                                           Uri.fromParts("mailto", EMAIL_ADDRESS, null));
+                startActivity(Intent.createChooser(intent, null));
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

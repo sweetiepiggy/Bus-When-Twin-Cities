@@ -33,114 +33,114 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class StopIdActivity extends AppCompatActivity
-							implements DownloadNexTripsTask.OnDownloadedListener {
-	private static final long MIN_SECONDS_BETWEEN_REFRESH = 30;
-	private RecyclerView mResultsRecyclerView;
-	private RecyclerView.Adapter mAdapter;
-	private RecyclerView.LayoutManager mLayoutManager;
-	private String mStopId = null;
-	private List<NexTrip> mNexTrips = null;
-	private DownloadNexTripsTask mDownloadNexTripsTask = null;
-	private long mLastUpdate = 0;
+                            implements DownloadNexTripsTask.OnDownloadedListener {
+    private static final long MIN_SECONDS_BETWEEN_REFRESH = 30;
+    private RecyclerView mResultsRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private String mStopId = null;
+    private List<NexTrip> mNexTrips = null;
+    private DownloadNexTripsTask mDownloadNexTripsTask = null;
+    private long mLastUpdate = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stop_id);
 
-		if (savedInstanceState == null) {
-			Bundle b = getIntent().getExtras();
-			if (b != null) {
-				loadState(b);
-			}
-		} else {
-			loadState(savedInstanceState);
-		}
+        if (savedInstanceState == null) {
+            Bundle b = getIntent().getExtras();
+            if (b != null) {
+                loadState(b);
+            }
+        } else {
+            loadState(savedInstanceState);
+        }
 
-		setTitle(getResources().getString(R.string.stop) + " #" + mStopId);
+        setTitle(getResources().getString(R.string.stop) + " #" + mStopId);
 
-		mResultsRecyclerView = (RecyclerView) findViewById(R.id.results_recycler_view);
+        mResultsRecyclerView = (RecyclerView) findViewById(R.id.results_recycler_view);
 
-		mLayoutManager = new LinearLayoutManager(this);
-		mResultsRecyclerView.setLayoutManager(mLayoutManager);
-		mResultsRecyclerView.addItemDecoration(new DividerItemDecoration(mResultsRecyclerView.getContext(),
-																		 DividerItemDecoration.VERTICAL));
+        mLayoutManager = new LinearLayoutManager(this);
+        mResultsRecyclerView.setLayoutManager(mLayoutManager);
+        mResultsRecyclerView.addItemDecoration(new DividerItemDecoration(mResultsRecyclerView.getContext(),
+                                                                         DividerItemDecoration.VERTICAL));
 
-		mNexTrips = new ArrayList<NexTrip>();
-		mAdapter = new StopIdAdapter(getApplicationContext(), mNexTrips);
-		mResultsRecyclerView.setAdapter(mAdapter);
+        mNexTrips = new ArrayList<NexTrip>();
+        mAdapter = new StopIdAdapter(getApplicationContext(), mNexTrips);
+        mResultsRecyclerView.setAdapter(mAdapter);
 
-		mDownloadNexTripsTask = new DownloadNexTripsTask(this, this, mStopId);
-		mDownloadNexTripsTask.execute();
+        mDownloadNexTripsTask = new DownloadNexTripsTask(this, this, mStopId);
+        mDownloadNexTripsTask.execute();
 
-		// FloatingActionButton fab = findViewById(R.id.fab);
-		// fab.setOnClickListener(new View.OnClickListener() {
-		// 		@Override
-		// 		public void onClick(View view) {
-		// 			if (mDownloadNexTripsTask.getStatus() == AsyncTask.Status.FINISHED) {
-		// 				mDownloadNexTripsTask = new DownloadNexTripsTask(StopIdActivity.this,
-		// 																 StopIdActivity.this,
-		// 																 mStopId);
-		// 				mDownloadNexTripsTask.execute();
-		// 			}
-		// 		}
-		// 	});
+        // FloatingActionButton fab = findViewById(R.id.fab);
+        // fab.setOnClickListener(new View.OnClickListener() {
+        //      @Override
+        //      public void onClick(View view) {
+        //          if (mDownloadNexTripsTask.getStatus() == AsyncTask.Status.FINISHED) {
+        //              mDownloadNexTripsTask = new DownloadNexTripsTask(StopIdActivity.this,
+        //                                                               StopIdActivity.this,
+        //                                                               mStopId);
+        //              mDownloadNexTripsTask.execute();
+        //          }
+        //      }
+        //  });
     }
 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		super.onSaveInstanceState(savedInstanceState);
-		savedInstanceState.putString("stopId", mStopId);
-	}
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("stopId", mStopId);
+    }
 
-	private void loadState(Bundle b) {
-		mStopId = b.getString("stopId");
-	}
+    private void loadState(Bundle b) {
+        mStopId = b.getString("stopId");
+    }
 
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		loadState(savedInstanceState);
-	}
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        loadState(savedInstanceState);
+    }
 
-	@Override
-	public void onDestroy() {
-		if (mDownloadNexTripsTask != null) {
-			mDownloadNexTripsTask.cancel(true);
-		}
-		super.onDestroy();
-	}
+    @Override
+    public void onDestroy() {
+        if (mDownloadNexTripsTask != null) {
+            mDownloadNexTripsTask.cancel(true);
+        }
+        super.onDestroy();
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_stop_id, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_stop_id, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_refresh:
-			if (mDownloadNexTripsTask.getStatus() == AsyncTask.Status.FINISHED
-				&& getUnixTime() - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-				mDownloadNexTripsTask = new DownloadNexTripsTask(this, this, mStopId);
-				mDownloadNexTripsTask.execute();
-			}
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.action_refresh:
+            if (mDownloadNexTripsTask.getStatus() == AsyncTask.Status.FINISHED
+                && getUnixTime() - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                mDownloadNexTripsTask = new DownloadNexTripsTask(this, this, mStopId);
+                mDownloadNexTripsTask.execute();
+            }
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 
-	public void onDownloaded(List<NexTrip> nexTrips) {
-		mNexTrips.clear();
-		mLastUpdate = getUnixTime();
-		mNexTrips.addAll(nexTrips);
-		mAdapter.notifyDataSetChanged();
-	}
+    public void onDownloaded(List<NexTrip> nexTrips) {
+        mNexTrips.clear();
+        mLastUpdate = getUnixTime();
+        mNexTrips.addAll(nexTrips);
+        mAdapter.notifyDataSetChanged();
+    }
 
-	private long getUnixTime() {
-		return Calendar.getInstance().getTimeInMillis() / 1000L;
-	}
+    private long getUnixTime() {
+        return Calendar.getInstance().getTimeInMillis() / 1000L;
+    }
 }
 

@@ -1,4 +1,4 @@
-/*
+ /*
     Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
@@ -29,80 +29,80 @@ import android.widget.TextView;
 import java.util.List;
 
 public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder> {
-	private List<NexTrip> mNexTrips;
-	private Context mCtxt;
+    private List<NexTrip> mNexTrips;
+    private Context mCtxt;
 
-	public static class StopIdViewHolder extends RecyclerView.ViewHolder {
-		public TextView mRouteTextView;
-		public TextView mDirectionTextView;
-		public TextView mDescriptionTextView;
-		public TextView mDepartureTextTextView;
-		public TextView mScheduledTextView;
-		public ImageButton mMapButton;
+    public static class StopIdViewHolder extends RecyclerView.ViewHolder {
+        public TextView mRouteTextView;
+        public TextView mDirectionTextView;
+        public TextView mDescriptionTextView;
+        public TextView mDepartureTextTextView;
+        public TextView mScheduledTextView;
+        public ImageButton mMapButton;
 
-		public StopIdViewHolder(View v) {
-			super(v);
-			mRouteTextView = (TextView) v.findViewById(R.id.route);
-			mDirectionTextView = (TextView) v.findViewById(R.id.direction);
-			mDescriptionTextView = (TextView) v.findViewById(R.id.description);
-			mDepartureTextTextView = (TextView) v.findViewById(R.id.departure_text);
-			mScheduledTextView = (TextView) v.findViewById(R.id.scheduled);
-			mMapButton = (ImageButton) v.findViewById(R.id.map_button);
-		}
-	}
+        public StopIdViewHolder(View v) {
+            super(v);
+            mRouteTextView = (TextView) v.findViewById(R.id.route);
+            mDirectionTextView = (TextView) v.findViewById(R.id.direction);
+            mDescriptionTextView = (TextView) v.findViewById(R.id.description);
+            mDepartureTextTextView = (TextView) v.findViewById(R.id.departure_text);
+            mScheduledTextView = (TextView) v.findViewById(R.id.scheduled);
+            mMapButton = (ImageButton) v.findViewById(R.id.map_button);
+        }
+    }
 
-	public StopIdAdapter(Context ctxt, List<NexTrip> nexTrips) {
-		mCtxt = ctxt;
-		mNexTrips = nexTrips;
-	}
+    public StopIdAdapter(Context ctxt, List<NexTrip> nexTrips) {
+        mCtxt = ctxt;
+        mNexTrips = nexTrips;
+    }
 
-	@Override
-	public StopIdAdapter.StopIdViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		View v = LayoutInflater.from(parent.getContext())
-			.inflate(R.layout.stop_id_item, parent, false);
-		StopIdViewHolder vh = new StopIdViewHolder(v);
-		return vh;
-	}
+    @Override
+    public StopIdAdapter.StopIdViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.stop_id_item, parent, false);
+        StopIdViewHolder vh = new StopIdViewHolder(v);
+        return vh;
+    }
 
-	@Override
-	public void onBindViewHolder(StopIdViewHolder holder, int position) {
-		NexTrip nexTrip = mNexTrips.get(position);
-		holder.mRouteTextView.setText(nexTrip.getRoute() + nexTrip.getTerminal());
-		holder.mDirectionTextView.setText(translateDirection(nexTrip.getRouteDirection()));
-		holder.mDescriptionTextView.setText(nexTrip.getDescription());
-		holder.mDepartureTextTextView.setText(translateDeparture(nexTrip.getDepartureText()));
-		// holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
-		holder.mMapButton.setVisibility(View.GONE);
-		holder.mScheduledTextView.setText(mCtxt.getResources().getString(nexTrip.isActual()
-																		 ? R.string.real_time
-																		 : R.string.scheduled));
-	}
+    @Override
+    public void onBindViewHolder(StopIdViewHolder holder, int position) {
+        NexTrip nexTrip = mNexTrips.get(position);
+        holder.mRouteTextView.setText(nexTrip.getRoute() + nexTrip.getTerminal());
+        holder.mDirectionTextView.setText(translateDirection(nexTrip.getRouteDirection()));
+        holder.mDescriptionTextView.setText(nexTrip.getDescription());
+        holder.mDepartureTextTextView.setText(translateDeparture(nexTrip.getDepartureText()));
+        // holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
+        holder.mMapButton.setVisibility(View.GONE);
+        holder.mScheduledTextView.setText(mCtxt.getResources().getString(nexTrip.isActual()
+                                                                         ? R.string.real_time
+                                                                         : R.string.scheduled));
+    }
 
-	@Override
-	public int getItemCount() {
-		return mNexTrips.size();
-	}
+    @Override
+    public int getItemCount() {
+        return mNexTrips.size();
+    }
 
-	String translateDeparture(String departure) {
-		if (departure.endsWith(" Min")) {
-			return departure.substring(0, departure.length() - 3)
-				+ mCtxt.getResources().getString(R.string.minutes);
-		} else {
-			return departure;
-		}
-	}
+    String translateDeparture(String departure) {
+        if (departure.endsWith(" Min")) {
+            return departure.substring(0, departure.length() - 3)
+                + mCtxt.getResources().getString(R.string.minutes);
+        } else {
+            return departure;
+        }
+    }
 
-	String translateDirection(String dir) {
-		if (dir.equals("SOUTHBOUND")) {
-			return mCtxt.getResources().getString(R.string.south);
-		} else if (dir.equals("EASTBOUND")) {
-			return mCtxt.getResources().getString(R.string.east);
-		} else if (dir.equals("WESTBOUND")) {
-			return mCtxt.getResources().getString(R.string.west);
-		} else if (dir.equals("NORTHBOUND")) {
-			return mCtxt.getResources().getString(R.string.north);
-		} else {
-			return dir;
-		}
-	}
+    String translateDirection(String dir) {
+        if (dir.equals("SOUTHBOUND")) {
+            return mCtxt.getResources().getString(R.string.south);
+        } else if (dir.equals("EASTBOUND")) {
+            return mCtxt.getResources().getString(R.string.east);
+        } else if (dir.equals("WESTBOUND")) {
+            return mCtxt.getResources().getString(R.string.west);
+        } else if (dir.equals("NORTHBOUND")) {
+            return mCtxt.getResources().getString(R.string.north);
+        } else {
+            return dir;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-/*
+g/*
     Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
@@ -31,77 +31,77 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
-	private static final String SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities";
-	// private CheckStopIdTask mCheckStopIdTask = null;
+    private static final String SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities";
+    // private CheckStopIdTask mCheckStopIdTask = null;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		if (savedInstanceState != null) {
-			restoreSavedState(savedInstanceState);
-		}
+        if (savedInstanceState != null) {
+            restoreSavedState(savedInstanceState);
+        }
 
-		Toolbar toolbar = findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-		FloatingActionButton fab = findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View view) {
-					String stopId = ((EditText) findViewById(R.id.stopIdEntry)).getText().toString();
-					if (stopId.length() == 0) {
-						((EditText) findViewById(R.id.stopIdEntry)).setError(getResources().getString(R.string.enter_stop_id));
-					} else {
-						Intent intent = new Intent(getApplicationContext(), StopIdActivity.class);
-						Bundle b = new Bundle();
-						b.putString("stopId", stopId);
-						intent.putExtras(b);
-						startActivity(intent);
-					}
-				}
-			});
-	}
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String stopId = ((EditText) findViewById(R.id.stopIdEntry)).getText().toString();
+                    if (stopId.length() == 0) {
+                        ((EditText) findViewById(R.id.stopIdEntry)).setError(getResources().getString(R.string.enter_stop_id));
+                    } else {
+                        Intent intent = new Intent(getApplicationContext(), StopIdActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("stopId", stopId);
+                        intent.putExtras(b);
+                        startActivity(intent);
+                    }
+                }
+            });
+    }
 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		savedInstanceState.putString("stopId",
-									 ((EditText) findViewById(R.id.stopIdEntry)).getText().toString());
-	}
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString("stopId",
+                                     ((EditText) findViewById(R.id.stopIdEntry)).getText().toString());
+    }
 
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		restoreSavedState(savedInstanceState);
-	}
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        restoreSavedState(savedInstanceState);
+    }
 
-	private void restoreSavedState(Bundle savedInstanceState) {
-		String stopId = savedInstanceState.getString("stopId");
-		((EditText) findViewById(R.id.stopIdEntry)).setText(stopId);
-	}
+    private void restoreSavedState(Bundle savedInstanceState) {
+        String stopId = savedInstanceState.getString("stopId");
+        ((EditText) findViewById(R.id.stopIdEntry)).setText(stopId);
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_main, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent;
-		switch (item.getItemId()) {
-		case R.id.action_about:
-			intent = new Intent(getApplicationContext(), AboutActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.action_source:
-			intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.parse(SOURCE_URL), "text/html");
-			startActivity(Intent.createChooser(intent, null));
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+        case R.id.action_about:
+            intent = new Intent(getApplicationContext(), AboutActivity.class);
+            startActivity(intent);
+            return true;
+        case R.id.action_source:
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.parse(SOURCE_URL), "text/html");
+            startActivity(Intent.createChooser(intent, null));
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
 }
