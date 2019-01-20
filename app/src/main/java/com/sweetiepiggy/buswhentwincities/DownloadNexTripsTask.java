@@ -37,7 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
-	private static final String NEXTRIPS_URL = "https://svc.metrotransit.org/NexTrip/";
+	private static final String NEXTRIPS_URL = "svc.metrotransit.org/NexTrip/";
+	private static boolean mUseHttps = true;
 	private Context mContext;
 	private OnDownloadedListener mDownloadedListener;
 	private String mAlertMessage = null;
@@ -63,26 +64,47 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		try {
-			mNexTrips = downloadNexTrips(mStopId);
-		} catch (UnknownHostException e) { // probably no internet connection
-			mAlertMessage = mContext.getResources().getString(R.string.unknown_host);
-		} catch (java.io.FileNotFoundException e) {
-			mAlertMessage =
-				mContext.getResources().getString(R.string.file_not_found) + ":\n" + e.getMessage();
-		} catch (java.net.SocketTimeoutException e) {
-			mAlertMessage =
-				mContext.getResources().getString(R.string.timed_out) + ":\n" + e.getMessage();
-		} catch (UnauthorizedException e) {
-			mAlertMessage = mContext.getResources().getString(R.string.unauthorized);
-		} catch (SocketException e) {
-			mAlertMessage = e.getMessage();
-		} catch (MalformedURLException e) {
-			mAlertMessage = e.getMessage();
-		} catch (UnsupportedEncodingException e) {
-			mAlertMessage = e.getMessage();
-		} catch (IOException e) {
-			mAlertMessage = e.getMessage();
+		boolean retry;
+		String firstAlertMessage = null;
+
+		do {
+			retry = false;
+			try {
+				mNexTrips = downloadNexTrips(mStopId);
+			} catch (UnknownHostException e) { // probably no internet connection
+				mAlertMessage = mContext.getResources().getString(R.string.unknown_host);
+			} catch (java.io.FileNotFoundException e) {
+				mAlertMessage =
+					mContext.getResources().getString(R.string.file_not_found) + ":\n" + e.getMessage();
+			} catch (java.net.SocketTimeoutException e) {
+				mAlertMessage =
+					mContext.getResources().getString(R.string.timed_out) + ":\n" + e.getMessage();
+			} catch (UnauthorizedException e) {
+				mAlertMessage = mContext.getResources().getString(R.string.unauthorized);
+			} catch (SocketException e) {
+				mAlertMessage = e.getMessage();
+			} catch (MalformedURLException e) {
+				mAlertMessage = e.getMessage();
+			} catch (UnsupportedEncodingException e) {
+				mAlertMessage = e.getMessage();
+			} catch (IOException e) {
+				if (firstAlertMessage == null) {
+					firstAlertMessage = e.getMessage();
+				}
+				// old Android versions seem to have a problem with https and
+				// throw IOException: CertPathValidatorException,
+				// try again using http
+				if (mUseHttps) {
+					mUseHttps = false;
+					retry = true;
+				} else {
+					mAlertMessage = e.getMessage();
+				}
+			}
+		} while (retry);
+
+		if (firstAlertMessage != null) {
+			mAlertMessage = firstAlertMessage;
 		}
 
 		return null;
@@ -94,7 +116,9 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
 		if (mAlertMessage != null && mContext != null) {
 			alert(mAlertMessage);
 		}
-		mDownloadedListener.onDownloaded(mNexTrips);
+		if (mNexTrips != null) {
+			mDownloadedListener.onDownloaded(mNexTrips);
+		}
 	}
 
 	private void alert(String msg)
@@ -113,7 +137,8 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
 		throws MalformedURLException, UnsupportedEncodingException, IOException {
 		List<NexTrip> nexTrips = null;
 
-		final String nexTripsUrl = NEXTRIPS_URL + stopId + "?format=json";
+		final String nexTripsUrl = (mUseHttps ? "https://" : "http://")
+			+ NEXTRIPS_URL + stopId + "?format=json";
 
 		URL url = new URL(nexTripsUrl);
 		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
