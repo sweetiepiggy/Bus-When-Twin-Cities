@@ -116,15 +116,19 @@ public class MapsActivity extends FragmentActivity
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location lastKnownLocation = locationManager
             .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        LatLng myLocationLatLng = new LatLng(lastKnownLocation.getLatitude(),
-                                             lastKnownLocation.getLongitude());
-        LatLng vehicleLatLng = new LatLng(mVehicleLatitude, mVehicleLongitude);
-        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-        boundsBuilder.include(vehicleLatLng);
-        boundsBuilder.include(myLocationLatLng);
-        LatLngBounds bounds = boundsBuilder.build();
-        int padding = 128;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        if (lastKnownLocation == null) {
+            zoomToVehicle();
+        } else {
+            LatLng myLocationLatLng = new LatLng(lastKnownLocation.getLatitude(),
+                                                 lastKnownLocation.getLongitude());
+            LatLng vehicleLatLng = new LatLng(mVehicleLatitude, mVehicleLongitude);
+            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+            boundsBuilder.include(vehicleLatLng);
+            boundsBuilder.include(myLocationLatLng);
+            LatLngBounds bounds = boundsBuilder.build();
+            int padding = 128;
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        }
     }
 
     private void zoomToVehicle() {
