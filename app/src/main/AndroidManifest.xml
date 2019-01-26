@@ -3,11 +3,13 @@
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.sweetiepiggy.buswhentwincities">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+		     android:required="false" />
 
     <dist:module dist:instant="true" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"
+		     android:required="true" />
 
     <application
         android:allowBackup="true"
