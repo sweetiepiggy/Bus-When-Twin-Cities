@@ -54,16 +54,26 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
             mMapButton = (ImageButton) v.findViewById(R.id.map_button);
             mMapButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
+                        // NexTrip nexTrip = mNexTrips.get(getAdapterPosition());
+                        // String latitudeStr = Double.toString(nexTrip.getVehicleLatitude());
+                        // String longitudeStr = Double.toString(nexTrip.getVehicleLongitude());
+                        // Uri uri = Uri.parse("geo:" + latitudeStr + "," + longitudeStr + "?q="
+                        //                     + Uri.encode(latitudeStr + "," + longitudeStr + "("
+                        //                                  + mCtxt.getResources().getString(R.string.bus)
+                        //                                  + " " + nexTrip.getRoute()
+                        //                                  + nexTrip.getTerminal() + ")"));
+                        // Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        // intent.setPackage("com.google.android.apps.maps");
+                        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        // mCtxt.startActivity(intent);
                         NexTrip nexTrip = mNexTrips.get(getAdapterPosition());
-                        String latitudeStr = Double.toString(nexTrip.getVehicleLatitude());
-                        String longitudeStr = Double.toString(nexTrip.getVehicleLongitude());
-                        Uri uri = Uri.parse("geo:" + latitudeStr + "," + longitudeStr + "?q="
-                                            + Uri.encode(latitudeStr + "," + longitudeStr + "("
-                                                         + mCtxt.getResources().getString(R.string.bus)
-                                                         + " " + nexTrip.getRoute()
-                                                         + nexTrip.getTerminal() + ")"));
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        intent.setPackage("com.google.android.apps.maps");
+                        Intent intent = new Intent(mCtxt, MapsActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("routeAndTerminal", nexTrip.getRoute() + nexTrip.getTerminal());
+                        b.putString("departureText", nexTrip.getDepartureText());
+                        b.putDouble("vehicleLatitude", nexTrip.getVehicleLatitude());
+                        b.putDouble("vehicleLongitude", nexTrip.getVehicleLongitude());
+                        intent.putExtras(b);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mCtxt.startActivity(intent);
                     }
