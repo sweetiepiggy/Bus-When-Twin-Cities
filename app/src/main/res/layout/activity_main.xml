@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_menu_search"
-        tools:contentDescription="@string/main_search_icon_content_description" />
+        android:contentDescription="@string/main_search_icon_content_description"
+        app:srcCompat="@android:drawable/ic_menu_search" />
 
 </android.support.design.widget.CoordinatorLayout>

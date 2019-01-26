@@ -62,6 +62,6 @@
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
         app:srcCompat="@android:drawable/ic_dialog_email"
-        tools:contentDescription="@string/about_email_icon_content_description" />
+        android:contentDescription="@string/about_email_icon_content_description" />
 
 </android.support.design.widget.CoordinatorLayout>
