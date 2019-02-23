@@ -25,6 +25,7 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +43,7 @@ public class StopIdActivity extends AppCompatActivity
     private List<NexTrip> mNexTrips = null;
     private DownloadNexTripsTask mDownloadNexTripsTask = null;
     private long mLastUpdate = 0;
+    private boolean mIsFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +128,12 @@ public class StopIdActivity extends AppCompatActivity
                 mDownloadNexTripsTask = new DownloadNexTripsTask(this, this, mStopId);
                 mDownloadNexTripsTask.execute();
             }
+            return true;
+        case R.id.action_favorite:
+            mIsFavorite = !mIsFavorite;
+            item.setIcon(ContextCompat.getDrawable(this, mIsFavorite
+                                                   ? android.R.drawable.btn_star_big_on
+                                                   : android.R.drawable.btn_star_big_off));
             return true;
         default:
             return super.onOptionsItemSelected(item);

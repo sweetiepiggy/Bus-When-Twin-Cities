@@ -22,8 +22,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.buswhentwincities.StopIdActivity">
     <item
-        android:id="@+id/action_refresh"
+        android:id="@+id/action_favorite"
+        android:icon="@android:drawable/btn_star_big_off"
         android:orderInCategory="100"
+        android:title="@string/action_favorite"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="200"
 	android:icon="@drawable/ic_action_refresh"
         android:title="@string/action_refresh"
         app:showAsAction="ifRoom" />
