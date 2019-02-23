@@ -106,12 +106,11 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
         if (nexTrip.getDepartureTime().isEmpty()) {
             holder.mDepartureTimeTextView.setVisibility(View.GONE);
         } else {
+            holder.mDepartureTimeTextView.setVisibility(View.VISIBLE);
             holder.mDepartureTimeTextView.setText(nexTrip.getDepartureTime());
         }
 
-        if (!nexTrip.isActual()) {
-            holder.mMapButton.setVisibility(View.GONE);
-        }
+        holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
 
         // holder.mMapButton.setVisibility(View.GONE);
         holder.mScheduledTextView.setText(mCtxt.getResources().getString(nexTrip.isActual()
