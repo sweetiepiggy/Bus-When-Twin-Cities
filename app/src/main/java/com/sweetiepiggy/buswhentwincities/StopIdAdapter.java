@@ -41,6 +41,7 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
         public TextView mDirectionTextView;
         public TextView mDescriptionTextView;
         public TextView mDepartureTextTextView;
+        public TextView mDepartureTimeTextView;
         public TextView mScheduledTextView;
         public ImageButton mMapButton;
 
@@ -50,6 +51,7 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
             mDirectionTextView = (TextView) v.findViewById(R.id.direction);
             mDescriptionTextView = (TextView) v.findViewById(R.id.description);
             mDepartureTextTextView = (TextView) v.findViewById(R.id.departure_text);
+            mDepartureTimeTextView = (TextView) v.findViewById(R.id.departure_time);
             mScheduledTextView = (TextView) v.findViewById(R.id.scheduled);
             mMapButton = (ImageButton) v.findViewById(R.id.map_button);
             mMapButton.setOnClickListener(new View.OnClickListener() {
@@ -98,10 +100,19 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
     public void onBindViewHolder(StopIdViewHolder holder, int position) {
         NexTrip nexTrip = mNexTrips.get(position);
         holder.mRouteTextView.setText(nexTrip.getRoute() + nexTrip.getTerminal());
-        holder.mDirectionTextView.setText(translateDirection(nexTrip.getRouteDirection()));
+        holder.mDirectionTextView.setText(nexTrip.getRouteDirection());
         holder.mDescriptionTextView.setText(nexTrip.getDescription());
-        holder.mDepartureTextTextView.setText(translateDeparture(nexTrip.getDepartureText()));
-        holder.mMapButton.setVisibility(nexTrip.isActual() ? View.VISIBLE : View.GONE);
+        holder.mDepartureTextTextView.setText(nexTrip.getDepartureText());
+        if (nexTrip.getDepartureTime().isEmpty()) {
+            holder.mDepartureTimeTextView.setVisibility(View.GONE);
+        } else {
+            holder.mDepartureTimeTextView.setText(nexTrip.getDepartureTime());
+        }
+
+        if (!nexTrip.isActual()) {
+            holder.mMapButton.setVisibility(View.GONE);
+        }
+
         // holder.mMapButton.setVisibility(View.GONE);
         holder.mScheduledTextView.setText(mCtxt.getResources().getString(nexTrip.isActual()
                                                                          ? R.string.real_time
@@ -113,26 +124,4 @@ public class StopIdAdapter extends RecyclerView.Adapter<StopIdAdapter.StopIdView
         return mNexTrips.size();
     }
 
-    String translateDeparture(String departure) {
-        if (departure.endsWith(" Min")) {
-            return departure.substring(0, departure.length() - 3)
-                + mCtxt.getResources().getString(R.string.minutes);
-        } else {
-            return departure;
-        }
-    }
-
-    String translateDirection(String dir) {
-        if (dir.equals("SOUTHBOUND")) {
-            return mCtxt.getResources().getString(R.string.south);
-        } else if (dir.equals("EASTBOUND")) {
-            return mCtxt.getResources().getString(R.string.east);
-        } else if (dir.equals("WESTBOUND")) {
-            return mCtxt.getResources().getString(R.string.west);
-        } else if (dir.equals("NORTHBOUND")) {
-            return mCtxt.getResources().getString(R.string.north);
-        } else {
-            return dir;
-        }
-    }
 }

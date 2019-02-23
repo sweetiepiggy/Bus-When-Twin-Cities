@@ -19,7 +19,14 @@
 
 package com.sweetiepiggy.buswhentwincities;
 
+import android.content.Context;
+import android.text.format.DateFormat;
+
+import java.util.Calendar;
+import java.util.Date;
+
 public class NexTrip {
+    private Context mCtxt;
     private boolean mActual;
     private int mBlockNumber;
     private String mDepartureText;
@@ -33,23 +40,39 @@ public class NexTrip {
     private double mVehicleLatitude;
     private double mVehicleLongitude;
 
-    public NexTrip(boolean actual, int blockNumber, String departureText,
+    public NexTrip(Context ctxt, boolean actual, int blockNumber, String departureText,
                    String departureTime, String description, String gate,
                    String route, String routeDirection, String terminal,
                    double vehicleHeading, double vehicleLatitude,
                    double vehicleLongitude) {
+        mCtxt = ctxt;
         mActual = actual;
         mBlockNumber = blockNumber;
-        mDepartureText = departureText;
-        mDepartureTime = departureTime;
         mDescription = description;
         mGate = gate;
         mRoute = route;
-        mRouteDirection = routeDirection;
+        mRouteDirection = translateDirection(routeDirection);
         mTerminal = terminal;
         mVehicleHeading = vehicleHeading;
         mVehicleLatitude = vehicleLatitude;
         mVehicleLongitude = vehicleLongitude;
+
+        long departureTimeInMillis = parseDepartureTime(departureTime);
+        long millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().getTimeInMillis();
+        long minutesUntilDeparture = millisUntilDeparture / 1000 / 60;
+        if (departureTimeInMillis < 0 || millisUntilDeparture < 0) {
+            mDepartureText = translateDepartureText(departureText);
+            mDepartureTime = "";
+        } else if (minutesUntilDeparture < 60) {
+            mDepartureText = (minutesUntilDeparture < 1
+                              ? mCtxt.getResources().getString(R.string.due)
+                              : Long.toString(minutesUntilDeparture)
+                                + " " + mCtxt.getResources().getString(R.string.minutes));
+            mDepartureTime = DateFormat.getTimeFormat(mCtxt).format(new Date(departureTimeInMillis));
+        } else {
+            mDepartureText = DateFormat.getTimeFormat(mCtxt).format(new Date(departureTimeInMillis));
+            mDepartureTime = "";
+        }
     }
 
     boolean isActual() {
@@ -97,5 +120,42 @@ public class NexTrip {
 
     double getVehicleLongitude() {
         return mVehicleLongitude;
+    }
+
+    long parseDepartureTime(String departureTime) {
+        if (departureTime.startsWith("/Date(")) {
+            int timezoneIdx = departureTime.indexOf('-', 6);
+            if (timezoneIdx < 0) {
+                timezoneIdx = departureTime.indexOf('+', 6);
+                if (timezoneIdx < 0) {
+                    return -1;
+                }
+            }
+            return Long.parseLong(departureTime.substring(6, timezoneIdx));
+        }
+        return -1;
+    }
+
+    String translateDepartureText(String departureText) {
+        if (departureText.endsWith(" Min")) {
+            return departureText.substring(0, departureText.length() - 3)
+                + mCtxt.getResources().getString(R.string.minutes);
+        } else {
+            return departureText;
+        }
+    }
+
+    String translateDirection(String dir) {
+        if (dir.equals("SOUTHBOUND")) {
+            return mCtxt.getResources().getString(R.string.south);
+        } else if (dir.equals("EASTBOUND")) {
+            return mCtxt.getResources().getString(R.string.east);
+        } else if (dir.equals("WESTBOUND")) {
+            return mCtxt.getResources().getString(R.string.west);
+        } else if (dir.equals("NORTHBOUND")) {
+            return mCtxt.getResources().getString(R.string.north);
+        } else {
+            return dir;
+        }
     }
 }

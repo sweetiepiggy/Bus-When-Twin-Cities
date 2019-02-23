@@ -214,7 +214,7 @@ public class DownloadNexTripsTask extends AsyncTask<Void, Integer, Void> {
                     reader.skipValue();
                 }
             }
-            nexTrips.add(new NexTrip(actual, blockNumber, departureText,
+            nexTrips.add(new NexTrip(mContext, actual, blockNumber, departureText,
                                      departureTime, description, gate, route,
                                      routeDirection, terminal, vehicleHeading,
                                      vehicleLatitude, vehicleLongitude));

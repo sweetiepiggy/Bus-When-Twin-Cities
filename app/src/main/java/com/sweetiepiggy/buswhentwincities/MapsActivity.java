@@ -58,11 +58,10 @@ public class MapsActivity extends FragmentActivity
         mMap.addMarker(new MarkerOptions().position(latLng).title(mRouteAndTerminal
                                                                   + " (" + mDepartureText+ ")"))
             .showInfoWindow();
-        mMap.setMaxZoomPreference(16);
+//        mMap.setMaxZoomPreference(16);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
             zoomIncludingMyLocation();
         } else {
 //            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
@@ -127,12 +126,14 @@ public class MapsActivity extends FragmentActivity
             boundsBuilder.include(myLocationLatLng);
             LatLngBounds bounds = boundsBuilder.build();
             int padding = 128;
+            mMap.setMyLocationEnabled(true);
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
         }
     }
 
     private void zoomToVehicle() {
         LatLng latLng = new LatLng(mVehicleLatitude, mVehicleLongitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
     }
 }
+
