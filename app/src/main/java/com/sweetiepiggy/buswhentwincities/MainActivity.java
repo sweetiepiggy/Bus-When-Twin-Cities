@@ -20,10 +20,14 @@
 package com.sweetiepiggy.buswhentwincities;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -33,9 +37,13 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.sweetiepiggy.buswhentwincities.DbAdapter.KEY_STOP_ID;
+
 public class MainActivity extends AppCompatActivity {
     private static final String SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities";
-    // private CheckStopIdTask mCheckStopIdTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,26 @@ public class MainActivity extends AppCompatActivity {
                     startStopIdActivity();
                 }
             });
+
+        RecyclerView favoritesRecyclerView = (RecyclerView) findViewById(R.id.favoritesRecyclerView);
+
+        favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        favoritesRecyclerView.
+            addItemDecoration(new DividerItemDecoration(favoritesRecyclerView.getContext(),
+                                                        DividerItemDecoration.VERTICAL));
+
+        DbAdapter dbHelper = new DbAdapter();
+        dbHelper.open(this);
+        List<String> favoriteStopIds = new ArrayList<String>();
+        Cursor c = dbHelper.fetchFavStops();
+        int columnIndex = c.getColumnIndex(KEY_STOP_ID);
+        while (c.moveToNext()) {
+            favoriteStopIds.add(c.getString(columnIndex));
+        }
+        c.close();
+        dbHelper.close();
+        favoritesRecyclerView.setAdapter(new FavoriteStopIdsAdapter(getApplicationContext(),
+                                                                    favoriteStopIds));
     }
 
     @Override

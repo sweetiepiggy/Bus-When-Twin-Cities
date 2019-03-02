@@ -19,7 +19,6 @@
 
 package com.sweetiepiggy.buswhentwincities;
 
-import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -60,13 +59,10 @@ public class StopIdActivity extends AppCompatActivity
             loadState(savedInstanceState);
         }
 
-        try {
-            DbAdapter dbHelper = new DbAdapter();
-            dbHelper.open(this);
-            mIsFavorite = dbHelper.isFavStop(mStopId);
-            dbHelper.close();
-        } catch (SQLiteException e) {
-        }
+        DbAdapter dbHelper = new DbAdapter();
+        dbHelper.open(this);
+        mIsFavorite = dbHelper.isFavStop(mStopId);
+        dbHelper.close();
 
         setTitle(getResources().getString(R.string.stop) + " #" + mStopId);
 

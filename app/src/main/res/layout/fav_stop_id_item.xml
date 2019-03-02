@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+    This file is part of Bus When? (Twin Cities).
+
+    Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
+-->
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+  <LinearLayout
+      android:id="@+id/route_layout"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      app:layout_constraintLeft_toLeftOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent" >
+
+    <TextView
+	android:id="@+id/stop_id"
+	style="@android:style/TextAppearance.Large"
+	android:gravity="center"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content" />
+  </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>
+

@@ -126,4 +126,8 @@ public class DbAdapter {
         c.close();
         return found;
     }
+
+    public Cursor fetchFavStops() {
+        return mDbHelper.mDb.query(TABLE_FAV_STOPS, null, null, null, null, null, null, null);
+    }
 }
