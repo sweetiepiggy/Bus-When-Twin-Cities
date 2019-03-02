@@ -19,10 +19,11 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity
-    implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
+    implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, ActivityCompat.OnRequestPermissionsResultCallback {
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0;
 
     private GoogleMap mMap;
+    private boolean mMapLoaded = false;
     private String mRouteAndTerminal;
     private String mDepartureText;
     private double mVehicleLatitude;
@@ -53,7 +54,6 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         LatLng latLng = new LatLng(mVehicleLatitude, mVehicleLongitude);
         mMap.addMarker(new MarkerOptions().position(latLng).title(mRouteAndTerminal
                                                                   + " (" + mDepartureText+ ")"))
@@ -74,6 +74,11 @@ public class MapsActivity extends FragmentActivity
 //            }
                 zoomToVehicle();
         }
+    }
+
+    @Override
+    public void onMapLoaded() {
+        mMapLoaded = true;
     }
 
     @Override
@@ -115,7 +120,7 @@ public class MapsActivity extends FragmentActivity
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location lastKnownLocation = locationManager
             .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (lastKnownLocation == null) {
+        if (lastKnownLocation == null || !mMapLoaded) {
             zoomToVehicle();
         } else {
             LatLng myLocationLatLng = new LatLng(lastKnownLocation.getLatitude(),

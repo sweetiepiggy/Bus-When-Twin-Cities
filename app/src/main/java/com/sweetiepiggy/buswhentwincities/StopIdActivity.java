@@ -19,19 +19,20 @@
 
 package com.sweetiepiggy.buswhentwincities;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
+import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 public class StopIdActivity extends AppCompatActivity
                             implements DownloadNexTripsTask.OnDownloadedListener {
@@ -57,6 +58,14 @@ public class StopIdActivity extends AppCompatActivity
             }
         } else {
             loadState(savedInstanceState);
+        }
+
+        try {
+            DbAdapter dbHelper = new DbAdapter();
+            dbHelper.open(this);
+            mIsFavorite = dbHelper.isFavStop(mStopId);
+            dbHelper.close();
+        } catch (SQLiteException e) {
         }
 
         setTitle(getResources().getString(R.string.stop) + " #" + mStopId);
@@ -116,6 +125,10 @@ public class StopIdActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_stop_id, menu);
+        menu.findItem(R.id.action_favorite)
+            .setIcon(ContextCompat.getDrawable(this, mIsFavorite
+                                               ? android.R.drawable.btn_star_big_on
+                                               : android.R.drawable.btn_star_big_off));
         return true;
     }
 
@@ -131,6 +144,14 @@ public class StopIdActivity extends AppCompatActivity
             return true;
         case R.id.action_favorite:
             mIsFavorite = !mIsFavorite;
+            DbAdapter dbHelper = new DbAdapter();
+            dbHelper.openReadWrite(this);
+            if (mIsFavorite) {
+                dbHelper.createFavStop(mStopId, null);
+            } else {
+                dbHelper.deleteFavStop(mStopId);
+            }
+            dbHelper.close();
             item.setIcon(ContextCompat.getDrawable(this, mIsFavorite
                                                    ? android.R.drawable.btn_star_big_on
                                                    : android.R.drawable.btn_star_big_off));
