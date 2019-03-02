@@ -44,7 +44,6 @@ import static com.sweetiepiggy.buswhentwincities.DbAdapter.KEY_STOP_ID;
 
 public class MainActivity extends AppCompatActivity {
     private static final String SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities";
-    // private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,27 +77,6 @@ public class MainActivity extends AppCompatActivity {
                     startStopIdActivity();
                 }
             });
-
-        // mDrawerLayout = findViewById(R.id.drawer_layout);
-        // mDrawerLayout.addDrawerListener(
-        //     new DrawerLayout.DrawerListener() {
-        //         @Override
-        //         public void onDrawerSlide(View drawerView, float slideOffset) {
-        //         }
-
-        //         @Override
-        //         public void onDrawerOpened(View drawerView) {
-        //         }
-
-        //         @Override
-        //         public void onDrawerClosed(View drawerView) {
-        //         }
-
-        //         @Override
-        //         public void onDrawerStateChanged(int newState) {
-        //         }
-        //     }
-        //     );
 
         RecyclerView favoritesRecyclerView = (RecyclerView) findViewById(R.id.favoritesRecyclerView);
 
@@ -157,9 +135,6 @@ public class MainActivity extends AppCompatActivity {
             intent.setDataAndType(Uri.parse(SOURCE_URL), "text/html");
             startActivity(Intent.createChooser(intent, null));
             return true;
-        // case android.R.id.home:
-        //     mDrawerLayout.openDrawer(GravityCompat.START);
-        //     return true;
         default:
             return super.onOptionsItemSelected(item);
         }
