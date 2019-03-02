@@ -20,58 +20,36 @@
 package com.sweetiepiggy.buswhentwincities;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.sweetiepiggy.buswhentwincities.DbAdapter.KEY_STOP_ID;
+
+public class FavoritesActivity extends AppCompatActivity {
     private static final String SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        if (savedInstanceState != null) {
-            restoreSavedState(savedInstanceState);
-        }
+        setContentView(R.layout.activity_favorites);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ((EditText) findViewById(R.id.stopIdEntry))
-            .setOnEditorActionListener(new EditText.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            startStopIdActivity();
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    startStopIdActivity();
-                }
-            });
-
         final BottomNavigationView bnv = findViewById(R.id.bnv);
-        bnv.getMenu().findItem(R.id.action_search).setChecked(true);
+        bnv.getMenu().findItem(R.id.action_favorites).setChecked(true);
         bnv.setOnNavigationItemSelectedListener(
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -79,34 +57,37 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent;
                     switch (item.getItemId()) {
                     case R.id.action_search:
+                        bnv.getMenu().findItem(R.id.action_favorites).setChecked(true);
+                        intent = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(intent);
                         return true;
                     case R.id.action_favorites:
-                        bnv.getMenu().findItem(R.id.action_search).setChecked(true);
-                        intent = new Intent(getApplicationContext(), FavoritesActivity.class);
-                        startActivity(intent);
                         return true;
                     }
                     return false;
                 }
             }
             );
-    }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putString("stopId",
-                                     ((EditText) findViewById(R.id.stopIdEntry)).getText().toString());
-    }
+        RecyclerView favoritesRecyclerView = (RecyclerView) findViewById(R.id.favoritesRecyclerView);
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        restoreSavedState(savedInstanceState);
-    }
+        favoritesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        favoritesRecyclerView.
+            addItemDecoration(new DividerItemDecoration(favoritesRecyclerView.getContext(),
+                                                        DividerItemDecoration.VERTICAL));
 
-    private void restoreSavedState(Bundle savedInstanceState) {
-        String stopId = savedInstanceState.getString("stopId");
-        ((EditText) findViewById(R.id.stopIdEntry)).setText(stopId);
+        DbAdapter dbHelper = new DbAdapter();
+        dbHelper.open(this);
+        List<String> favoriteStopIds = new ArrayList<String>();
+        Cursor c = dbHelper.fetchFavStops();
+        int columnIndex = c.getColumnIndex(KEY_STOP_ID);
+        while (c.moveToNext()) {
+            favoriteStopIds.add(c.getString(columnIndex));
+        }
+        c.close();
+        dbHelper.close();
+        favoritesRecyclerView.setAdapter(new FavoriteStopIdsAdapter(getApplicationContext(),
+                                                                    favoriteStopIds));
     }
 
     @Override
@@ -132,17 +113,5 @@ public class MainActivity extends AppCompatActivity {
             return super.onOptionsItemSelected(item);
         }
     }
-
-    private void startStopIdActivity() {
-        String stopId = ((EditText) findViewById(R.id.stopIdEntry)).getText().toString();
-        if (stopId.length() == 0) {
-            ((EditText) findViewById(R.id.stopIdEntry)).setError(getResources().getString(R.string.enter_stop_id));
-        } else {
-            Intent intent = new Intent(getApplicationContext(), StopIdActivity.class);
-            Bundle b = new Bundle();
-            b.putString("stopId", stopId);
-            intent.putExtras(b);
-            startActivity(intent);
-        }
-    }
 }
+

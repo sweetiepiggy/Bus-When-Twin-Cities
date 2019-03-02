@@ -128,6 +128,7 @@ public class DbAdapter {
     }
 
     public Cursor fetchFavStops() {
-        return mDbHelper.mDb.query(TABLE_FAV_STOPS, null, null, null, null, null, null, null);
+        return mDbHelper.mDb.query(TABLE_FAV_STOPS, null, null, null, null, null,
+                                   KEY_ROWID + " DESC", null);
     }
 }
