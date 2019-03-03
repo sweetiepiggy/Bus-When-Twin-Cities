@@ -22,7 +22,7 @@ package com.sweetiepiggy.buswhentwincities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.util.JsonReader;
 
 import java.io.IOException;
