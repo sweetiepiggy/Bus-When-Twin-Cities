@@ -34,7 +34,7 @@ import android.view.MenuItem
 
 import java.util.ArrayList
 
-import com.sweetiepiggy.buswhentwincities.DbAdapter.KEY_STOP_ID
+import com.sweetiepiggy.buswhentwincities.DbAdapter
 
 class FavoritesActivity : AppCompatActivity() {
 
@@ -63,7 +63,7 @@ class FavoritesActivity : AppCompatActivity() {
                 }
         )
 
-        val favoritesRecyclerView = findViewById<View>(R.id.favoritesRecyclerView) as RecyclerView
+        val favoritesRecyclerView = findViewById<RecyclerView>(R.id.favoritesRecyclerView) as RecyclerView
 
         favoritesRecyclerView.layoutManager = LinearLayoutManager(this)
         favoritesRecyclerView.addItemDecoration(DividerItemDecoration(favoritesRecyclerView.context,
@@ -73,7 +73,7 @@ class FavoritesActivity : AppCompatActivity() {
         dbHelper.open(this)
         val favoriteStopIds = ArrayList<String>()
         val c = dbHelper.fetchFavStops()
-        val columnIndex = c.getColumnIndex(KEY_STOP_ID)
+        val columnIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
         while (c.moveToNext()) {
             favoriteStopIds.add(c.getString(columnIndex))
         }

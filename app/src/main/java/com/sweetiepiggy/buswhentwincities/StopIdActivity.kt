@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 
 import java.util.ArrayList
 import java.util.Calendar
@@ -60,20 +61,22 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
 
         val dbHelper = DbAdapter()
         dbHelper.open(this)
-        mIsFavorite = dbHelper.isFavStop(mStopId)
+        val stopId = mStopId
+        mIsFavorite = if (stopId != null) dbHelper.isFavStop(stopId) else false
         dbHelper.close()
 
         title = resources.getString(R.string.stop) + " #" + mStopId
 
-        mResultsRecyclerView = findViewById<View>(R.id.results_recycler_view)
+        mResultsRecyclerView = findViewById<RecyclerView>(R.id.results_recycler_view)
 
         mLayoutManager = LinearLayoutManager(this)
         mResultsRecyclerView!!.layoutManager = mLayoutManager
         mResultsRecyclerView!!.addItemDecoration(DividerItemDecoration(mResultsRecyclerView!!.context,
                 DividerItemDecoration.VERTICAL))
 
-        mNexTrips = ArrayList()
-        mAdapter = StopIdAdapter(applicationContext, mNexTrips)
+        val nexTrips = ArrayList<NexTrip>()
+        mNexTrips = nexTrips
+        mAdapter = StopIdAdapter(applicationContext, nexTrips)
         mResultsRecyclerView!!.adapter = mAdapter
 
         mDownloadNexTripsTask = DownloadNexTripsTask(this, this, mStopId)
@@ -134,14 +137,17 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
             }
             R.id.action_favorite -> {
                 mIsFavorite = !mIsFavorite
-                val dbHelper = DbAdapter()
-                dbHelper.openReadWrite(this)
-                if (mIsFavorite) {
-                    dbHelper.createFavStop(mStopId, null)
-                } else {
-                    dbHelper.deleteFavStop(mStopId)
+                val stopId = mStopId
+                if (stopId != null) {
+                    val dbHelper = DbAdapter()
+                    dbHelper.openReadWrite(this)
+                    if (mIsFavorite) {
+                        dbHelper.createFavStop(stopId, null)
+                    } else {
+                        dbHelper.deleteFavStop(stopId)
+                    }
+                    dbHelper.close()
                 }
-                dbHelper.close()
                 item.icon = ContextCompat.getDrawable(this, if (mIsFavorite)
                     android.R.drawable.btn_star_big_on
                 else

@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         (findViewById<View>(R.id.stopIdEntry) as EditText)
-                .setOnEditorActionListener(object : EditText.OnEditorActionListener {
+                .setOnEditorActionListener(object : TextView.OnEditorActionListener {
                     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             startStopIdActivity()

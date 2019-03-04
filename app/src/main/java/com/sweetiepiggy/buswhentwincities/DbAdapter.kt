@@ -80,9 +80,8 @@ class DbAdapter {
         mDbHelper!!.close()
     }
 
-    /** @return rowId or -1 if failed
-     */
-    fun createFavStop(stopId: String, stopDescription: String): Long {
+    /** @return rowId or -1 if failed */
+    fun createFavStop(stopId: String, stopDescription: String?): Long {
         val cv = ContentValues()
         cv.put(KEY_STOP_ID, stopId)
         cv.put(KEY_STOP_DESCRIPTION, stopDescription)

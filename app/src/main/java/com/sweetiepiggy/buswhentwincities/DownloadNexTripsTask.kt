@@ -36,7 +36,7 @@ import java.net.UnknownHostException
 import java.util.ArrayList
 
 class DownloadNexTripsTask(private val mContext: Context?, private val mDownloadedListener: OnDownloadedListener,
-                           stopId: String) : AsyncTask<Void, Int, Void>() {
+                           stopId: String?) : AsyncTask<Void, Int, Void>() {
     private var mAlertMessage: String? = null
     private var mStopId: String? = null
     private var mNexTrips: List<NexTrip>? = null
@@ -98,11 +98,13 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
     }
 
     override fun onPostExecute(result: Void) {
-        if (mAlertMessage != null && mContext != null) {
-            alert(mAlertMessage)
+        val alertMessage = mAlertMessage
+        if (alertMessage != null && mContext != null) {
+            alert(alertMessage)
         }
-        if (mNexTrips != null) {
-            mDownloadedListener.onDownloaded(mNexTrips)
+        val nexTrips = mNexTrips
+        if (nexTrips != null) {
+            mDownloadedListener.onDownloaded(nexTrips)
         }
     }
 

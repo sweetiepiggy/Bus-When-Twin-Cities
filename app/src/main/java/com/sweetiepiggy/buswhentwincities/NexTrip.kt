@@ -25,19 +25,19 @@ import android.text.format.DateFormat
 import java.util.Calendar
 import java.util.Date
 
-class NexTrip(private val mCtxt: Context, internal val isActual: Boolean, internal val blockNumber: Int, departureText: String,
-              departureTime: String, internal val description: String, internal val gate: String,
-              internal val route: String, routeDirection: String, internal val terminal: String,
+class NexTrip(private val mCtxt: Context?, internal val isActual: Boolean, internal val blockNumber: Int, departureText: String?,
+              departureTime: String?, internal val description: String?, internal val gate: String?,
+              internal val route: String?, routeDirection: String?, internal val terminal: String?,
               internal val vehicleHeading: Double, internal val vehicleLatitude: Double,
               internal val vehicleLongitude: Double) {
     internal var departureText: String? = null
         private set
     internal var departureTime: String? = null
         private set
-    internal val routeDirection: String
+    internal val routeDirection: String?
 
     init {
-        this.routeDirection = translateDirection(routeDirection)
+        this.routeDirection = if (routeDirection != null) translateDirection(routeDirection) else null
 
         val departureTimeInMillis = parseDepartureTime(departureTime)
         val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
@@ -46,11 +46,12 @@ class NexTrip(private val mCtxt: Context, internal val isActual: Boolean, intern
             this.departureText = translateDepartureText(departureText)
             this.departureTime = ""
         } else if (minutesUntilDeparture < 60) {
+            val resources = mCtxt?.resources
             this.departureText = if (minutesUntilDeparture < 1)
-                mCtxt.resources.getString(R.string.due)
+                resources?.getString(R.string.due) ?: "Due"
             else
-                java.lang.Long.toString(minutesUntilDeparture)
-                        + " " + mCtxt.resources.getString(R.string.minutes)
+                java.lang.Long.toString(minutesUntilDeparture) +
+                        " " + (if (resources != null) resources.getString(R.string.minutes) else "min")
             this.departureTime = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
         } else {
             this.departureText = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
@@ -58,8 +59,8 @@ class NexTrip(private val mCtxt: Context, internal val isActual: Boolean, intern
         }
     }
 
-    internal fun parseDepartureTime(departureTime: String): Long {
-        if (departureTime.startsWith("/Date(")) {
+    internal fun parseDepartureTime(departureTime: String?): Long {
+        if (departureTime != null && departureTime.startsWith("/Date(")) {
             var timezoneIdx = departureTime.indexOf('-', 6)
             if (timezoneIdx < 0) {
                 timezoneIdx = departureTime.indexOf('+', 6)
@@ -72,23 +73,24 @@ class NexTrip(private val mCtxt: Context, internal val isActual: Boolean, intern
         return -1
     }
 
-    internal fun translateDepartureText(departureText: String): String {
-        return if (departureText.endsWith(" Min")) {
-            departureText.substring(0, departureText.length - 3) + mCtxt.resources.getString(R.string.minutes)
+    internal fun translateDepartureText(departureText: String?): String? {
+        return if (departureText != null && departureText.endsWith(" Min")) {
+            departureText.substring(0, departureText.length - 3) + (mCtxt?.resources?.getString(R.string.minutes) ?: "min")
         } else {
             departureText
         }
     }
 
     internal fun translateDirection(dir: String): String {
-        return if (dir == "SOUTHBOUND") {
-            mCtxt.resources.getString(R.string.south)
-        } else if (dir == "EASTBOUND") {
-            mCtxt.resources.getString(R.string.east)
-        } else if (dir == "WESTBOUND") {
-            mCtxt.resources.getString(R.string.west)
-        } else if (dir == "NORTHBOUND") {
-            mCtxt.resources.getString(R.string.north)
+        val resources = mCtxt?.resources
+        return if (resources != null) {
+            when (dir) {
+                "SOUTHBOUND" -> resources.getString(R.string.south)
+                "EASTBOUND" -> resources.getString(R.string.east)
+                "WESTBOUND" -> resources.getString(R.string.west)
+                "NORTHBOUND" -> resources.getString(R.string.north)
+                else -> dir
+            }
         } else {
             dir
         }
