@@ -33,67 +33,59 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
+import androidx.fragment.app.Fragment
+import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity() {
+    private var mFavFragment: Fragment? = null
+    private var mSearchFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState != null) {
-            restoreSavedState(savedInstanceState)
+        if (savedInstanceState == null) {
+            val fragment = if (hasAnyFavorites()) {
+                mFavFragment = FavoriteStopIdsFragment.newInstance()
+                mFavFragment
+            } else {
+                mSearchFragment = SearchStopIdFragment.newInstance()
+                mSearchFragment
+            }
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment!!)
+                    .commitNow()
         }
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        (findViewById<View>(R.id.stopIdEntry) as EditText)
-                .setOnEditorActionListener(object : TextView.OnEditorActionListener {
-                    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            startStopIdActivity()
-                            return true
-                        } else {
-                            return false
-                        }
-                    }
-                })
-
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
-        fab.setOnClickListener { startStopIdActivity() }
-
         val bnv = findViewById<BottomNavigationView>(R.id.bnv)
-        bnv.menu.findItem(R.id.action_search).isChecked = true
         bnv.setOnNavigationItemSelectedListener(
                 BottomNavigationView.OnNavigationItemSelectedListener { item ->
-                    val intent: Intent
+                    var fragment: Fragment? = null
                     when (item.itemId) {
-                        R.id.action_search -> return@OnNavigationItemSelectedListener true
-                        R.id.action_favorites -> {
-                            bnv.menu.findItem(R.id.action_search).isChecked = true
-                            intent = Intent(applicationContext, FavoritesActivity::class.java)
-                            startActivity(intent)
-                            return@OnNavigationItemSelectedListener true
+                        R.id.action_search -> {
+                            if (mSearchFragment == null){
+                                mSearchFragment = SearchStopIdFragment.newInstance();
+                            }
+                            fragment = mSearchFragment
                         }
+                        R.id.action_favorites -> {
+                            if (mFavFragment == null){
+                                mFavFragment = FavoriteStopIdsFragment.newInstance();
+                            }
+                            fragment = mFavFragment
+                        }
+                        else -> return@OnNavigationItemSelectedListener false
                     }
-                    false
+
+                    supportFragmentManager.beginTransaction()
+                            .replace(R.id.container, fragment!!)
+                            .commitNow()
+                    true
                 }
         )
-    }
-
-    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putString("stopId",
-                (findViewById<View>(R.id.stopIdEntry) as EditText).text.toString())
-    }
-
-    public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        restoreSavedState(savedInstanceState)
-    }
-
-    private fun restoreSavedState(savedInstanceState: Bundle) {
-        val stopId = savedInstanceState.getString("stopId")
-        (findViewById<View>(R.id.stopIdEntry) as EditText).setText(stopId)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -119,17 +111,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startStopIdActivity() {
-        val stopId = (findViewById<View>(R.id.stopIdEntry) as EditText).text.toString()
-        if (stopId.length == 0) {
-            (findViewById<View>(R.id.stopIdEntry) as EditText).error = resources.getString(R.string.enter_stop_id)
-        } else {
-            val intent = Intent(applicationContext, StopIdActivity::class.java)
-            val b = Bundle()
-            b.putString("stopId", stopId)
-            intent.putExtras(b)
-            startActivity(intent)
-        }
+    fun hasAnyFavorites(): Boolean {
+        return true
     }
 
     companion object {

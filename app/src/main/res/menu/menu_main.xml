@@ -26,7 +26,7 @@
         android:orderInCategory="100"
 	android:icon="@drawable/ic_baseline_info_24px"
         android:title="@string/action_about"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_source"
         android:orderInCategory="200"

@@ -1,4 +1,4 @@
-<!--
+/*
     Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
@@ -14,22 +14,17 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
--->
+    along with Bus When? (Twin Cities); if not, see <http://www.gnu.org/licenses/>.
+*/
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-    <item
-        android:id="@+id/action_search"
-        android:orderInCategory="200"
-	android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/action_search"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_favorites"
-        android:icon="@android:drawable/star_big_on"
-        android:orderInCategory="100"
-        android:title="@string/favorites"
-        app:showAsAction="never" />
-</menu>
+package com.sweetiepiggy.buswhentwincities
+
+import androidx.lifecycle.ViewModel;
+
+class SearchStopIdViewModel : ViewModel() {
+    private val stopId: String = ""
+
+    fun getStopId(): String {
+        return stopId
+    }
+}
