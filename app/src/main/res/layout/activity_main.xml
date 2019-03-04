@@ -53,10 +53,11 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bnv"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:layout_alignParentBottom="true"
-	android:layout_gravity="bottom"
-	app:layout_insetEdge="bottom"
-	app:menu="@menu/navigation_items" />
+        style="@style/Widget.MaterialComponents.BottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        app:layout_insetEdge="bottom"
+        app:menu="@menu/navigation_items" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
