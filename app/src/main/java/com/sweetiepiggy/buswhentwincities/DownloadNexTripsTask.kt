@@ -97,7 +97,7 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
         return null
     }
 
-    override fun onPostExecute(result: Void) {
+    override fun onPostExecute(result: Void?) {
         val alertMessage = mAlertMessage
         if (alertMessage != null && mContext != null) {
             alert(alertMessage)
