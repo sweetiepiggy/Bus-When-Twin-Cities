@@ -79,21 +79,10 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         mAdapter = StopIdAdapter(applicationContext, nexTrips)
         mResultsRecyclerView!!.adapter = mAdapter
 
-        mDownloadNexTripsTask = DownloadNexTripsTask(this, this, mStopId)
-        mDownloadNexTripsTask!!.execute()
-
-        // FloatingActionButton fab = findViewById(R.id.fab);
-        // fab.setOnClickListener(new View.OnClickListener() {
-        //      @Override
-        //      public void onClick(View view) {
-        //          if (mDownloadNexTripsTask.getStatus() == AsyncTask.Status.FINISHED) {
-        //              mDownloadNexTripsTask = new DownloadNexTripsTask(StopIdActivity.this,
-        //                                                               StopIdActivity.this,
-        //                                                               mStopId);
-        //              mDownloadNexTripsTask.execute();
-        //          }
-        //      }
-        //  });
+        if (stopId != null) {
+            mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
+            mDownloadNexTripsTask!!.execute()
+        }
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -129,8 +118,9 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_refresh -> {
-                if (mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED && unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                    mDownloadNexTripsTask = DownloadNexTripsTask(this, this, mStopId)
+                val stopId = mStopId
+                if (stopId != null && mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED && unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                    mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
                     mDownloadNexTripsTask!!.execute()
                 }
                 return true

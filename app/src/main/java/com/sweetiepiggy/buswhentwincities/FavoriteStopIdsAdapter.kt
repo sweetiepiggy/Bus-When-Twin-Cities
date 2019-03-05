@@ -34,7 +34,7 @@ class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStop
         var mStopIdTextView: TextView
 
         init {
-            mStopIdTextView = v.findViewById<View>(R.id.stop_id) as TextView
+            mStopIdTextView = v.findViewById<TextView>(R.id.stop_id)
             v.setOnClickListener {
                 val stopId = mFavStopIds[adapterPosition]
                 val intent = Intent(mContext, StopIdActivity::class.java)

@@ -32,16 +32,16 @@ class AboutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)
-        val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val fab = findViewById<View>(R.id.fab) as FloatingActionButton
+        val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO,
                     Uri.fromParts("mailto", EMAIL_ADDRESS, null))
             startActivity(Intent.createChooser(intent, null))
         }
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     companion object {

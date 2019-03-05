@@ -36,9 +36,8 @@ import java.net.UnknownHostException
 import java.util.ArrayList
 
 class DownloadNexTripsTask(private val mContext: Context?, private val mDownloadedListener: OnDownloadedListener,
-                           stopId: String?) : AsyncTask<Void, Int, Void>() {
+                           private val mStopId: String) : AsyncTask<Void, Int, Void>() {
     private var mAlertMessage: String? = null
-    private var mStopId: String? = null
     private var mNexTrips: List<NexTrip>? = null
 
     interface OnDownloadedListener {
@@ -46,10 +45,6 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
     }
 
     inner class UnauthorizedException : IOException()
-
-    init {
-        mStopId = stopId
-    }
 
     override fun doInBackground(vararg params: Void): Void? {
         var retry: Boolean
@@ -117,8 +112,8 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class)
-    private fun downloadNexTrips(stopId: String?): List<NexTrip>? {
-        var nexTrips: List<NexTrip>? = null
+    private fun downloadNexTrips(stopId: String): List<NexTrip>? {
+        var nexTrips: List<NexTrip>?
 
         val nexTripsUrl = ((if (mUseHttps) "https://" else "http://")
                 + NEXTRIPS_URL + stopId + "?format=json")

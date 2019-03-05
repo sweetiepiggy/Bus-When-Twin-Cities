@@ -22,6 +22,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnMapLoad
 
     private var mMap: GoogleMap? = null
     private var mMapLoaded = false
+    private var mDoZoomOnMapLoaded = false
     private var mRouteAndTerminal: String? = null
     private var mDepartureText: String? = null
     private var mVehicleLatitude: Double = 0.toDouble()
@@ -73,6 +74,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnMapLoad
 
     override fun onMapLoaded() {
         mMapLoaded = true
+        if (mDoZoomOnMapLoaded) zoomIncludingMyLocation()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -112,8 +114,11 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, GoogleMap.OnMapLoad
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val lastKnownLocation = locationManager
                 .getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (lastKnownLocation == null || !mMapLoaded) {
+        if (lastKnownLocation == null) {
             zoomToVehicle()
+        } else if (!mMapLoaded) {
+            zoomToVehicle()
+            mDoZoomOnMapLoaded = true
         } else {
             val myLocationLatLng = LatLng(lastKnownLocation.latitude,
                     lastKnownLocation.longitude)
