@@ -56,11 +56,12 @@ class FavoriteStopIdsFragment : Fragment() {
         if (context != null) {
             val dbHelper = DbAdapter()
             dbHelper.open(context)
-            val favoriteStopIds = ArrayList<String>()
+            val favoriteStopIds = ArrayList<Pair<String, String>>()
             val c = dbHelper.fetchFavStops()
-            val columnIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
+            val stopIdIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
+            val stopDescIndex = c.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
             while (c.moveToNext()) {
-                favoriteStopIds.add(c.getString(columnIndex))
+                favoriteStopIds.add(Pair(c.getString(stopIdIndex), c.getString(stopDescIndex)))
             }
             c.close()
             dbHelper.close()

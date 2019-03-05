@@ -21,17 +21,16 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.os.AsyncTask
 import android.os.Bundle
-import androidx.core.content.ContextCompat
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-
-import java.util.ArrayList
-import java.util.Calendar
+import java.util.*
 
 class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener {
     private var mResultsRecyclerView: RecyclerView? = null
@@ -119,29 +118,43 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         when (item.itemId) {
             R.id.action_refresh -> {
                 val stopId = mStopId
-                if (stopId != null && mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED && unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                if (stopId != null && mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED &&
+                		unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
                     mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
                     mDownloadNexTripsTask!!.execute()
                 }
                 return true
             }
             R.id.action_favorite -> {
-                mIsFavorite = !mIsFavorite
-                val stopId = mStopId
-                if (stopId != null) {
-                    val dbHelper = DbAdapter()
-                    dbHelper.openReadWrite(this)
-                    if (mIsFavorite) {
-                        dbHelper.createFavStop(stopId, null)
-                    } else {
+                if (mIsFavorite) {
+                    mStopId?.let { stopId ->
+                        val dbHelper = DbAdapter()
+                        dbHelper.openReadWrite(this)
                         dbHelper.deleteFavStop(stopId)
+                        dbHelper.close()
                     }
-                    dbHelper.close()
+                    item.icon = ContextCompat.getDrawable(this, android.R.drawable.btn_star_big_off)
+                    mIsFavorite = false
+                } else {
+                    val builder = AlertDialog.Builder(this)
+                    val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
+                    builder.setView(favStopIdDialog)
+                    builder.setPositiveButton(android.R.string.ok) { dialog, id ->
+                        val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
+                        mStopId?.let { stopId ->
+                            val dbHelper = DbAdapter()
+                            dbHelper.openReadWrite(this)
+                            dbHelper.createFavStop(stopId, stopName)
+                            dbHelper.close()
+                        }
+                        item.icon = ContextCompat.getDrawable(this, android.R.drawable.btn_star_big_on)
+                        mIsFavorite = true
+                    }
+                    builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
+                    builder.setTitle(R.string.enter_stop_name_dialog_title)
+                    builder.show()
                 }
-                item.icon = ContextCompat.getDrawable(this, if (mIsFavorite)
-                    android.R.drawable.btn_star_big_on
-                else
-                    android.R.drawable.btn_star_big_off)
+
                 return true
             }
             else -> return super.onOptionsItemSelected(item)

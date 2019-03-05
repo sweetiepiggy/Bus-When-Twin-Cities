@@ -28,15 +28,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStopIds: List<String>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStops: List<Pair<String, String>>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var mStopIdTextView: TextView
+        var mStopDescTextView: TextView
 
         init {
             mStopIdTextView = v.findViewById<TextView>(R.id.stop_id)
+            mStopDescTextView = v.findViewById<TextView>(R.id.stop_desc)
             v.setOnClickListener {
-                val stopId = mFavStopIds[adapterPosition]
+                val (stopId, _) = mFavStops[adapterPosition]
                 val intent = Intent(mContext, StopIdActivity::class.java)
                 val b = Bundle()
                 b.putString("stopId", stopId)
@@ -54,11 +56,13 @@ class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStop
     }
 
     override fun onBindViewHolder(holder: FavoriteStopIdsViewHolder, position: Int) {
-        holder.mStopIdTextView.text = mFavStopIds[position]
+        val (stopId, stopDesc) = mFavStops[position]
+        holder.mStopIdTextView.text = stopId
+        holder.mStopDescTextView.text = stopDesc
     }
 
     override fun getItemCount(): Int {
-        return mFavStopIds.size
+        return mFavStops.size
     }
 
 }
