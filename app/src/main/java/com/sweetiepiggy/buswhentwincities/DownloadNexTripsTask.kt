@@ -112,7 +112,7 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
         val alert = AlertDialog.Builder(mContext!!)
         alert.setTitle(mContext.resources.getString(android.R.string.dialog_alert_title))
         alert.setMessage(msg)
-        alert.setPositiveButton(android.R.string.ok) { dialog, which -> }
+        alert.setPositiveButton(android.R.string.ok) { dialog, _ -> }
         alert.show()
     }
 

@@ -20,7 +20,6 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.content.Intent
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.fragment.app.Fragment
@@ -30,7 +29,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
-import androidx.lifecycle.Observer
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
@@ -40,8 +38,6 @@ class SearchStopIdFragment : Fragment() {
         fun newInstance() = SearchStopIdFragment()
     }
 
-    private lateinit var viewModel: SearchStopIdViewModel
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.search_stop_id_fragment, container, false)
@@ -49,12 +45,12 @@ class SearchStopIdFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SearchStopIdViewModel::class.java)
-        val stopId = viewModel.getStopId()
-        val stopIdEntry = getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
-        stopIdEntry?.setText(stopId)
 
-        stopIdEntry
+        if (savedInstanceState != null) {
+            restoreSavedState(savedInstanceState)
+        }
+
+        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
                 ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
                     override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -68,6 +64,17 @@ class SearchStopIdFragment : Fragment() {
 
         val fab = getActivity()?.findViewById<FloatingActionButton>(R.id.fab)
         fab?.setOnClickListener { startStopIdActivity() }
+    }
+
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        savedInstanceState.putString("stopId",
+    		getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.text.toString())
+        super.onSaveInstanceState(savedInstanceState)
+    }
+
+    private fun restoreSavedState(savedInstanceState: Bundle) {
+        val stopId = savedInstanceState.getString("stopId")
+        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.setText(stopId)
     }
 
     private fun startStopIdActivity() {

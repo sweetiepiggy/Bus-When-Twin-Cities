@@ -107,6 +107,13 @@ class DbAdapter {
                 "$KEY_ROWID DESC", null)
     }
 
+    fun hasAnyFavorites(): Boolean {
+        val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, null, null, null, null, null, null, "1")
+        val found = c.moveToFirst()
+        c.close()
+        return found
+    }
+
     companion object {
         val KEY_ROWID = "_id"
         val KEY_STOP_ID = "stop_id"

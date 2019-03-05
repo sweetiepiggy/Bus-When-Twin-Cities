@@ -34,6 +34,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity() {
@@ -44,11 +45,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
+
+        val fab = findViewById<FloatingActionButton>(R.id.fab)
         if (savedInstanceState == null) {
             val fragment = if (hasAnyFavorites()) {
+                fab.setVisibility(View.GONE)
+                bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
                 mFavFragment = FavoriteStopIdsFragment.newInstance()
                 mFavFragment
             } else {
+                fab.setVisibility(View.VISIBLE)
+                bnv.menu.findItem(R.id.action_search)?.isChecked = true
                 mSearchFragment = SearchStopIdFragment.newInstance()
                 mSearchFragment
             }
@@ -60,29 +68,31 @@ class MainActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
         bnv.setOnNavigationItemSelectedListener(
                 BottomNavigationView.OnNavigationItemSelectedListener { item ->
                     var fragment: Fragment? = null
                     when (item.itemId) {
                         R.id.action_search -> {
                             if (mSearchFragment == null){
-                                mSearchFragment = SearchStopIdFragment.newInstance();
+                                mSearchFragment = SearchStopIdFragment.newInstance()
                             }
                             fragment = mSearchFragment
+                            fab.setVisibility(View.VISIBLE)
                         }
                         R.id.action_favorites -> {
                             if (mFavFragment == null){
-                                mFavFragment = FavoriteStopIdsFragment.newInstance();
+                                mFavFragment = FavoriteStopIdsFragment.newInstance()
                             }
                             fragment = mFavFragment
+                            fab.setVisibility(View.GONE)
                         }
                         else -> return@OnNavigationItemSelectedListener false
                     }
 
                     supportFragmentManager.beginTransaction()
                             .replace(R.id.container, fragment!!)
-                            .commitNow()
+                    		.setTransition(TRANSIT_FRAGMENT_FADE)
+                            .commit()
                     true
                 }
         )
@@ -112,7 +122,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun hasAnyFavorites(): Boolean {
-        return true
+        val dbHelper = DbAdapter()
+        dbHelper.open(applicationContext)
+        val ret = dbHelper.hasAnyFavorites()
+        dbHelper.close()
+        return ret
     }
 
     companion object {
