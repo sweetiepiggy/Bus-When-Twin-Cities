@@ -14,7 +14,7 @@ class MapsActivity : AppCompatActivity() {
             fragment.setArguments(intent.extras)
             supportFragmentManager.beginTransaction()
             	    .add(R.id.container, fragment)
-                    .commitNow()
+                    .commit()
         }
     }
 }

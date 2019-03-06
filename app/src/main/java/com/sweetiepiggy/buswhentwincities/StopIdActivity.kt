@@ -19,6 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
@@ -32,13 +33,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener {
-    private var mResultsRecyclerView: RecyclerView? = null
-    private var mAdapter: RecyclerView.Adapter<*>? = null
-    private var mLayoutManager: RecyclerView.LayoutManager? = null
+class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener, StopIdAdapter.OnClickMapListener {
+    private lateinit var mResultsRecyclerView: RecyclerView
+    private lateinit var mAdapter: RecyclerView.Adapter<*>
+    private lateinit var mLayoutManager: RecyclerView.LayoutManager
     private var mStopId: String? = null
     private var mStopDesc: String? = null
-    private var mNexTrips: MutableList<NexTrip>? = null
+    private lateinit var mNexTrips: MutableList<NexTrip>
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mLastUpdate: Long = 0
     private var mIsFavorite = false
@@ -73,28 +74,27 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         mResultsRecyclerView = findViewById<RecyclerView>(R.id.results_recycler_view)
 
         mLayoutManager = LinearLayoutManager(this)
-        mResultsRecyclerView!!.layoutManager = mLayoutManager
-        mResultsRecyclerView!!.addItemDecoration(DividerItemDecoration(mResultsRecyclerView!!.context,
+        mResultsRecyclerView.layoutManager = mLayoutManager
+        mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
                 DividerItemDecoration.VERTICAL))
 
-        val nexTrips = ArrayList<NexTrip>()
-        mNexTrips = nexTrips
-        mAdapter = StopIdAdapter(applicationContext, nexTrips)
-        mResultsRecyclerView!!.adapter = mAdapter
+        mNexTrips = ArrayList<NexTrip>()
+        mAdapter = StopIdAdapter(applicationContext, mNexTrips, this)
+        mResultsRecyclerView.adapter = mAdapter
 
         if (stopId != null) {
             mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
-            mDownloadNexTripsTask!!.execute()
+            mDownloadNexTripsTask?.execute()
         }
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putString("stopId", mStopId)
+        savedInstanceState.putString(KEY_STOP_ID, mStopId)
     }
 
     private fun loadState(b: Bundle) {
-        mStopId = b.getString("stopId")
+        mStopId = b.getString(KEY_STOP_ID)
     }
 
     public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -103,9 +103,7 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     }
 
     public override fun onDestroy() {
-        if (mDownloadNexTripsTask != null) {
-            mDownloadNexTripsTask!!.cancel(true)
-        }
+        mDownloadNexTripsTask?.cancel(true)
         super.onDestroy()
     }
 
@@ -167,13 +165,25 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         mNexTrips!!.clear()
         mLastUpdate = unixTime
         mNexTrips!!.addAll(nexTrips)
-        mAdapter!!.notifyDataSetChanged()
+        mAdapter.notifyDataSetChanged()
+    }
+
+    override fun onClickMap(nexTrip: NexTrip) {
+        val intent = Intent(applicationContext, MapsActivity::class.java)
+        val b = Bundle()
+        b.putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
+        b.putString("departureText", nexTrip.departureText)
+        b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
+        b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
+        intent.putExtras(b)
+        startActivity(intent)
     }
 
     companion object {
         private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
+        private val KEY_STOP_ID = "stopId"
     }
 }
 

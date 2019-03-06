@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
             }
             supportFragmentManager.beginTransaction()
                     .replace(R.id.container, fragment!!)
-                    .commitNow()
+                    .commit()
         }
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
         bnv.setOnNavigationItemSelectedListener(
                 BottomNavigationView.OnNavigationItemSelectedListener { item ->
-                    var fragment: Fragment? = null
+                    var fragment: Fragment?
                     when (item.itemId) {
                         R.id.action_search -> {
                             if (mSearchFragment == null){

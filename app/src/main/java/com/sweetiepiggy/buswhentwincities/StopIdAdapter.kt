@@ -29,7 +29,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 
-class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexTrip>) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexTrip>, private val mClickMapListener: OnClickMapListener) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+
+    interface OnClickMapListener {
+        fun onClickMap(nexTrip: NexTrip)
+    }
 
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var mRouteTextView: TextView
@@ -41,36 +45,15 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
         var mMapButton: ImageButton
 
         init {
-            mRouteTextView = v.findViewById<View>(R.id.route) as TextView
-            mDirectionTextView = v.findViewById<View>(R.id.direction) as TextView
-            mDescriptionTextView = v.findViewById<View>(R.id.description) as TextView
-            mDepartureTextTextView = v.findViewById<View>(R.id.departure_text) as TextView
-            mDepartureTimeTextView = v.findViewById<View>(R.id.departure_time) as TextView
-            mScheduledTextView = v.findViewById<View>(R.id.scheduled) as TextView
-            mMapButton = v.findViewById<View>(R.id.map_button) as ImageButton
+            mRouteTextView = v.findViewById<TextView>(R.id.route)
+            mDirectionTextView = v.findViewById<TextView>(R.id.direction)
+            mDescriptionTextView = v.findViewById<TextView>(R.id.description)
+            mDepartureTextTextView = v.findViewById<TextView>(R.id.departure_text)
+            mDepartureTimeTextView = v.findViewById<TextView>(R.id.departure_time)
+            mScheduledTextView = v.findViewById<TextView>(R.id.scheduled)
+            mMapButton = v.findViewById<ImageButton>(R.id.map_button)
             mMapButton.setOnClickListener {
-                // NexTrip nexTrip = mNexTrips.get(getAdapterPosition());
-                // String latitudeStr = Double.toString(nexTrip.getVehicleLatitude());
-                // String longitudeStr = Double.toString(nexTrip.getVehicleLongitude());
-                // Uri uri = Uri.parse("geo:" + latitudeStr + "," + longitudeStr + "?q="
-                //                     + Uri.encode(latitudeStr + "," + longitudeStr + "("
-                //                                  + mCtxt.getResources().getString(R.string.bus)
-                //                                  + " " + nexTrip.getRoute()
-                //                                  + nexTrip.getTerminal() + ")"));
-                // Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                // intent.setPackage("com.google.android.apps.maps");
-                // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                // mCtxt.startActivity(intent);
-                val nexTrip = mNexTrips[adapterPosition]
-                val intent = Intent(mCtxt, MapsActivity::class.java)
-                val b = Bundle()
-                b.putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
-                b.putString("departureText", nexTrip.departureText)
-                b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
-                b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-                intent.putExtras(b)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                mCtxt.startActivity(intent)
+                mClickMapListener.onClickMap(mNexTrips[adapterPosition])
             }
         }
     }
@@ -87,7 +70,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
         holder.mDirectionTextView.text = nexTrip.routeDirection
         holder.mDescriptionTextView.text = nexTrip.description
         holder.mDepartureTextTextView.text = nexTrip.departureText
-        if (nexTrip.departureTime!!.isEmpty()) {
+        if (nexTrip.departureTime == null || nexTrip.departureTime!!.isEmpty()) {
             holder.mDepartureTimeTextView.visibility = View.GONE
         } else {
             holder.mDepartureTimeTextView.visibility = View.VISIBLE
@@ -96,7 +79,6 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
 
         holder.mMapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
 
-        // holder.mMapButton.setVisibility(View.GONE);
         holder.mScheduledTextView.text = mCtxt.resources.getString(if (nexTrip.isActual)
             R.string.real_time
         else
