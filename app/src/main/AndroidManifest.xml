@@ -38,6 +38,7 @@
 
         <activity
             android:name=".MapsActivity"
+	    android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/title_activity_maps">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -1,11 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+<!--
+    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+    This file is part of Bus When? (Twin Cities).
+
+    Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
+-->
+<!-- <fragment xmlns:android="http://schemas.android.com/apk/res/android" -->
+<!--     xmlns:map="http://schemas.android.com/apk/res-auto" -->
+<!--     xmlns:tools="http://schemas.android.com/tools" -->
+<!--     android:id="@+id/map" -->
+<!--     android:name="com.google.android.gms.maps.SupportMapFragment" -->
+<!--     android:layout_width="match_parent" -->
+<!--     android:layout_height="match_parent" -->
+<!--     map:cameraZoom="15" -->
+<!--     map:uiZoomControls="true" -->
+<!--     tools:context=".MapsActivity" /> -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    map:cameraZoom="15"
-    map:uiZoomControls="true"
-    tools:context=".MapsActivity" />
+    tools:context=".MapsActivity">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
