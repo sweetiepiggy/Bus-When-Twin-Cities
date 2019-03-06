@@ -66,8 +66,9 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         mStopDesc = stopId?.let { dbHelper.getStopDesc(it) }
         dbHelper.close()
 
+        val stopDesc = mStopDesc
         title = resources.getString(R.string.stop) + " #" + mStopId +
-        	(mStopDesc?.let { " ($it)" } ?: "")
+        	(if (stopDesc != null && !stopDesc.isEmpty()) " ($stopDesc)" else "")
 
         mResultsRecyclerView = findViewById<RecyclerView>(R.id.results_recycler_view)
 

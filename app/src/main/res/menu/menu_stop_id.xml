@@ -23,7 +23,7 @@
     tools:context="com.example.buswhentwincities.StopIdActivity">
     <item
         android:id="@+id/action_favorite"
-        android:icon="@android:drawable/btn_star_big_off"
+        android:icon="@drawable/ic_baseline_favorite_24px"
         android:orderInCategory="100"
         android:title="@string/action_favorite"
         app:showAsAction="ifRoom" />

@@ -47,10 +47,11 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         app:layout_anchor="@+id/appBarLayout"
         app:layout_anchorGravity="bottom|center"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_dodgeInsetEdges="bottom"
-	app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".MainActivity" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

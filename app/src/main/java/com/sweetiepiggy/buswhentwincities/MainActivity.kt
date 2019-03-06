@@ -22,19 +22,14 @@ package com.sweetiepiggy.buswhentwincities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_FADE
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity() {
@@ -91,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
                     supportFragmentManager.beginTransaction()
                             .replace(R.id.container, fragment!!)
-                    		.setTransition(TRANSIT_FRAGMENT_FADE)
+                    		// .setTransition(TRANSIT_FRAGMENT_FADE)
                             .commit()
                     true
                 }
