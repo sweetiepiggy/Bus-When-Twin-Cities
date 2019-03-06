@@ -18,16 +18,19 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity">
-
+    android:orientation="horizontal">
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/results_recycler_view"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:scrollbars="vertical"
+      android:contentDescription="@null" />
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
+        android:id="@+id/container_by_side"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

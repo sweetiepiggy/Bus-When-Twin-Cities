@@ -24,12 +24,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.TypedValue
+import android.util.TypedValue.complexToDimensionPixelSize
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -136,8 +137,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             boundsBuilder.include(vehicleLatLng)
             boundsBuilder.include(myLocationLatLng)
             val bounds = boundsBuilder.build()
+            val tv = TypedValue()
+            getActivity()!!.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)
+            val actionBarHeight = complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics())
             val width = getResources().getDisplayMetrics().widthPixels
-            val height = getResources().getDisplayMetrics().heightPixels
+            val height = getResources().getDisplayMetrics().heightPixels - actionBarHeight
             mMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0))
             mMap?.moveCamera(CameraUpdateFactory.zoomTo(mMap?.getCameraPosition()!!.zoom - 0.5f))
         } else {

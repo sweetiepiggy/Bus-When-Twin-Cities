@@ -37,13 +37,6 @@
             android:required="false" />
 
         <activity
-            android:name=".MapsActivity"
-	    android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.sweetiepiggy.buswhentwincities.StopIdActivity" />
-        </activity>
-        <activity
             android:name=".AboutActivity"
             android:label="@string/action_about"
             android:parentActivityName=".MainActivity"

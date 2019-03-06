@@ -19,7 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Intent
+import android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
@@ -29,6 +29,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_CLOSE
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -58,10 +59,10 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                 loadState(b)
             }
 
-            if (findViewById<View>(R.id.container) != null) {
+            if (findViewById<View>(R.id.container_by_side) != null) {
                 val mapFragment = MyMapFragment.newInstance()
                 supportFragmentManager.beginTransaction()
-            	        .add(R.id.container, mapFragment)
+            	        .add(R.id.container_by_side, mapFragment)
                         .commit()
             }
         } else {
@@ -182,11 +183,15 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         b.putString("departureText", nexTrip.departureText)
         b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
         b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.container) as MyMapFragment?
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.container_by_side) as MyMapFragment?
         if (mapFragment == null) {
-            val intent = Intent(applicationContext, MapsActivity::class.java)
-            intent.putExtras(b)
-            startActivity(intent)
+            val f = MyMapFragment.newInstance()
+            f.setArguments(b)
+            supportFragmentManager.beginTransaction()
+            		.replace(R.id.container, f)
+                    .setTransition(TRANSIT_FRAGMENT_OPEN)
+            		.addToBackStack(null)
+            		.commit()
         } else {
             mapFragment.updateVehicle(b)
         }
