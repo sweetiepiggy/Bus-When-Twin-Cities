@@ -36,6 +36,7 @@ class SearchStopIdFragment : Fragment() {
 
     companion object {
         fun newInstance() = SearchStopIdFragment()
+        private val KEY_STOP_ID = "stopId"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -67,13 +68,13 @@ class SearchStopIdFragment : Fragment() {
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putString("stopId",
+        savedInstanceState.putString(KEY_STOP_ID,
     		getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.text.toString())
         super.onSaveInstanceState(savedInstanceState)
     }
 
     private fun restoreSavedState(savedInstanceState: Bundle) {
-        val stopId = savedInstanceState.getString("stopId")
+        val stopId = savedInstanceState.getString(KEY_STOP_ID)
         getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.setText(stopId)
     }
 
@@ -86,7 +87,7 @@ class SearchStopIdFragment : Fragment() {
             } else {
                 val intent = Intent(getActivity()?.getApplicationContext(), StopIdActivity::class.java)
                 val b = Bundle()
-                b.putString("stopId", stopId)
+                b.putString(KEY_STOP_ID, stopId)
                 intent.putExtras(b)
                 startActivity(intent)
             }
