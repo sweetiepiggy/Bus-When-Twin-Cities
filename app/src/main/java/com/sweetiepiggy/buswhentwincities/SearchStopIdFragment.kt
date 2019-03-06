@@ -51,17 +51,17 @@ class SearchStopIdFragment : Fragment() {
             restoreSavedState(savedInstanceState)
         }
 
-        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
-                ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-                    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            startStopIdActivity()
-                            return true
-                        } else {
-                            return false
-                        }
-                    }
-                })
+        // getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
+        //         ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+        //             override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
+        //                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+        //                     startStopIdActivity()
+        //                     return true
+        //                 } else {
+        //                     return false
+        //                 }
+        //             }
+        //         })
 
         val fab = getActivity()?.findViewById<FloatingActionButton>(R.id.fab)
         fab?.setOnClickListener { startStopIdActivity() }
