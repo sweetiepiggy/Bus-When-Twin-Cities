@@ -102,6 +102,14 @@ class DbAdapter {
         return found
     }
 
+    fun getStopDesc(stopId: String): String? {
+        val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf(KEY_STOP_DESCRIPTION),
+	    	"$KEY_STOP_ID == ?", arrayOf(stopId), null, null, null, "1")
+        val ret = if (c.moveToFirst()) c.getString(c.getColumnIndex(KEY_STOP_DESCRIPTION)) else null
+        c.close()
+        return ret
+    }
+
     fun fetchFavStops(): Cursor {
         return mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, null, null, null, null, null,
                 "$KEY_ROWID DESC", null)

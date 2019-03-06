@@ -29,8 +29,8 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_baseline_refresh_24px"
         android:orderInCategory="200"
-	android:icon="@drawable/ic_action_refresh"
         android:title="@string/action_refresh"
         app:showAsAction="ifRoom" />
 </menu>

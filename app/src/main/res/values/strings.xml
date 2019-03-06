@@ -39,7 +39,7 @@
     <string name="action_favorite">Favorite</string>
     <string name="action_search">Search</string>
 
-    <string name="enter_stop_name_dialog_title">Save favorite stop</string>
+    <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
 
     <string name="unknown_host">Unable to connect to internet</string>

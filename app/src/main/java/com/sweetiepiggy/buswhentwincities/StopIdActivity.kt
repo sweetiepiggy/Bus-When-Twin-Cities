@@ -37,6 +37,7 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     private var mAdapter: RecyclerView.Adapter<*>? = null
     private var mLayoutManager: RecyclerView.LayoutManager? = null
     private var mStopId: String? = null
+    private var mStopDesc: String? = null
     private var mNexTrips: MutableList<NexTrip>? = null
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mLastUpdate: Long = 0
@@ -62,9 +63,11 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         dbHelper.open(this)
         val stopId = mStopId
         mIsFavorite = if (stopId != null) dbHelper.isFavStop(stopId) else false
+        mStopDesc = stopId?.let { dbHelper.getStopDesc(it) }
         dbHelper.close()
 
-        title = resources.getString(R.string.stop) + " #" + mStopId
+        title = resources.getString(R.string.stop) + " #" + mStopId +
+        	(mStopDesc?.let { " ($it)" } ?: "")
 
         mResultsRecyclerView = findViewById<RecyclerView>(R.id.results_recycler_view)
 
@@ -107,10 +110,8 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_stop_id, menu)
-        menu.findItem(R.id.action_favorite).icon = ContextCompat.getDrawable(this, if (mIsFavorite)
-            android.R.drawable.btn_star_big_on
-        else
-            android.R.drawable.btn_star_big_off)
+        menu.findItem(R.id.action_favorite).icon = ContextCompat.getDrawable(this,
+        	if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         return true
     }
 
@@ -133,13 +134,13 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                         dbHelper.deleteFavStop(stopId)
                         dbHelper.close()
                     }
-                    item.icon = ContextCompat.getDrawable(this, android.R.drawable.btn_star_big_off)
+                    item.icon = ContextCompat.getDrawable(this, IS_NOT_FAV_ICON)
                     mIsFavorite = false
                 } else {
                     val builder = AlertDialog.Builder(this)
                     val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
                     builder.setView(favStopIdDialog)
-                    builder.setPositiveButton(android.R.string.ok) { dialog, id ->
+                    builder.setPositiveButton(android.R.string.ok) { _, _ ->
                         val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
                         mStopId?.let { stopId ->
                             val dbHelper = DbAdapter()
@@ -147,7 +148,7 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                             dbHelper.createFavStop(stopId, stopName)
                             dbHelper.close()
                         }
-                        item.icon = ContextCompat.getDrawable(this, android.R.drawable.btn_star_big_on)
+                        item.icon = ContextCompat.getDrawable(this, IS_FAV_ICON)
                         mIsFavorite = true
                     }
                     builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
@@ -170,6 +171,8 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
 
     companion object {
         private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
+        private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
+        private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
     }
 }
 
