@@ -24,6 +24,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -55,6 +56,13 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
             val b = intent.extras
             if (b != null) {
                 loadState(b)
+            }
+
+            if (findViewById<View>(R.id.container) != null) {
+                val mapFragment = MyMapFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+            	        .add(R.id.container, mapFragment)
+                        .commit()
             }
         } else {
             loadState(savedInstanceState)
@@ -162,21 +170,26 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     }
 
     override fun onDownloaded(nexTrips: List<NexTrip>) {
-        mNexTrips!!.clear()
+        mNexTrips.clear()
         mLastUpdate = unixTime
-        mNexTrips!!.addAll(nexTrips)
+        mNexTrips.addAll(nexTrips)
         mAdapter.notifyDataSetChanged()
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
-        val intent = Intent(applicationContext, MapsActivity::class.java)
         val b = Bundle()
         b.putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
         b.putString("departureText", nexTrip.departureText)
         b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
         b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        intent.putExtras(b)
-        startActivity(intent)
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.container) as MyMapFragment?
+        if (mapFragment == null) {
+            val intent = Intent(applicationContext, MapsActivity::class.java)
+            intent.putExtras(b)
+            startActivity(intent)
+        } else {
+            mapFragment.updateVehicle(b)
+        }
     }
 
     companion object {

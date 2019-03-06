@@ -66,9 +66,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
         if (savedInstanceState == null) {
             val b = getArguments()
-            if (b != null) {
-                loadState(b)
-            }
+            b?.let { loadState(it) }
         } else {
             loadState(savedInstanceState)
         }
@@ -95,10 +93,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-        mMap?.addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
-                + " (" + mDepartureText + ")"))
-                ?.showInfoWindow()
+        if (mRouteAndTerminal != null) {
+            val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
+            mMap?.addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
+    	        	+ " (" + mDepartureText + ")"))
+	            ?.showInfoWindow()
+        }
         if (ContextCompat.checkSelfPermission(getActivity()?.getApplicationContext()!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             zoomIncludingMyLocation()
         } else {
@@ -128,7 +128,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 .getLastKnownLocation(LocationManager.GPS_PROVIDER)
         if (lastKnownLocation == null) {
             zoomToVehicle()
-        } else {
+        } else if (mRouteAndTerminal != null) {
             val myLocationLatLng = LatLng(lastKnownLocation.latitude,
                     lastKnownLocation.longitude)
             val vehicleLatLng = LatLng(mVehicleLatitude, mVehicleLongitude)
@@ -136,13 +136,30 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             boundsBuilder.include(vehicleLatLng)
             boundsBuilder.include(myLocationLatLng)
             val bounds = boundsBuilder.build()
-            mMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            val width = getResources().getDisplayMetrics().widthPixels
+            val height = getResources().getDisplayMetrics().heightPixels
+            mMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0))
             mMap?.moveCamera(CameraUpdateFactory.zoomTo(mMap?.getCameraPosition()!!.zoom - 0.5f))
+        } else {
+            val myLocationLatLng = LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude)
+            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocationLatLng, 15f))
         }
     }
 
     private fun zoomToVehicle() {
+        if (mRouteAndTerminal != null) {
+            val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
+            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+        }
+    }
+
+    fun updateVehicle(b: Bundle) {
+        loadState(b)
         val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+        mMap?.clear()
+        mMap?.addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
+                + " (" + mDepartureText + ")"))
+                ?.showInfoWindow()
+        mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
     }
 }
