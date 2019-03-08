@@ -19,30 +19,31 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.ActionBar.NAVIGATION_MODE_TABS
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentTransaction.TRANSIT_FRAGMENT_CLOSE
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentTransaction
+import androidx.viewpager.widget.ViewPager
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener, StopIdAdapter.OnClickMapListener {
-    private lateinit var mResultsRecyclerView: RecyclerView
-    private lateinit var mAdapter: RecyclerView.Adapter<*>
-    private lateinit var mLayoutManager: RecyclerView.LayoutManager
+class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener, StopIdAdapter.OnClickMapListener, ActionBar.TabListener {
+    private var mViewPager: ViewPager? = null
+    private var mStopIdPagerAdapter: StopIdPagerAdapter? = null
     private var mStopId: String? = null
     private var mStopDesc: String? = null
-    private lateinit var mNexTrips: MutableList<NexTrip>
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
+    private var mNexTripsFragment: NexTripsFragment? = null
+    private var mMapFragment: MyMapFragment? = null
     private var mLastUpdate: Long = 0
     private var mIsFavorite = false
 
@@ -59,14 +60,32 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                 loadState(b)
             }
 
-            if (findViewById<View>(R.id.container_by_side) != null) {
-                val mapFragment = MyMapFragment.newInstance()
-                supportFragmentManager.beginTransaction()
-            	        .add(R.id.container_by_side, mapFragment)
-                        .commit()
-            }
         } else {
             loadState(savedInstanceState)
+        }
+
+        mViewPager = findViewById(R.id.pager)
+
+        if (mViewPager != null) {
+            supportActionBar?.navigationMode = NAVIGATION_MODE_TABS
+            val listTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_view_list_24px)
+            val mapTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_map_24px)
+            listTab?.setTabListener(this)
+            mapTab?.setTabListener(this)
+            supportActionBar?.addTab(listTab)
+            supportActionBar?.addTab(mapTab)
+            mStopIdPagerAdapter = StopIdPagerAdapter(supportFragmentManager, this)
+            mViewPager!!.adapter = mStopIdPagerAdapter
+        } else {
+            mNexTripsFragment = NexTripsFragment.newInstance()
+            mNexTripsFragment!!.setOnClickMapListener(this)
+            mMapFragment = MyMapFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.nextrips_container, mNexTripsFragment!!)
+                    .commit()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.map_container, mMapFragment!!)
+                    .commit()
         }
 
         val dbHelper = DbAdapter()
@@ -79,17 +98,6 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         val stopDesc = mStopDesc
         title = resources.getString(R.string.stop) + " #" + mStopId +
         	(if (stopDesc != null && !stopDesc.isEmpty()) " ($stopDesc)" else "")
-
-        mResultsRecyclerView = findViewById<RecyclerView>(R.id.results_recycler_view)
-
-        mLayoutManager = LinearLayoutManager(this)
-        mResultsRecyclerView.layoutManager = mLayoutManager
-        mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
-                DividerItemDecoration.VERTICAL))
-
-        mNexTrips = ArrayList<NexTrip>()
-        mAdapter = StopIdAdapter(applicationContext, mNexTrips, this)
-        mResultsRecyclerView.adapter = mAdapter
 
         if (stopId != null) {
             mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
@@ -126,11 +134,12 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_refresh -> {
-                val stopId = mStopId
-                if (stopId != null && mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED &&
-                		unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                    mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
-                    mDownloadNexTripsTask!!.execute()
+                mStopId?.let { stopId ->
+                    if (mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED &&
+                			unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                        mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
+                        mDownloadNexTripsTask!!.execute()
+                    }
                 }
                 return true
             }
@@ -171,10 +180,8 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     }
 
     override fun onDownloaded(nexTrips: List<NexTrip>) {
-        mNexTrips.clear()
         mLastUpdate = unixTime
-        mNexTrips.addAll(nexTrips)
-        mAdapter.notifyDataSetChanged()
+        mNexTripsFragment?.updateNexTrips(nexTrips)
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
@@ -183,18 +190,47 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         b.putString("departureText", nexTrip.departureText)
         b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
         b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.container_by_side) as MyMapFragment?
-        if (mapFragment == null) {
-            val f = MyMapFragment.newInstance()
-            f.setArguments(b)
-            supportFragmentManager.beginTransaction()
-            		.replace(R.id.container, f)
-                    .setTransition(TRANSIT_FRAGMENT_OPEN)
-            		.addToBackStack(null)
-            		.commit()
-        } else {
-            mapFragment.updateVehicle(b)
+        val mapFragment = mMapFragment
+        // if (mapFragment == null) {
+        //     val f = MyMapFragment.newInstance()
+        //     f.setArguments(b)
+        //     supportFragmentManager.beginTransaction()
+        //     		.replace(R.id.container, f)
+        //             .setTransition(TRANSIT_FRAGMENT_OPEN)
+        //     		.addToBackStack(null)
+        //     		.commit()
+        // } else {
+            mapFragment?.updateVehicle(b)
+        // }
+    }
+
+    inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {
+        override fun getCount(): Int = 2
+
+        override fun getItem(i: Int): Fragment {
+            if (i == 0) {
+                val fragment = NexTripsFragment.newInstance()
+                android.util.Log.d("a", "got here: getItem(0)")
+                fragment.setOnClickMapListener(mClickMapListener)
+                mNexTripsFragment = fragment
+                return fragment
+            } else {
+                val fragment = MyMapFragment.newInstance()
+                mMapFragment = fragment
+                return fragment
+            }
         }
+    }
+
+    override fun onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
+        android.util.Log.d("a", "got here: onTabSelected " + tab.getPosition().toString())
+        mViewPager?.setCurrentItem(tab.getPosition())
+    }
+
+    override fun onTabUnselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
+    }
+
+    override fun onTabReselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
     }
 
     companion object {

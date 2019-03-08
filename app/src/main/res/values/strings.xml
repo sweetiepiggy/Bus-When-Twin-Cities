@@ -33,7 +33,8 @@
     <string name="minutes">min</string>
     <string name="due">Due</string>
     <string name="action_about">About</string>
-    <string name="favorites">Favorites</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_search">Search</string>
     <string name="action_source">View source code</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
@@ -46,6 +47,8 @@
     <string name="unauthorized">Incorrect username or password</string>
     <string name="file_not_found">File not found</string>
     <string name="timed_out">Timed out</string>
+
+    <string name="no_nextrips_found">No upcoming trips</string>
 
     <string name="main_search_icon_content_description">search button</string>
     <string name="favorite_stop_ids_content_description">favorite stop IDs</string>

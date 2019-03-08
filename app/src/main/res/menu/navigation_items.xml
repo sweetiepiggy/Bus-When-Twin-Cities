@@ -24,12 +24,12 @@
         android:id="@+id/action_search"
         android:orderInCategory="200"
 	android:icon="@android:drawable/ic_menu_search"
-        android:title="@string/action_search"
+        android:title="@string/nav_search"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_favorites"
         android:icon="@drawable/ic_baseline_favorite_24px"
         android:orderInCategory="100"
-        android:title="@string/favorites"
+        android:title="@string/nav_favorites"
         app:showAsAction="never" />
 </menu>

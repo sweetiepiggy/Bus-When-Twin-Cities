@@ -22,6 +22,7 @@ package com.sweetiepiggy.buswhentwincities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -29,7 +30,8 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 
-class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexTrip>, private val mClickMapListener: OnClickMapListener) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexTrip>) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+    private var mClickMapListener: OnClickMapListener? = null
 
     interface OnClickMapListener {
         fun onClickMap(nexTrip: NexTrip)
@@ -53,7 +55,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
             mScheduledTextView = v.findViewById<TextView>(R.id.scheduled)
             mMapButton = v.findViewById<ImageButton>(R.id.map_button)
             mMapButton.setOnClickListener {
-                mClickMapListener.onClickMap(mNexTrips[adapterPosition])
+                mClickMapListener!!.onClickMap(mNexTrips[adapterPosition])
             }
         }
     }
@@ -89,4 +91,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
         return mNexTrips.size
     }
 
+    fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
+        mClickMapListener = clickMapListener
+    }
 }
