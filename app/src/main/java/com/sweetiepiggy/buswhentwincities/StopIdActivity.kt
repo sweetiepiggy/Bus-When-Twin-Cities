@@ -190,34 +190,30 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         b.putString("departureText", nexTrip.departureText)
         b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
         b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        val mapFragment = mMapFragment
-        // if (mapFragment == null) {
-        //     val f = MyMapFragment.newInstance()
-        //     f.setArguments(b)
-        //     supportFragmentManager.beginTransaction()
-        //     		.replace(R.id.container, f)
-        //             .setTransition(TRANSIT_FRAGMENT_OPEN)
-        //     		.addToBackStack(null)
-        //     		.commit()
-        // } else {
-            mapFragment?.updateVehicle(b)
-        // }
+        mViewPager?.setCurrentItem(ITEM_IDX_MAP, false)
+        // supportActionBar?.let { it.selectTab(it.getTabAt(ITEM_IDX_MAP)) }
+        supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
+        mMapFragment?.updateVehicle(b)
     }
 
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
-        override fun getItem(i: Int): Fragment {
-            if (i == 0) {
-                val fragment = NexTripsFragment.newInstance()
-                android.util.Log.d("a", "got here: getItem(0)")
-                fragment.setOnClickMapListener(mClickMapListener)
-                mNexTripsFragment = fragment
-                return fragment
-            } else {
-                val fragment = MyMapFragment.newInstance()
-                mMapFragment = fragment
-                return fragment
+        override fun getItem(i: Int): Fragment? {
+            return when (i) {
+                ITEM_IDX_NEXTRIPS -> {
+                    val fragment = NexTripsFragment.newInstance()
+                    android.util.Log.d("a", "got here: getItem(0)")
+                    fragment.setOnClickMapListener(mClickMapListener)
+                    mNexTripsFragment = fragment
+                    fragment
+                }
+                ITEM_IDX_MAP -> {
+                    val fragment = MyMapFragment.newInstance()
+                    mMapFragment = fragment
+                    fragment
+                }
+                else ->null
             }
         }
     }
@@ -238,6 +234,8 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val KEY_STOP_ID = "stopId"
+        private val ITEM_IDX_NEXTRIPS = 0
+        private val ITEM_IDX_MAP = 1
     }
 }
 
