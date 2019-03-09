@@ -19,80 +19,80 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Context
-import android.text.format.DateFormat
+data class NexTrip(val isActual: Boolean, val blockNumber: Int, val departureText: String?,
+              val departureTime: String?, val description: String?, val gate: String?,
+              val route: String?, val routeDirection: String?, val terminal: String?,
+              val vehicleHeading: Double, val vehicleLatitude: Double,
+              val vehicleLongitude: Double)
 
-import java.util.Calendar
-import java.util.Date
+// class NexTrip(internal val isActual: Boolean, internal val blockNumber: Int, departureText: String?,
+//               departureTime: String?, internal val description: String?, internal val gate: String?,
+//               internal val route: String?, routeDirection: String?, internal val terminal: String?,
+//               internal val vehicleHeading: Double, internal val vehicleLatitude: Double,
+//               internal val vehicleLongitude: Double) {
+//     internal var departureText: String? = null
+//         private set
+//     internal var departureTime: String? = null
+//         private set
+//     internal val routeDirection: String?
 
-class NexTrip(private val mCtxt: Context?, internal val isActual: Boolean, internal val blockNumber: Int, departureText: String?,
-              departureTime: String?, internal val description: String?, internal val gate: String?,
-              internal val route: String?, routeDirection: String?, internal val terminal: String?,
-              internal val vehicleHeading: Double, internal val vehicleLatitude: Double,
-              internal val vehicleLongitude: Double) {
-    internal var departureText: String? = null
-        private set
-    internal var departureTime: String? = null
-        private set
-    internal val routeDirection: String?
+//     init {
+//         this.routeDirection = if (routeDirection != null) translateDirection(routeDirection) else null
 
-    init {
-        this.routeDirection = if (routeDirection != null) translateDirection(routeDirection) else null
+//         val departureTimeInMillis = parseDepartureTime(departureTime)
+//         val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
+//         val minutesUntilDeparture = millisUntilDeparture / 1000 / 60
+//         if (departureTimeInMillis < 0 || millisUntilDeparture < 0) {
+//             this.departureText = translateDepartureText(departureText)
+//             this.departureTime = ""
+//         } else if (minutesUntilDeparture < 60) {
+//             val resources = mCtxt?.resources
+//             this.departureText = if (minutesUntilDeparture < 1)
+//                 resources?.getString(R.string.due) ?: "Due"
+//             else
+//                 java.lang.Long.toString(minutesUntilDeparture) +
+//                         " " + (if (resources != null) resources.getString(R.string.minutes) else "min")
+//             this.departureTime = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
+//         } else {
+//             this.departureText = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
+//             this.departureTime = ""
+//         }
+//     }
 
-        val departureTimeInMillis = parseDepartureTime(departureTime)
-        val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
-        val minutesUntilDeparture = millisUntilDeparture / 1000 / 60
-        if (departureTimeInMillis < 0 || millisUntilDeparture < 0) {
-            this.departureText = translateDepartureText(departureText)
-            this.departureTime = ""
-        } else if (minutesUntilDeparture < 60) {
-            val resources = mCtxt?.resources
-            this.departureText = if (minutesUntilDeparture < 1)
-                resources?.getString(R.string.due) ?: "Due"
-            else
-                java.lang.Long.toString(minutesUntilDeparture) +
-                        " " + (if (resources != null) resources.getString(R.string.minutes) else "min")
-            this.departureTime = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
-        } else {
-            this.departureText = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
-            this.departureTime = ""
-        }
-    }
+//     internal fun parseDepartureTime(departureTime: String?): Long {
+//         if (departureTime != null && departureTime.startsWith("/Date(")) {
+//             var timezoneIdx = departureTime.indexOf('-', 6)
+//             if (timezoneIdx < 0) {
+//                 timezoneIdx = departureTime.indexOf('+', 6)
+//                 if (timezoneIdx < 0) {
+//                     return -1
+//                 }
+//             }
+//             return java.lang.Long.parseLong(departureTime.substring(6, timezoneIdx))
+//         }
+//         return -1
+//     }
 
-    internal fun parseDepartureTime(departureTime: String?): Long {
-        if (departureTime != null && departureTime.startsWith("/Date(")) {
-            var timezoneIdx = departureTime.indexOf('-', 6)
-            if (timezoneIdx < 0) {
-                timezoneIdx = departureTime.indexOf('+', 6)
-                if (timezoneIdx < 0) {
-                    return -1
-                }
-            }
-            return java.lang.Long.parseLong(departureTime.substring(6, timezoneIdx))
-        }
-        return -1
-    }
+//     internal fun translateDepartureText(departureText: String?): String? {
+//         return if (departureText != null && departureText.endsWith(" Min")) {
+//             departureText.substring(0, departureText.length - 3) + (mCtxt?.resources?.getString(R.string.minutes) ?: "min")
+//         } else {
+//             departureText
+//         }
+//     }
 
-    internal fun translateDepartureText(departureText: String?): String? {
-        return if (departureText != null && departureText.endsWith(" Min")) {
-            departureText.substring(0, departureText.length - 3) + (mCtxt?.resources?.getString(R.string.minutes) ?: "min")
-        } else {
-            departureText
-        }
-    }
-
-    internal fun translateDirection(dir: String): String {
-        val resources = mCtxt?.resources
-        return if (resources != null) {
-            when (dir) {
-                "SOUTHBOUND" -> resources.getString(R.string.south)
-                "EASTBOUND" -> resources.getString(R.string.east)
-                "WESTBOUND" -> resources.getString(R.string.west)
-                "NORTHBOUND" -> resources.getString(R.string.north)
-                else -> dir
-            }
-        } else {
-            dir
-        }
-    }
-}
+//     internal fun translateDirection(dir: String): String {
+//         val resources = mCtxt?.resources
+//         return if (resources != null) {
+//             when (dir) {
+//                 "SOUTHBOUND" -> resources.getString(R.string.south)
+//                 "EASTBOUND" -> resources.getString(R.string.east)
+//                 "WESTBOUND" -> resources.getString(R.string.west)
+//                 "NORTHBOUND" -> resources.getString(R.string.north)
+//                 else -> dir
+//             }
+//         } else {
+//             dir
+//         }
+//     }
+// }

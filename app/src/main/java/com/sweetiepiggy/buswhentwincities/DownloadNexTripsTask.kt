@@ -19,21 +19,13 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Context
-import android.content.DialogInterface
 import android.os.AsyncTask
-import androidx.appcompat.app.AlertDialog
 import android.util.JsonReader
-
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.SocketException
-import java.net.URL
-import java.net.UnknownHostException
-import java.util.ArrayList
+import java.net.*
+import java.util.*
 
 class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener,
                            private val mStopId: String) : AsyncTask<Void, Int, Void>() {
@@ -142,6 +134,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
                     "Actual" -> actual = reader.nextBoolean()
                     "BlockNumber" -> blockNumber = reader.nextInt()
                     "DepartureText" -> departureText = reader.nextString()
+                    "DepartureTime" -> departureTime = reader.nextString()
                     "Description" -> description = reader.nextString()
                     "Gate" -> gate = reader.nextString()
                     "Route" -> route = reader.nextString()
@@ -153,7 +146,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
                     else -> reader.skipValue()
                 }
             }
-            nexTrips.add(NexTrip(null, actual, blockNumber, departureText,
+            nexTrips.add(NexTrip(actual, blockNumber, departureText,
                     departureTime, description, gate, route,
                     routeDirection, terminal, vehicleHeading,
                     vehicleLatitude, vehicleLongitude))
