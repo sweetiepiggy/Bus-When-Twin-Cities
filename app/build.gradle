@@ -8,8 +8,8 @@ android {
         applicationId "com.sweetiepiggy.buswhentwincities"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 20
-        versionName "0.6"
+        versionCode 21
+        versionName "0.7-rc1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
