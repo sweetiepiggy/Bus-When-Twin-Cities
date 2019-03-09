@@ -64,13 +64,13 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
         }
     }
 
-    override fun onDownloaded(nts: List<NexTrip>) {
+    override fun onDownloaded(nexTrips: List<NexTrip>) {
         mLastUpdate = unixTime
-        nexTrips.value = nts
+        this.nexTrips.value = nexTrips
     }
 
-    override fun onDownloadError(e: DownloadNexTripsTask.DownloadError) {
-        mLoadNexTripsErrorListener?.onLoadNexTripsError(e)
+    override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
+        mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
     }
 
     override fun onCleared() {

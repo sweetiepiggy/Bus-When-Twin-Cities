@@ -19,6 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -43,6 +44,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
     private var mStopDesc: String? = null
     private var mNexTripsFragment: NexTripsFragment? = null
     private var mMapFragment: MyMapFragment? = null
+    private var mMenu: Menu? = null
     private var mIsFavorite = false
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
@@ -88,15 +90,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
             findViewById<ViewPager>(R.id.pager)!!.adapter = mStopIdPagerAdapter
         }
 
-        val dbHelper = DbAdapter()
-        dbHelper.open(this)
-        mIsFavorite = mStopId?.let { dbHelper.isFavStop(it) } ?: false
-        mStopDesc = mStopId?.let { dbHelper.getStopDesc(it) }
-        dbHelper.close()
+        title = resources.getString(R.string.stop) + " #" + mStopId
 
-        val stopDesc = mStopDesc
-        title = resources.getString(R.string.stop) + " #" + mStopId +
-        	(if (stopDesc != null && !stopDesc.isEmpty()) " ($stopDesc)" else "")
+        LoadIsFavorite().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -114,6 +110,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        mMenu = menu
         menuInflater.inflate(R.menu.menu_stop_id, menu)
         menu.findItem(R.id.action_favorite).icon = ContextCompat.getDrawable(this,
         	if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
@@ -128,32 +125,49 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
             }
             R.id.action_favorite -> {
                 if (mIsFavorite) {
-                    mStopId?.let { stopId ->
-                        val dbHelper = DbAdapter()
-                        dbHelper.openReadWrite(this)
-                        dbHelper.deleteFavStop(stopId)
-                        dbHelper.close()
-                    }
-                    item.icon = ContextCompat.getDrawable(this, IS_NOT_FAV_ICON)
                     mIsFavorite = false
+                    item.icon = ContextCompat.getDrawable(this, IS_NOT_FAV_ICON)
+                    title = resources.getString(R.string.stop) + " #" + mStopId
+                    mStopId?.let { stopId ->
+                        object : AsyncTask<Void, Void, Void>() {
+                            override fun doInBackground(vararg params: Void): Void? {
+                                DbAdapter().apply {
+                                    openReadWrite(applicationContext)
+                                    deleteFavStop(stopId)
+                                    close()
+                                }
+                                return null
+                            }
+                            override fun onPostExecute(result: Void?) {}
+                        }.execute()
+                    }
                 } else {
                     val builder = AlertDialog.Builder(this)
                     val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
                     builder.setView(favStopIdDialog)
                     builder.setPositiveButton(android.R.string.ok) { _, _ ->
-                        val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
-                        mStopId?.let { stopId ->
-                            val dbHelper = DbAdapter()
-                            dbHelper.openReadWrite(this)
-                            dbHelper.createFavStop(stopId, stopName)
-                            dbHelper.close()
-                        }
-                        item.icon = ContextCompat.getDrawable(this, IS_FAV_ICON)
                         mIsFavorite = true
+                        item.icon = ContextCompat.getDrawable(this, IS_FAV_ICON)
+                        val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
+                        title = resources.getString(R.string.stop) + " #" + mStopId +
+            	        	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
+                        mStopId?.let { stopId ->
+                            object : AsyncTask<Void, Void, Void>() {
+                                override fun doInBackground(vararg params: Void): Void? {
+                                    DbAdapter().apply {
+                                        openReadWrite(applicationContext)
+                                        createFavStop(stopId, stopName)
+                                        close()
+                                    }
+                                    return null
+                                }
+                                override fun onPostExecute(result: Void?) {}
+                            }.execute()
+                        }
                     }
                     builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
-                    builder.setTitle(R.string.enter_stop_name_dialog_title)
-                    builder.show()
+                            .setTitle(R.string.enter_stop_name_dialog_title)
+                            .show()
                 }
 
                 return true
@@ -174,7 +188,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         val alert = AlertDialog.Builder(this).apply {
             setTitle(getResources().getString(android.R.string.dialog_alert_title))
             message?.let { setMessage(it) }
-            setPositiveButton(android.R.string.ok) { dialog, _ -> }
+            setPositiveButton(android.R.string.ok) { _, _ -> }
             show()
         }
     }
@@ -221,6 +235,28 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
     }
 
     override fun onTabReselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
+    }
+
+    private inner class LoadIsFavorite(): AsyncTask<Void, Void, Pair<Boolean, String?>>() {
+        override fun doInBackground(vararg params: Void): Pair<Boolean, String?> {
+            val dbHelper = DbAdapter()
+            dbHelper.open(applicationContext)
+            val isFavorite = mStopId?.let { dbHelper.isFavStop(it) } ?: false
+            val stopDesc = mStopId?.let { dbHelper.getStopDesc(it) }
+            dbHelper.close()
+            return Pair(isFavorite, stopDesc)
+        }
+
+        override fun onPostExecute(result: Pair<Boolean, String?>) {
+            val (isFavorite, stopDesc) = result
+            mIsFavorite = isFavorite
+            mStopDesc = stopDesc
+
+            title = resources.getString(R.string.stop) + " #" + mStopId +
+            	(if (!stopDesc.isNullOrEmpty()) " ($stopDesc)" else "")
+            mMenu?.findItem(R.id.action_favorite)?.icon = ContextCompat.getDrawable(applicationContext,
+        		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
+        }
     }
 
     companion object {

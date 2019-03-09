@@ -78,7 +78,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
             holder.mDepartureTextTextView.text = translateDepartureText(nexTrip.departureText)
             holder.mDepartureTimeTextView.visibility = View.GONE
         } else if (minutesUntilDeparture < 60) {
-            val resources = mCtxt?.resources
+            val resources = mCtxt.resources
             holder.mDepartureTextTextView.text = if (minutesUntilDeparture < 1)
                  resources?.getString(R.string.due) ?: "Due"
             else
@@ -123,7 +123,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
 
     internal fun translateDepartureText(departureText: String?): String? {
         return if (departureText != null && departureText.endsWith(" Min")) {
-            departureText.substring(0, departureText.length - 3) + (mCtxt?.resources?.getString(R.string.minutes) ?: "min")
+            departureText.substring(0, departureText.length - 3) + (mCtxt.resources?.getString(R.string.minutes) ?: "min")
         } else {
             departureText
         }
