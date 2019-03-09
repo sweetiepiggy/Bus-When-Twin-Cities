@@ -47,7 +47,6 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
     }
 
     fun loadNexTrips() {
-        android.util.Log.d("abc", "got here: loadNexTrips()")
         val downloadNextTripsTask = mDownloadNexTripsTask
         if (downloadNextTripsTask != null) {
             if (downloadNextTripsTask.status == AsyncTask.Status.FINISHED &&
@@ -66,13 +65,11 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
     }
 
     override fun onDownloaded(nts: List<NexTrip>) {
-        android.util.Log.d("abc", "got here: onDownloaded(): nts.isEmpty() == ${nts.isEmpty()}")
         mLastUpdate = unixTime
         nexTrips.value = nts
     }
 
     override fun onDownloadError(e: DownloadNexTripsTask.DownloadError) {
-        android.util.Log.d("abc", "got here: onDownloadError()")
         mLoadNexTripsErrorListener?.onLoadNexTripsError(e)
     }
 
@@ -87,7 +84,6 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
 
     class NexTripsViewModelFactory(private val stopId: String?) : ViewModelProvider.NewInstanceFactory() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            android.util.Log.d("abc", "got here: create NexTripsViewModelFactory()")
             return NexTripsViewModel(stopId) as T
         }
     }

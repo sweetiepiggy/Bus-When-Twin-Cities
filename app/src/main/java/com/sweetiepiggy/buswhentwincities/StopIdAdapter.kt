@@ -75,12 +75,9 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
         val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
         val minutesUntilDeparture = millisUntilDeparture / 1000 / 60
         if (departureTimeInMillis < 0 || millisUntilDeparture < 0) {
-            android.util.Log.d("abc", "got here1: onBindViewHolder: departureTime: ${nexTrip.departureTime}")
-            android.util.Log.d("abc", "got here1: onBindViewHolder: departureTimeInMillis: ${departureTimeInMillis}")
             holder.mDepartureTextTextView.text = translateDepartureText(nexTrip.departureText)
             holder.mDepartureTimeTextView.visibility = View.GONE
         } else if (minutesUntilDeparture < 60) {
-            android.util.Log.d("abc", "got here2: onBindViewHolder: minutesUntilDeparture: ${minutesUntilDeparture}")
             val resources = mCtxt?.resources
             holder.mDepartureTextTextView.text = if (minutesUntilDeparture < 1)
                  resources?.getString(R.string.due) ?: "Due"
@@ -90,7 +87,6 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
             holder.mDepartureTimeTextView.visibility = View.VISIBLE
             holder.mDepartureTimeTextView.text = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
         } else {
-            android.util.Log.d("abc", "got here3: onBindViewHolder")
             holder.mDepartureTextTextView.text = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
             holder.mDepartureTimeTextView.visibility = View.GONE
          }

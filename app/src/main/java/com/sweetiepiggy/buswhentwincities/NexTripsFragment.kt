@@ -45,7 +45,6 @@ class NexTripsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        android.util.Log.d("abc", "got here4: setOnClickMapListener: mAdapter is null == " + (mAdapter == null).toString())
         mClickMapListener = context as StopIdAdapter.OnClickMapListener
         mAdapter?.setOnClickMapListener(mClickMapListener!!)
     }
@@ -55,7 +54,6 @@ class NexTripsFragment : Fragment() {
         mModel = activity?.run {
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        android.util.Log.d("abc", "NexTripsFragment observing")
         mModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
     }
 
@@ -68,31 +66,20 @@ class NexTripsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         mLayoutManager = LinearLayoutManager(getContext())
-        android.util.Log.d("abc", "got here5: onActivityCreated")
 
         getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.let { resultsRecyclerView ->
             resultsRecyclerView.layoutManager = mLayoutManager
             resultsRecyclerView.addItemDecoration(DividerItemDecoration(resultsRecyclerView.context,
             	    DividerItemDecoration.VERTICAL))
-            android.util.Log.d("abc", "got here: mNexTrips.isEmpty() = " + mNexTrips.isEmpty())
-            android.util.Log.d("abc", "got here6: context is null == " + (getContext() == null).toString())
             mAdapter = getContext()?.let { StopIdAdapter(it, mNexTrips) }
-            android.util.Log.d("abc", "got here7: mAdapter is null == " + (mAdapter == null).toString())
             resultsRecyclerView.adapter = mAdapter
             mClickMapListener?.let { mAdapter!!.setOnClickMapListener(it) }
         }
     }
 
-    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        super.onSaveInstanceState(savedInstanceState)
-        android.util.Log.d("abc", "got here: saving fragment instance state")
-    }
-
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        android.util.Log.d("abc", "got here2: nexTrips.isEmpty() = " + nexTrips.isEmpty())
         mNexTrips.clear()
         mNexTrips.addAll(nexTrips)
-        android.util.Log.d("abc", "got here3: mNexTrips.isEmpty() = " + mNexTrips.isEmpty())
         mAdapter?.notifyDataSetChanged()
 
         val resultsRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)

@@ -83,7 +83,6 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
     }
 
     override fun onPostExecute(result: Void?) {
-        android.util.Log.d("abc", "got here: onPostExecute(): mNexTrips?.isEmpty() == ${mNexTrips?.isEmpty()}")
         mError?.let { mDownloadedListener.onDownloadError(it) }
         mNexTrips?.let { mDownloadedListener.onDownloaded(it) }
     }
@@ -153,7 +152,6 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
             reader.endObject()
         }
         reader.endArray()
-        android.util.Log.d("abc", "got here: parseNexTrips().isEmpty() == ${nexTrips.isEmpty()}")
 
         return nexTrips
     }

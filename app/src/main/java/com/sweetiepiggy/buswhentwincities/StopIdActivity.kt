@@ -65,7 +65,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
                 .get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
-        android.util.Log.d("abc", "StopIdActivity observing")
         mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ _ -> })
 
         if (mDualPane) {
@@ -102,17 +101,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        android.util.Log.d("abc", "got here: saving activity instance state")
         savedInstanceState.putString(KEY_STOP_ID, mStopId)
-        // supportFragmentManager.putFragment(savedInstanceState, KEY_NEXTRIPS_FRAGMENT, mNexTripsFragment!!)
-        // supportFragmentManager.putFragment(savedInstanceState, KEY_MAP_FRAGMENT, mMapFragment!!)
     }
 
     private fun loadState(b: Bundle) {
         mStopId = b.getString(KEY_STOP_ID)
-        android.util.Log.d("abc", "got here: loadState")
-        // mNexTripsFragment = supportFragmentManager.getFragment(b, KEY_NEXTRIPS_FRAGMENT) as NexTripsFragment?
-        // mMapFragment = supportFragmentManager.getFragment(b, KEY_MAP_FRAGMENT) as MyMapFragment?
     }
 
     public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -169,12 +162,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         }
     }
 
-    // override fun onDownloaded(nexTrips: List<NexTrip>) {
-    //     mLastUpdate = unixTime
-    //     mNexTrips = nexTrips
-    //     mNexTripsFragment?.updateNexTrips(nexTrips)
-    // }
-
     override fun onLoadNexTripsError(e: DownloadNexTripsTask.DownloadError) {
         val message: String? =
             when (e) {
@@ -213,7 +200,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
             return when (i) {
                 ITEM_IDX_NEXTRIPS -> {
                     val fragment = NexTripsFragment.newInstance()
-                    android.util.Log.d("a", "got here: getItem(0)")
                     mNexTripsFragment = fragment
                     fragment
                 }
@@ -228,7 +214,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
     }
 
     override fun onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
-        android.util.Log.d("a", "got here: onTabSelected " + tab.getPosition().toString())
         if (!mDualPane) findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(tab.getPosition())
     }
 
