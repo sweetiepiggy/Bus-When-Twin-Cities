@@ -47,9 +47,9 @@ class SearchStopIdFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (savedInstanceState != null) {
-            restoreSavedState(savedInstanceState)
-        }
+        // if (savedInstanceState != null) {
+        //     restoreSavedState(savedInstanceState)
+        // }
 
         // getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
         //         ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
@@ -67,27 +67,27 @@ class SearchStopIdFragment : Fragment() {
         fab?.setOnClickListener { startStopIdActivity() }
     }
 
-    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putString(KEY_STOP_ID,
-    		getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.text.toString())
-        super.onSaveInstanceState(savedInstanceState)
-    }
+    // public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+    //     savedInstanceState.putString(KEY_STOP_ID,
+    // 		getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.text.toString())
+    //     super.onSaveInstanceState(savedInstanceState)
+    // }
 
-    private fun restoreSavedState(savedInstanceState: Bundle) {
-        val stopId = savedInstanceState.getString(KEY_STOP_ID)
-        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.setText(stopId)
-    }
+    // private fun restoreSavedState(savedInstanceState: Bundle) {
+    //     val stopId = savedInstanceState.getString(KEY_STOP_ID)
+    //     getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.setText(stopId)
+    // }
 
     private fun startStopIdActivity() {
-        val stopIdEntry = getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
-        if (stopIdEntry != null) {
+        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
             val stopId = stopIdEntry.text.toString()
             if (stopId.length == 0) {
                 stopIdEntry.error = resources.getString(R.string.enter_stop_id)
             } else {
                 val intent = Intent(getActivity()?.getApplicationContext(), StopIdActivity::class.java)
-                val b = Bundle()
-                b.putString(KEY_STOP_ID, stopId)
+                val b = Bundle().apply {
+                    putString(KEY_STOP_ID, stopId)
+                }
                 intent.putExtras(b)
                 startActivity(intent)
             }

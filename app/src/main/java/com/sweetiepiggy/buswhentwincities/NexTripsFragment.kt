@@ -19,11 +19,14 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,13 +35,28 @@ import androidx.recyclerview.widget.RecyclerView
 class NexTripsFragment : Fragment() {
     private var mClickMapListener: StopIdAdapter.OnClickMapListener? = null
     private var mAdapter: StopIdAdapter? = null
-    private var mResultsRecyclerView: RecyclerView? = null
-    private var mNoResultsView: View? = null
     private lateinit var mLayoutManager: RecyclerView.LayoutManager
     private var mNexTrips: MutableList<NexTrip> = ArrayList<NexTrip>()
+    private lateinit var mModel: NexTripsViewModel
 
     companion object {
-        fun newInstance() = NexTripsFragment()
+        fun newInstance(): NexTripsFragment = NexTripsFragment()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        android.util.Log.d("abc", "got here4: setOnClickMapListener: mAdapter is null == " + (mAdapter == null).toString())
+        mClickMapListener = context as StopIdAdapter.OnClickMapListener
+        mAdapter?.setOnClickMapListener(mClickMapListener!!)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mModel = activity?.run {
+            ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+        android.util.Log.d("abc", "NexTripsFragment observing")
+        mModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -49,49 +67,42 @@ class NexTripsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mResultsRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)
-        mNoResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
-
-        val context = getActivity()?.getApplicationContext()
-        mLayoutManager = LinearLayoutManager(context)
+        mLayoutManager = LinearLayoutManager(getContext())
         android.util.Log.d("abc", "got here5: onActivityCreated")
 
-        mResultsRecyclerView?.let { resultsRecyclerView ->
+        getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.let { resultsRecyclerView ->
             resultsRecyclerView.layoutManager = mLayoutManager
             resultsRecyclerView.addItemDecoration(DividerItemDecoration(resultsRecyclerView.context,
             	    DividerItemDecoration.VERTICAL))
             android.util.Log.d("abc", "got here: mNexTrips.isEmpty() = " + mNexTrips.isEmpty())
-            android.util.Log.d("abc", "got here6: context is null == " + (context == null).toString())
-            mAdapter = context?.let { StopIdAdapter(it, mNexTrips) }
+            android.util.Log.d("abc", "got here6: context is null == " + (getContext() == null).toString())
+            mAdapter = getContext()?.let { StopIdAdapter(it, mNexTrips) }
             android.util.Log.d("abc", "got here7: mAdapter is null == " + (mAdapter == null).toString())
             resultsRecyclerView.adapter = mAdapter
             mClickMapListener?.let { mAdapter!!.setOnClickMapListener(it) }
         }
     }
 
-    fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
-        android.util.Log.d("abc", "got here4: setOnClickMapListener: mAdapter is null == " + (mAdapter == null).toString())
-        mAdapter?.setOnClickMapListener(clickMapListener)
-        mClickMapListener = clickMapListener
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        android.util.Log.d("abc", "got here: saving fragment instance state")
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         android.util.Log.d("abc", "got here2: nexTrips.isEmpty() = " + nexTrips.isEmpty())
-        if (mNexTrips == null) {
-            mNexTrips = nexTrips.toMutableList()
-        } else {
-            mNexTrips.clear()
-            mNexTrips.addAll(nexTrips)
-            android.util.Log.d("abc", "got here3: mNexTrips.isEmpty() = " + mNexTrips.isEmpty())
-            mAdapter?.notifyDataSetChanged()
-        }
+        mNexTrips.clear()
+        mNexTrips.addAll(nexTrips)
+        android.util.Log.d("abc", "got here3: mNexTrips.isEmpty() = " + mNexTrips.isEmpty())
+        mAdapter?.notifyDataSetChanged()
 
+        val resultsRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)
+        val noResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
-            mResultsRecyclerView?.setVisibility(View.GONE)
-            mNoResultsView?.setVisibility(View.VISIBLE)
+            resultsRecyclerView?.setVisibility(View.GONE)
+            noResultsView?.setVisibility(View.VISIBLE)
         } else {
-            mNoResultsView?.setVisibility(View.GONE)
-            mResultsRecyclerView?.setVisibility(View.VISIBLE)
+            noResultsView?.setVisibility(View.GONE)
+            resultsRecyclerView?.setVisibility(View.VISIBLE)
         }
     }
 }

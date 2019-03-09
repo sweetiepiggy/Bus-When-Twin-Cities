@@ -33,19 +33,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedListener, StopIdAdapter.OnClickMapListener, ActionBar.TabListener {
-    private var mViewPager: ViewPager? = null
+class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, ActionBar.TabListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
     private var mStopIdPagerAdapter: StopIdPagerAdapter? = null
     private var mStopId: String? = null
     private var mStopDesc: String? = null
-    private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mNexTripsFragment: NexTripsFragment? = null
     private var mMapFragment: MyMapFragment? = null
-    private var mLastUpdate: Long = 0
     private var mIsFavorite = false
+    private var mDualPane = false
+    private lateinit var mNexTripsModel: NexTripsViewModel
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -55,18 +56,29 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         setContentView(R.layout.activity_stop_id)
 
         if (savedInstanceState == null) {
-            val b = intent.extras
-            if (b != null) {
-                loadState(b)
-            }
-
+            intent.extras?.let { loadState(it) }
         } else {
             loadState(savedInstanceState)
         }
 
-        mViewPager = findViewById(R.id.pager)
+        mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
-        if (mViewPager != null) {
+        mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
+                .get(NexTripsViewModel::class.java)
+        mNexTripsModel.setLoadNexTripsErrorListener(this)
+        android.util.Log.d("abc", "StopIdActivity observing")
+        mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ _ -> })
+
+        if (mDualPane) {
+            mNexTripsFragment = NexTripsFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.nextrips_container, mNexTripsFragment!!)
+                    .commit()
+            mMapFragment = MyMapFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.map_container, mMapFragment!!)
+                    .commit()
+        } else {
             supportActionBar?.navigationMode = NAVIGATION_MODE_TABS
             val listTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_view_list_24px)
             val mapTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_map_24px)
@@ -75,53 +87,38 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
             supportActionBar?.addTab(listTab)
             supportActionBar?.addTab(mapTab)
             mStopIdPagerAdapter = StopIdPagerAdapter(supportFragmentManager, this)
-            mViewPager!!.adapter = mStopIdPagerAdapter
-        } else {
-            mNexTripsFragment = NexTripsFragment.newInstance()
-            mNexTripsFragment!!.setOnClickMapListener(this)
-            mMapFragment = MyMapFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.nextrips_container, mNexTripsFragment!!)
-                    .commit()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.map_container, mMapFragment!!)
-                    .commit()
+            findViewById<ViewPager>(R.id.pager)!!.adapter = mStopIdPagerAdapter
         }
 
         val dbHelper = DbAdapter()
         dbHelper.open(this)
-        val stopId = mStopId
-        mIsFavorite = if (stopId != null) dbHelper.isFavStop(stopId) else false
-        mStopDesc = stopId?.let { dbHelper.getStopDesc(it) }
+        mIsFavorite = mStopId?.let { dbHelper.isFavStop(it) } ?: false
+        mStopDesc = mStopId?.let { dbHelper.getStopDesc(it) }
         dbHelper.close()
 
         val stopDesc = mStopDesc
         title = resources.getString(R.string.stop) + " #" + mStopId +
         	(if (stopDesc != null && !stopDesc.isEmpty()) " ($stopDesc)" else "")
-
-        if (stopId != null) {
-            mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
-            mDownloadNexTripsTask?.execute()
-        }
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
+        android.util.Log.d("abc", "got here: saving activity instance state")
         savedInstanceState.putString(KEY_STOP_ID, mStopId)
+        // supportFragmentManager.putFragment(savedInstanceState, KEY_NEXTRIPS_FRAGMENT, mNexTripsFragment!!)
+        // supportFragmentManager.putFragment(savedInstanceState, KEY_MAP_FRAGMENT, mMapFragment!!)
     }
 
     private fun loadState(b: Bundle) {
         mStopId = b.getString(KEY_STOP_ID)
+        android.util.Log.d("abc", "got here: loadState")
+        // mNexTripsFragment = supportFragmentManager.getFragment(b, KEY_NEXTRIPS_FRAGMENT) as NexTripsFragment?
+        // mMapFragment = supportFragmentManager.getFragment(b, KEY_MAP_FRAGMENT) as MyMapFragment?
     }
 
     public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         loadState(savedInstanceState)
-    }
-
-    public override fun onDestroy() {
-        mDownloadNexTripsTask?.cancel(true)
-        super.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -134,13 +131,7 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_refresh -> {
-                mStopId?.let { stopId ->
-                    if (mDownloadNexTripsTask!!.status == AsyncTask.Status.FINISHED &&
-                			unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                        mDownloadNexTripsTask = DownloadNexTripsTask(this, this, stopId)
-                        mDownloadNexTripsTask!!.execute()
-                    }
-                }
+                mNexTripsModel.loadNexTrips()
                 return true
             }
             R.id.action_favorite -> {
@@ -179,9 +170,27 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         }
     }
 
-    override fun onDownloaded(nexTrips: List<NexTrip>) {
-        mLastUpdate = unixTime
-        mNexTripsFragment?.updateNexTrips(nexTrips)
+    // override fun onDownloaded(nexTrips: List<NexTrip>) {
+    //     mLastUpdate = unixTime
+    //     mNexTrips = nexTrips
+    //     mNexTripsFragment?.updateNexTrips(nexTrips)
+    // }
+
+    override fun onLoadNexTripsError(e: DownloadNexTripsTask.DownloadError) {
+        val message: String? =
+            when (e) {
+                is DownloadNexTripsTask.DownloadError.UnknownHost -> getResources().getString(R.string.unknown_host)
+                is DownloadNexTripsTask.DownloadError.FileNotFound -> getResources().getString(R.string.file_not_found) + ":\n${e.message}"
+                is DownloadNexTripsTask.DownloadError.TimedOut -> getResources().getString(R.string.timed_out) + ":\n${e.message}"
+                is DownloadNexTripsTask.DownloadError.Unauthorized -> getResources().getString(R.string.unauthorized)
+                is DownloadNexTripsTask.DownloadError.OtherDownloadError -> e.message
+            }
+        val alert = AlertDialog.Builder(this).apply {
+            setTitle(getResources().getString(android.R.string.dialog_alert_title))
+            message?.let { setMessage(it) }
+            setPositiveButton(android.R.string.ok) { dialog, _ -> }
+            show()
+        }
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
@@ -190,9 +199,11 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         b.putString("departureText", nexTrip.departureText)
         b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
         b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        mViewPager?.setCurrentItem(ITEM_IDX_MAP, false)
-        // supportActionBar?.let { it.selectTab(it.getTabAt(ITEM_IDX_MAP)) }
-        supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
+        if (!mDualPane) {
+            findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
+            // supportActionBar?.let { it.selectTab(it.getTabAt(ITEM_IDX_MAP)) }
+            supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
+        }
         mMapFragment?.updateVehicle(b)
     }
 
@@ -204,7 +215,6 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                 ITEM_IDX_NEXTRIPS -> {
                     val fragment = NexTripsFragment.newInstance()
                     android.util.Log.d("a", "got here: getItem(0)")
-                    fragment.setOnClickMapListener(mClickMapListener)
                     mNexTripsFragment = fragment
                     fragment
                 }
@@ -213,14 +223,14 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
                     mMapFragment = fragment
                     fragment
                 }
-                else ->null
+                else -> null
             }
         }
     }
 
     override fun onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
         android.util.Log.d("a", "got here: onTabSelected " + tab.getPosition().toString())
-        mViewPager?.setCurrentItem(tab.getPosition())
+        if (!mDualPane) findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(tab.getPosition())
     }
 
     override fun onTabUnselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
@@ -234,6 +244,8 @@ class StopIdActivity : AppCompatActivity(), DownloadNexTripsTask.OnDownloadedLis
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val KEY_STOP_ID = "stopId"
+        private val KEY_NEXTRIPS_FRAGMENT = "nexTripsFragment"
+        private val KEY_MAP_FRAGMENT = "mapFragment"
         private val ITEM_IDX_NEXTRIPS = 0
         private val ITEM_IDX_MAP = 1
     }

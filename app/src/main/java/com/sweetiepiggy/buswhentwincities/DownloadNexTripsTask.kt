@@ -35,43 +35,42 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.util.ArrayList
 
-class DownloadNexTripsTask(private val mContext: Context?, private val mDownloadedListener: OnDownloadedListener,
+class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener,
                            private val mStopId: String) : AsyncTask<Void, Int, Void>() {
-    private var mAlertMessage: String? = null
+    private var mError: DownloadError? = null
     private var mNexTrips: List<NexTrip>? = null
 
     interface OnDownloadedListener {
         fun onDownloaded(nexTrips: List<NexTrip>)
+        fun onDownloadError(err: DownloadError)
     }
 
     inner class UnauthorizedException : IOException()
 
     override fun doInBackground(vararg params: Void): Void? {
         var retry: Boolean
-        var firstAlertMessage: String? = null
+        var firstError: DownloadError? = null
 
         do {
             retry = false
             try {
                 mNexTrips = downloadNexTrips(mStopId)
             } catch (e: UnknownHostException) { // probably no internet connection
-                mAlertMessage = mContext!!.resources.getString(R.string.unknown_host)
+            	mError = DownloadError.UnknownHost
             } catch (e: java.io.FileNotFoundException) {
-                mAlertMessage = mContext!!.resources.getString(R.string.file_not_found) + ":\n" + e.message
+                mError = DownloadError.FileNotFound(e.message)
             } catch (e: java.net.SocketTimeoutException) {
-                mAlertMessage = mContext!!.resources.getString(R.string.timed_out) + ":\n" + e.message
+                mError = DownloadError.TimedOut(e.message)
             } catch (e: UnauthorizedException) {
-                mAlertMessage = mContext!!.resources.getString(R.string.unauthorized)
+                mError = DownloadError.Unauthorized
             } catch (e: SocketException) {
-                mAlertMessage = e.message
+                mError = DownloadError.OtherDownloadError(e.message)
             } catch (e: MalformedURLException) {
-                mAlertMessage = e.message
+                mError = DownloadError.OtherDownloadError(e.message)
             } catch (e: UnsupportedEncodingException) {
-                mAlertMessage = e.message
+                mError = DownloadError.OtherDownloadError(e.message)
             } catch (e: IOException) {
-                if (firstAlertMessage == null) {
-                    firstAlertMessage = e.message
-                }
+                if (firstError == null) firstError = DownloadError.OtherDownloadError(e.message)
                 // old Android versions seem to have a problem with https and
                 // throw IOException: CertPathValidatorException,
                 // try again using http
@@ -79,36 +78,22 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
                     mUseHttps = false
                     retry = true
                 } else {
-                    mAlertMessage = e.message
+                    mError = DownloadError.OtherDownloadError(e.message)
                 }
             }
-
         } while (retry)
 
-        if (mAlertMessage != null && firstAlertMessage != null) {
-            mAlertMessage = firstAlertMessage
+        if (mError != null && firstError != null) {
+            mError = firstError
         }
 
         return null
     }
 
     override fun onPostExecute(result: Void?) {
-        val alertMessage = mAlertMessage
-        if (alertMessage != null && mContext != null) {
-            alert(alertMessage)
-        }
-        val nexTrips = mNexTrips
-        if (nexTrips != null) {
-            mDownloadedListener.onDownloaded(nexTrips)
-        }
-    }
-
-    private fun alert(msg: String) {
-        val alert = AlertDialog.Builder(mContext!!)
-        alert.setTitle(mContext.resources.getString(android.R.string.dialog_alert_title))
-        alert.setMessage(msg)
-        alert.setPositiveButton(android.R.string.ok) { dialog, _ -> }
-        alert.show()
+        android.util.Log.d("abc", "got here: onPostExecute(): mNexTrips?.isEmpty() == ${mNexTrips?.isEmpty()}")
+        mError?.let { mDownloadedListener.onDownloadError(it) }
+        mNexTrips?.let { mDownloadedListener.onDownloaded(it) }
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class)
@@ -129,16 +114,6 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
         } finally {
             reader.close()
         }
-        // nexTrips = new ArrayList<NexTrip>();
-        // nexTrips.add(new NexTrip(true, 1175, "5 Min", "/Date(1547811780000-0600)/",
-        //                        "Minn Drive / France Av / Southdale", "", "6",
-        //                        "SOUTHBOUND", "F", 0, 44.980820, -93.270970));
-        // nexTrips.add(new NexTrip(true, 2036, "10 Min", "/Date(1547812080000-0600)/",
-        //                        "Hopkins/United Health/Bren Rd W", "", "12",
-        //                        "WESTBOUND", "G", 0, 44.982220, -93.268790));
-        // nexTrips.add(new NexTrip(false, 1078, "7:58", "/Date(1547812200000-0600)/",
-        //                        "Bryant Av/82St-35W TC/Via Lyndale", "", "4",
-        //                        "SOUTHBOUND", "L", 0, 0, 0));
 
         return nexTrips
     }
@@ -163,44 +138,45 @@ class DownloadNexTripsTask(private val mContext: Context?, private val mDownload
             var vehicleLatitude = 0.0
             var vehicleLongitude = 0.0
             while (reader.hasNext()) {
-                val name = reader.nextName()
-                if (name == "Actual") {
-                    actual = reader.nextBoolean()
-                } else if (name == "BlockNumber") {
-                    blockNumber = reader.nextInt()
-                } else if (name == "DepartureText") {
-                    departureText = reader.nextString()
-                } else if (name == "DepartureTime") {
-                    departureTime = reader.nextString()
-                } else if (name == "Description") {
-                    description = reader.nextString()
-                } else if (name == "Gate") {
-                    gate = reader.nextString()
-                } else if (name == "Route") {
-                    route = reader.nextString()
-                } else if (name == "RouteDirection") {
-                    routeDirection = reader.nextString()
-                } else if (name == "Terminal") {
-                    terminal = reader.nextString()
-                } else if (name == "VehicleHeading") {
-                    vehicleHeading = reader.nextDouble()
-                } else if (name == "VehicleLatitude") {
-                    vehicleLatitude = reader.nextDouble()
-                } else if (name == "VehicleLongitude") {
-                    vehicleLongitude = reader.nextDouble()
-                } else {
-                    reader.skipValue()
+                when (reader.nextName()) {
+                    "Actual" -> actual = reader.nextBoolean()
+                    "BlockNumber" -> blockNumber = reader.nextInt()
+                    "DepartureText" -> departureText = reader.nextString()
+                    "Description" -> description = reader.nextString()
+                    "Gate" -> gate = reader.nextString()
+                    "Route" -> route = reader.nextString()
+                    "RouteDirection" -> routeDirection = reader.nextString()
+                    "Terminal" -> terminal = reader.nextString()
+                    "VehicleHeading" -> vehicleHeading = reader.nextDouble()
+                    "VehicleLatitude" -> vehicleLatitude = reader.nextDouble()
+                    "VehicleLongitude" -> vehicleLongitude = reader.nextDouble()
+                    else -> reader.skipValue()
                 }
             }
-            nexTrips.add(NexTrip(mContext, actual, blockNumber, departureText,
+            nexTrips.add(NexTrip(null, actual, blockNumber, departureText,
                     departureTime, description, gate, route,
                     routeDirection, terminal, vehicleHeading,
                     vehicleLatitude, vehicleLongitude))
             reader.endObject()
         }
         reader.endArray()
+        android.util.Log.d("abc", "got here: parseNexTrips().isEmpty() == ${nexTrips.isEmpty()}")
 
         return nexTrips
+    }
+
+    sealed class DownloadError {
+        object UnknownHost: DownloadError()
+        data class FileNotFound(
+            val message: String?
+        ): DownloadError()
+        data class TimedOut(
+            val message: String?
+        ): DownloadError()
+        object Unauthorized: DownloadError()
+        data class OtherDownloadError(
+            val message: String?
+        ): DownloadError()
     }
 
     companion object {
