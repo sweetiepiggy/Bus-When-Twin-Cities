@@ -21,6 +21,7 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.content.Intent
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -47,35 +48,22 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             loadState(savedInstanceState)
         }
 
-        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
-
-        if (mBnvIdx == BNV_UNINITIALIZED) {
-            mBnvIdx = if (hasAnyFavorites()) BNV_FAV else BNV_SEARCH
-        }
-
-        val fragment = when (mBnvIdx) {
-            BNV_FAV -> {
-                fab.setVisibility(View.GONE)
-                bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
-                mFavFragment = FavoriteStopIdsFragment.newInstance()
-                mFavFragment
-            }
-            BNV_SEARCH -> {
-                fab.setVisibility(View.VISIBLE)
-                bnv.menu.findItem(R.id.action_search)?.isChecked = true
-                mSearchFragment = SearchStopIdFragment.newInstance()
-                mSearchFragment
-            }
-            else -> null
-        }
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, fragment!!)
-                .commit()
-
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
+        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
         bnv.setOnNavigationItemSelectedListener(this)
+
+        when (mBnvIdx) {
+            BNV_FAV -> {
+                bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
+                selectBnvFav()
+            }
+            BNV_SEARCH -> {
+                bnv.menu.findItem(R.id.action_search)?.isChecked = true
+                selectBnvSearch()
+            }
+            else -> SelectDefaultBnv().execute()
+        }
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -115,32 +103,20 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        var fragment: Fragment?
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
+    override fun onNavigationItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.action_search -> {
-                if (mSearchFragment == null){
-                    mSearchFragment = SearchStopIdFragment.newInstance()
-                }
-                fragment = mSearchFragment
-                fab.setVisibility(View.VISIBLE)
+                mBnvIdx = BNV_SEARCH
+                selectBnvSearch()
+                true
             }
             R.id.action_favorites -> {
-                if (mFavFragment == null){
-                    mFavFragment = FavoriteStopIdsFragment.newInstance()
-                }
-                fragment = mFavFragment
-                fab.setVisibility(View.GONE)
+                mBnvIdx = BNV_FAV
+                selectBnvFav()
+                true
             }
-            else -> return false
+            else -> false
         }
-
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, fragment!!)
-                .commit()
-        return true
-    }
 
     override fun onClickFavorite(stopId: String) {
         val b = Bundle().apply {
@@ -152,12 +128,53 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startActivity(intent)
     }
 
-    fun hasAnyFavorites(): Boolean {
+    private fun selectBnvSearch() {
+        if (mSearchFragment == null){
+            mSearchFragment = SearchStopIdFragment.newInstance()
+        }
+        findViewById<View>(R.id.fab).setVisibility(View.VISIBLE)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, mSearchFragment!!)
+                .commit()
+    }
+
+    private fun selectBnvFav() {
+        if (mFavFragment == null){
+            mFavFragment = FavoriteStopIdsFragment.newInstance()
+        }
+        findViewById<View>(R.id.fab).setVisibility(View.GONE)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, mFavFragment!!)
+                .commit()
+    }
+
+    private fun hasAnyFavorites(): Boolean {
         val dbHelper = DbAdapter()
         dbHelper.open(applicationContext)
         val ret = dbHelper.hasAnyFavorites()
         dbHelper.close()
         return ret
+    }
+
+    private inner class SelectDefaultBnv(): AsyncTask<Void, Void, Int>() {
+        override fun doInBackground(vararg params: Void): Int {
+            return if (hasAnyFavorites()) BNV_FAV else BNV_SEARCH
+        }
+
+        override fun onPostExecute(result: Int) {
+            mBnvIdx = result
+            val bnv = findViewById<BottomNavigationView>(R.id.bnv)
+            when (mBnvIdx) {
+                BNV_FAV -> {
+                    bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
+                    selectBnvFav()
+                }
+                BNV_SEARCH -> {
+                    bnv.menu.findItem(R.id.action_search)?.isChecked = true
+                    selectBnvSearch()
+                }
+            }
+        }
     }
 
     companion object {

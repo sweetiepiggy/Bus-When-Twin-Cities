@@ -49,6 +49,7 @@
     <string name="timed_out">Timed out</string>
 
     <string name="no_nextrips_found">No upcoming trips</string>
+    <string name="no_favorites_found">No favorites here yet</string>
 
     <string name="main_search_icon_content_description">search button</string>
     <string name="favorite_stop_ids_content_description">favorite stop IDs</string>

@@ -36,6 +36,8 @@ import com.sweetiepiggy.buswhentwincities.R
 
 class FavoriteStopIdsFragment : Fragment() {
     private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
+    private lateinit var mAdapter: FavoriteStopIdsAdapter
+    private val mFavoriteStopIds: MutableList<FavoriteStopIdsViewModel.FavoriteStopId> = ArrayList<FavoriteStopIdsViewModel.FavoriteStopId>()
 
     companion object {
         fun newInstance() = FavoriteStopIdsFragment()
@@ -54,19 +56,31 @@ class FavoriteStopIdsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val favoritesRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView) as RecyclerView
-
-        favoritesRecyclerView.layoutManager = LinearLayoutManager(context)
-        favoritesRecyclerView.addItemDecoration(DividerItemDecoration(favoritesRecyclerView.context,
-                DividerItemDecoration.VERTICAL))
+        mAdapter = FavoriteStopIdsAdapter(mClickFavoriteListener, mFavoriteStopIds)
+        getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView)?.apply {
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            adapter = mAdapter
+        }
 
         val model = activity?.run {
             ViewModelProviders.of(this).get(FavoriteStopIdsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         model.getFavoriteStopIds().observe(this, Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ favoriteStopIds ->
-            val context = getActivity()?.getApplicationContext()
-            favoritesRecyclerView.adapter = FavoriteStopIdsAdapter(mClickFavoriteListener, favoriteStopIds)
+            mFavoriteStopIds.clear()
+            mFavoriteStopIds.addAll(favoriteStopIds)
+            mAdapter.notifyDataSetChanged()
+
+            val resultsRecyclerView = getActivity()?.findViewById<View>(R.id.favoritesRecyclerView)
+            val noResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
+            if (favoriteStopIds.isEmpty()) {
+                resultsRecyclerView?.setVisibility(View.GONE)
+                noResultsView?.setVisibility(View.VISIBLE)
+            } else {
+                noResultsView?.setVisibility(View.GONE)
+                resultsRecyclerView?.setVisibility(View.VISIBLE)
+            }
         })
     }
 }

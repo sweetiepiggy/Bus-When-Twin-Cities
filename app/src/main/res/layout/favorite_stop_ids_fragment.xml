@@ -38,4 +38,17 @@
       app:layout_constraintTop_toTopOf="parent"
       android:contentDescription="@string/favorite_stop_ids_content_description" />
 
+	<TextView
+		android:id="@+id/no_results_textview"
+		style="@android:style/TextAppearance.Large"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center"
+		android:text="@string/no_favorites_found"
+		android:visibility="gone"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
