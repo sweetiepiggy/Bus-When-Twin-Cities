@@ -44,10 +44,6 @@ class SearchStopIdFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        // if (savedInstanceState != null) {
-        //     restoreSavedState(savedInstanceState)
-        // }
-
         // getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
         //         ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
         //             override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
@@ -63,17 +59,6 @@ class SearchStopIdFragment : Fragment() {
         val fab = getActivity()?.findViewById<FloatingActionButton>(R.id.fab)
         fab?.setOnClickListener { startStopIdActivity() }
     }
-
-    // public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-    //     savedInstanceState.putString(KEY_STOP_ID,
-    // 		getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.text.toString())
-    //     super.onSaveInstanceState(savedInstanceState)
-    // }
-
-    // private fun restoreSavedState(savedInstanceState: Bundle) {
-    //     val stopId = savedInstanceState.getString(KEY_STOP_ID)
-    //     getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.setText(stopId)
-    // }
 
     private fun startStopIdActivity() {
         getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.let { stopIdEntry ->

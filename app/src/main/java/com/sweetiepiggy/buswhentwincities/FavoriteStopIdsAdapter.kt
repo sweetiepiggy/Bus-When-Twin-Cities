@@ -28,7 +28,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStops: List<Pair<String, String>>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavoriteListener, private val mFavStops: List<FavoriteStopIdsViewModel.FavoriteStopId>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+
+    interface OnClickFavoriteListener {
+        fun onClickFavorite(stopId: String)
+    }
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var mStopIdTextView: TextView
@@ -38,13 +42,8 @@ class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStop
             mStopIdTextView = v.findViewById<TextView>(R.id.stop_id)
             mStopDescTextView = v.findViewById<TextView>(R.id.stop_desc)
             v.setOnClickListener {
-                val (stopId, _) = mFavStops[adapterPosition]
-                val intent = Intent(mContext, StopIdActivity::class.java)
-                val b = Bundle()
-                b.putString("stopId", stopId)
-                intent.putExtras(b)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                mContext.startActivity(intent)
+                val stopId = mFavStops[adapterPosition].stopId
+                mClickFavoriteListener.onClickFavorite(stopId)
             }
         }
     }
@@ -56,13 +55,15 @@ class FavoriteStopIdsAdapter(private val mContext: Context, private val mFavStop
     }
 
     override fun onBindViewHolder(holder: FavoriteStopIdsViewHolder, position: Int) {
-        val (stopId, stopDesc) = mFavStops[position]
-        holder.mStopIdTextView.text = stopId
-        holder.mStopDescTextView.text = stopDesc
+        holder.mStopIdTextView.text = mFavStops[position].stopId
+        holder.mStopDescTextView.text = mFavStops[position].stopDesc
     }
 
     override fun getItemCount(): Int {
         return mFavStops.size
     }
 
+    companion object {
+        private val KEY_STOP_ID = "stopId"
+    }
 }

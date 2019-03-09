@@ -19,23 +19,31 @@
 
 package com.sweetiepiggy.buswhentwincities.ui.favoritestopids
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sweetiepiggy.buswhentwincities.DbAdapter
 import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsAdapter
+import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsViewModel
 import com.sweetiepiggy.buswhentwincities.R
-import java.util.*
 
 class FavoriteStopIdsFragment : Fragment() {
+    private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
 
     companion object {
         fun newInstance() = FavoriteStopIdsFragment()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mClickFavoriteListener = context as FavoriteStopIdsAdapter.OnClickFavoriteListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -47,26 +55,18 @@ class FavoriteStopIdsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         val favoritesRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView) as RecyclerView
-        val context = getActivity()?.getApplicationContext()
 
         favoritesRecyclerView.layoutManager = LinearLayoutManager(context)
         favoritesRecyclerView.addItemDecoration(DividerItemDecoration(favoritesRecyclerView.context,
                 DividerItemDecoration.VERTICAL))
 
-        if (context != null) {
-            val dbHelper = DbAdapter()
-            dbHelper.open(context)
-            val favoriteStopIds = ArrayList<Pair<String, String>>()
-            val c = dbHelper.fetchFavStops()
-            val stopIdIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
-            val stopDescIndex = c.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
-            while (c.moveToNext()) {
-                favoriteStopIds.add(Pair(c.getString(stopIdIndex), c.getString(stopDescIndex)))
-            }
-            c.close()
-            dbHelper.close()
-            favoritesRecyclerView.adapter = FavoriteStopIdsAdapter(context, favoriteStopIds)
-        }
-    }
+        val model = activity?.run {
+            ViewModelProviders.of(this).get(FavoriteStopIdsViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
 
+        model.getFavoriteStopIds().observe(this, Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ favoriteStopIds ->
+            val context = getActivity()?.getApplicationContext()
+            favoritesRecyclerView.adapter = FavoriteStopIdsAdapter(mClickFavoriteListener, favoriteStopIds)
+        })
+    }
 }

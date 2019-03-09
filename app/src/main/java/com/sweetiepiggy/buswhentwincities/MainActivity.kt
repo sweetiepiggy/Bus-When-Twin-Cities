@@ -32,65 +32,64 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private var mFavFragment: Fragment? = null
     private var mSearchFragment: Fragment? = null
+    private var mBnvIdx = BNV_UNINITIALIZED
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
-
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
         if (savedInstanceState == null) {
-            val fragment = if (hasAnyFavorites()) {
+            intent.extras?.let { loadState(it) }
+        } else {
+            loadState(savedInstanceState)
+        }
+
+        val bnv = findViewById<BottomNavigationView>(R.id.bnv)
+        val fab = findViewById<FloatingActionButton>(R.id.fab)
+
+        if (mBnvIdx == BNV_UNINITIALIZED) {
+            mBnvIdx = if (hasAnyFavorites()) BNV_FAV else BNV_SEARCH
+        }
+
+        val fragment = when (mBnvIdx) {
+            BNV_FAV -> {
                 fab.setVisibility(View.GONE)
                 bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
                 mFavFragment = FavoriteStopIdsFragment.newInstance()
                 mFavFragment
-            } else {
+            }
+            BNV_SEARCH -> {
                 fab.setVisibility(View.VISIBLE)
                 bnv.menu.findItem(R.id.action_search)?.isChecked = true
                 mSearchFragment = SearchStopIdFragment.newInstance()
                 mSearchFragment
             }
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, fragment!!)
-                    .commit()
+            else -> null
         }
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment!!)
+                .commit()
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
-        bnv.setOnNavigationItemSelectedListener(
-                BottomNavigationView.OnNavigationItemSelectedListener { item ->
-                    var fragment: Fragment?
-                    when (item.itemId) {
-                        R.id.action_search -> {
-                            if (mSearchFragment == null){
-                                mSearchFragment = SearchStopIdFragment.newInstance()
-                            }
-                            fragment = mSearchFragment
-                            fab.setVisibility(View.VISIBLE)
-                        }
-                        R.id.action_favorites -> {
-                            if (mFavFragment == null){
-                                mFavFragment = FavoriteStopIdsFragment.newInstance()
-                            }
-                            fragment = mFavFragment
-                            fab.setVisibility(View.GONE)
-                        }
-                        else -> return@OnNavigationItemSelectedListener false
-                    }
+        bnv.setOnNavigationItemSelectedListener(this)
+    }
 
-                    supportFragmentManager.beginTransaction()
-                            .replace(R.id.container, fragment!!)
-                    		// .setTransition(TRANSIT_FRAGMENT_FADE)
-                            .commit()
-                    true
-                }
-        )
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.putInt(KEY_BNV_IDX, mBnvIdx)
+    }
+
+    private fun loadState(b: Bundle) {
+        mBnvIdx = b.getInt(KEY_BNV_IDX) ?: BNV_UNINITIALIZED
+    }
+
+    public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        loadState(savedInstanceState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -102,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         val intent: Intent
         when (item.itemId) {
             R.id.action_about -> {
-                intent = Intent(applicationContext, AboutActivity::class.java)
+                intent = Intent(this, AboutActivity::class.java)
                 startActivity(intent)
                 return true
             }
@@ -116,6 +115,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        var fragment: Fragment?
+        val fab = findViewById<FloatingActionButton>(R.id.fab)
+        when (item.itemId) {
+            R.id.action_search -> {
+                if (mSearchFragment == null){
+                    mSearchFragment = SearchStopIdFragment.newInstance()
+                }
+                fragment = mSearchFragment
+                fab.setVisibility(View.VISIBLE)
+            }
+            R.id.action_favorites -> {
+                if (mFavFragment == null){
+                    mFavFragment = FavoriteStopIdsFragment.newInstance()
+                }
+                fragment = mFavFragment
+                fab.setVisibility(View.GONE)
+            }
+            else -> return false
+        }
+
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment!!)
+                .commit()
+        return true
+    }
+
+    override fun onClickFavorite(stopId: String) {
+        val b = Bundle().apply {
+            putString(KEY_STOP_ID, stopId)
+        }
+        val intent = Intent(this, StopIdActivity::class.java).apply {
+            putExtras(b)
+        }
+        startActivity(intent)
+    }
+
     fun hasAnyFavorites(): Boolean {
         val dbHelper = DbAdapter()
         dbHelper.open(applicationContext)
@@ -126,5 +162,11 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private val SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities"
+        private val KEY_STOP_ID = "stopId"
+        private val KEY_BNV_IDX = "bnvIdx"
+
+        private val BNV_UNINITIALIZED = 0
+        private val BNV_FAV = 1
+        private val BNV_SEARCH = 2
     }
 }

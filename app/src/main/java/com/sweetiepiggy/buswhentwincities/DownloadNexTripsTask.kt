@@ -73,7 +73,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
                     mError = DownloadError.OtherDownloadError(e.message)
                 }
             }
-        } while (retry)
+        } while (retry && !isCancelled())
 
         if (mError != null && firstError != null) {
             mError = firstError
@@ -114,7 +114,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
         val nexTrips = ArrayList<NexTrip>()
 
         reader.beginArray()
-        while (reader.hasNext()) {
+        while (!isCancelled() && reader.hasNext()) {
             reader.beginObject()
             var actual = false
             var blockNumber = -1
