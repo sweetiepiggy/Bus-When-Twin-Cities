@@ -165,7 +165,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         loadState(b)
 
         mMap?.run {
-            val latLng = LatLng(mVehicleLongitude, mVehicleLongitude)
+            val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
             clear()
             addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
             		+ " (" + mDepartureText + ")"))
