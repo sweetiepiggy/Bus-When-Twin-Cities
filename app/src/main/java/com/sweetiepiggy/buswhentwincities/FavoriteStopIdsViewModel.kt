@@ -26,13 +26,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(application) {
-    private val favoriteStopIds: MutableLiveData<List<FavoriteStopId>> by lazy {
+    private val mFavoriteStopIds: MutableLiveData<List<FavoriteStopId>> by lazy {
         MutableLiveData<List<FavoriteStopId>>().also {
             loadFavoriteStopIds()
         }
     }
 
-    fun getFavoriteStopIds(): LiveData<List<FavoriteStopId>> = favoriteStopIds
+    fun getFavoriteStopIds(): LiveData<List<FavoriteStopId>> = mFavoriteStopIds
 
     private fun loadFavoriteStopIds() {
         LoadFavoriteStopIdsTask().execute()
@@ -57,7 +57,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
         }
 
         override fun onPostExecute(result: List<FavoriteStopId>) {
-            favoriteStopIds.value = result
+            mFavoriteStopIds.value = result
         }
     }
 }

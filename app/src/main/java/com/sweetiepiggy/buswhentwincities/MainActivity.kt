@@ -29,13 +29,14 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, BottomNavigationView.OnNavigationItemSelectedListener {
-    private var mFavFragment: Fragment? = null
-    private var mSearchFragment: Fragment? = null
     private var mBnvIdx = BNV_UNINITIALIZED
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +50,8 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
 
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+
+        findViewById<ViewPager>(R.id.pager)!!.adapter = MainPagerAdapter(supportFragmentManager)
 
         val bnv = findViewById<BottomNavigationView>(R.id.bnv)
         bnv.setOnNavigationItemSelectedListener(this)
@@ -129,23 +132,13 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     private fun selectBnvSearch() {
-        if (mSearchFragment == null){
-            mSearchFragment = SearchStopIdFragment.newInstance()
-        }
         findViewById<View>(R.id.fab).setVisibility(View.VISIBLE)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, mSearchFragment!!)
-                .commit()
+        findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_SEARCH)
     }
 
     private fun selectBnvFav() {
-        if (mFavFragment == null){
-            mFavFragment = FavoriteStopIdsFragment.newInstance()
-        }
         findViewById<View>(R.id.fab).setVisibility(View.GONE)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, mFavFragment!!)
-                .commit()
+        findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_FAV)
     }
 
     private fun hasAnyFavorites(): Boolean {
@@ -177,6 +170,17 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
     }
 
+    private class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+        override fun getCount(): Int = 2
+
+        override fun getItem(i: Int): Fragment? =
+            when (i) {
+                ITEM_IDX_FAV -> FavoriteStopIdsFragment.newInstance()
+                ITEM_IDX_SEARCH -> SearchStopIdFragment.newInstance()
+                else -> null
+            }
+    }
+
     companion object {
         private val SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities"
         private val KEY_STOP_ID = "stopId"
@@ -185,5 +189,8 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         private val BNV_UNINITIALIZED = 0
         private val BNV_FAV = 1
         private val BNV_SEARCH = 2
+
+        private val ITEM_IDX_FAV = 0
+        private val ITEM_IDX_SEARCH = 1
     }
 }

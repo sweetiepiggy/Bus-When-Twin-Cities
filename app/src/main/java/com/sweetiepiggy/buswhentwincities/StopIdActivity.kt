@@ -42,7 +42,6 @@ import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import java.util.*
 
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, ActionBar.TabListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
-    private var mStopIdPagerAdapter: StopIdPagerAdapter? = null
     private var mStopId: String? = null
     private var mStopDesc: String? = null
     private var mNexTripsFragment: NexTripsFragment? = null
@@ -89,8 +88,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
             mapTab?.setTabListener(this)
             supportActionBar?.addTab(listTab)
             supportActionBar?.addTab(mapTab)
-            mStopIdPagerAdapter = StopIdPagerAdapter(supportFragmentManager, this)
-            findViewById<ViewPager>(R.id.pager)!!.adapter = mStopIdPagerAdapter
+            findViewById<ViewPager>(R.id.pager)!!.adapter =
+            	StopIdPagerAdapter(supportFragmentManager, this)
         }
 
         title = resources.getString(R.string.stop) + " #" + mStopId
@@ -215,14 +214,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         override fun getItem(i: Int): Fragment? {
             return when (i) {
                 ITEM_IDX_NEXTRIPS -> {
-                    val fragment = NexTripsFragment.newInstance()
-                    mNexTripsFragment = fragment
-                    fragment
+                    mNexTripsFragment = NexTripsFragment.newInstance()
+                    mNexTripsFragment
                 }
                 ITEM_IDX_MAP -> {
-                    val fragment = MyMapFragment.newInstance()
-                    mMapFragment = fragment
-                    fragment
+                    mMapFragment = MyMapFragment.newInstance()
+                    mMapFragment
                 }
                 else -> null
             }

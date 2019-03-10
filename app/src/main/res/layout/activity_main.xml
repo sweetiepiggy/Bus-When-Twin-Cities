@@ -42,17 +42,16 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <androidx.viewpager.widget.ViewPager
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/pager"
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_anchor="@+id/appBarLayout"
         app:layout_anchorGravity="bottom|center"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_dodgeInsetEdges="bottom"
-        tools:context=".MainActivity" />
+	android:layout_width="match_parent"
+	android:layout_height="match_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
