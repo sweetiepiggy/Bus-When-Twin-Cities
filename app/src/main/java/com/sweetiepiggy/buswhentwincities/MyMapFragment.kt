@@ -165,11 +165,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         loadState(b)
 
         mMap?.run {
+            val latLng = LatLng(mVehicleLongitude, mVehicleLongitude)
             clear()
             addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
             		+ " (" + mDepartureText + ")"))
                 	?.showInfoWindow()
-            animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(mVehicleLongitude, mVehicleLongitude), 15f))
+            animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
         }
     }
 }
