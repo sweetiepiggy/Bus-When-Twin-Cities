@@ -19,7 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,10 +30,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class SearchStopIdFragment : Fragment() {
+    private lateinit var mSearchStopIdListener: OnSearchStopIdListener
 
     companion object {
         fun newInstance() = SearchStopIdFragment()
         private val KEY_STOP_ID = "stopId"
+    }
+
+    interface OnSearchStopIdListener {
+        fun onSearchStopId(stopId: String)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mSearchStopIdListener = context as OnSearchStopIdListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -66,12 +76,7 @@ class SearchStopIdFragment : Fragment() {
             if (stopId.length == 0) {
                 stopIdEntry.error = resources.getString(R.string.enter_stop_id)
             } else {
-                val intent = Intent(getActivity()?.getApplicationContext(), StopIdActivity::class.java)
-                val b = Bundle().apply {
-                    putString(KEY_STOP_ID, stopId)
-                }
-                intent.putExtras(b)
-                startActivity(intent)
+                mSearchStopIdListener.onSearchStopId(stopId)
             }
         }
     }

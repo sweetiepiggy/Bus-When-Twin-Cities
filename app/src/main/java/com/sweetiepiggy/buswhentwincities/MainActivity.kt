@@ -36,7 +36,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
-class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, BottomNavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, SearchStopIdFragment.OnSearchStopIdListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private var mBnvIdx = BNV_UNINITIALIZED
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,12 +75,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     private fun loadState(b: Bundle) {
-        mBnvIdx = b.getInt(KEY_BNV_IDX) ?: BNV_UNINITIALIZED
-    }
-
-    public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        loadState(savedInstanceState)
+        mBnvIdx = b.getInt(KEY_BNV_IDX)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -88,23 +83,22 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val intent: Intent
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.action_about -> {
-                intent = Intent(this, AboutActivity::class.java)
+                val intent = Intent(this, AboutActivity::class.java)
                 startActivity(intent)
-                return true
+                true
             }
             R.id.action_source -> {
-                intent = Intent(Intent.ACTION_VIEW)
-                intent.setDataAndType(Uri.parse(SOURCE_URL), "text/html")
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(SOURCE_URL), "text/html")
+                }
                 startActivity(Intent.createChooser(intent, null))
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
-    }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
@@ -122,6 +116,14 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
 
     override fun onClickFavorite(stopId: String) {
+        startStopIdActivity(stopId)
+    }
+
+    override fun onSearchStopId(stopId: String) {
+        startStopIdActivity(stopId)
+    }
+
+    private fun startStopIdActivity(stopId: String) {
         val b = Bundle().apply {
             putString(KEY_STOP_ID, stopId)
         }
