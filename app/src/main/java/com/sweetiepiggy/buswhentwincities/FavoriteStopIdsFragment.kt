@@ -37,6 +37,7 @@ import com.sweetiepiggy.buswhentwincities.R
 class FavoriteStopIdsFragment : Fragment() {
     private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
     private lateinit var mAdapter: FavoriteStopIdsAdapter
+    private lateinit var mModel: FavoriteStopIdsViewModel
     private val mFavoriteStopIds: MutableList<FavoriteStopIdsViewModel.FavoriteStopId> = ArrayList<FavoriteStopIdsViewModel.FavoriteStopId>()
 
     companion object {
@@ -63,11 +64,11 @@ class FavoriteStopIdsFragment : Fragment() {
             adapter = mAdapter
         }
 
-        val model = activity?.run {
+        mModel = activity?.run {
             ViewModelProviders.of(this).get(FavoriteStopIdsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        model.getFavoriteStopIds().observe(this, Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ favoriteStopIds ->
+        mModel.getFavoriteStopIds().observe(this, Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ favoriteStopIds ->
             mFavoriteStopIds.clear()
             mFavoriteStopIds.addAll(favoriteStopIds)
             mAdapter.notifyDataSetChanged()
@@ -82,5 +83,9 @@ class FavoriteStopIdsFragment : Fragment() {
                 resultsRecyclerView?.setVisibility(View.VISIBLE)
             }
         })
+    }
+
+    fun refresh() {
+        mModel.loadFavoriteStopIds()
     }
 }

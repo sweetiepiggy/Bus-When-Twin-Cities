@@ -34,7 +34,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
 
     fun getFavoriteStopIds(): LiveData<List<FavoriteStopId>> = mFavoriteStopIds
 
-    private fun loadFavoriteStopIds() {
+    fun loadFavoriteStopIds() {
         LoadFavoriteStopIdsTask().execute()
     }
 

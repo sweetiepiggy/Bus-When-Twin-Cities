@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -33,11 +34,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, SearchStopIdFragment.OnSearchStopIdListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private var mBnvIdx = BNV_UNINITIALIZED
+    private var mFavStopIdsFragment: FavoriteStopIdsFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,7 +131,18 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         val intent = Intent(this, StopIdActivity::class.java).apply {
             putExtras(b)
         }
-        startActivity(intent)
+        startActivityForResult(intent, ACTIVITY_STOP_ID)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            ACTIVITY_STOP_ID -> {
+                // if (resultCode == RESULT_OK) {
+                    mFavStopIdsFragment?.refresh()
+                // }
+            }
+        }
     }
 
     private fun selectBnvSearch() {
@@ -172,7 +184,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
     }
 
-    private class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
         override fun getItem(i: Int): Fragment? =
@@ -181,6 +193,12 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 ITEM_IDX_SEARCH -> SearchStopIdFragment.newInstance()
                 else -> null
             }
+
+        override fun instantiateItem(container: ViewGroup, i: Int): Any {
+            val fragment = super.instantiateItem(container, i)
+            if (i == ITEM_IDX_FAV) mFavStopIdsFragment = fragment as FavoriteStopIdsFragment
+            return fragment
+        }
     }
 
     companion object {
@@ -194,5 +212,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
         private val ITEM_IDX_FAV = 0
         private val ITEM_IDX_SEARCH = 1
+
+        private val ACTIVITY_STOP_ID = 0
     }
 }
