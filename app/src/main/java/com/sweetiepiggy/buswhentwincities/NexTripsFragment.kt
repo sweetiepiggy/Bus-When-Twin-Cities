@@ -31,13 +31,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
 class NexTripsFragment : Fragment() {
-    private var mClickMapListener: StopIdAdapter.OnClickMapListener? = null
-    private var mAdapter: StopIdAdapter? = null
-    private lateinit var mLayoutManager: RecyclerView.LayoutManager
+    private lateinit var mClickMapListener: StopIdAdapter.OnClickMapListener
+    private lateinit var mAdapter: StopIdAdapter
+    private lateinit var mResultsRecyclerView: RecyclerView
     private var mNexTrips: MutableList<NexTrip> = ArrayList<NexTrip>()
-    private lateinit var mModel: NexTripsViewModel
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -46,50 +44,43 @@ class NexTripsFragment : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mClickMapListener = context as StopIdAdapter.OnClickMapListener
-        mAdapter?.setOnClickMapListener(mClickMapListener!!)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mModel = activity?.run {
-            ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-        mModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.nextrips_fragment, container, false)
+        val v = inflater.inflate(R.layout.nextrips_fragment, container, false)
+		mResultsRecyclerView = v.findViewById<RecyclerView>(R.id.results_recycler_view)!!
+        return v
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mLayoutManager = LinearLayoutManager(getContext())
+        val model = activity?.run {
+            ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+        model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
-        getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.let { resultsRecyclerView ->
-            resultsRecyclerView.layoutManager = mLayoutManager
-            resultsRecyclerView.addItemDecoration(DividerItemDecoration(resultsRecyclerView.context,
-            	    DividerItemDecoration.VERTICAL))
-            mAdapter = getContext()?.let { StopIdAdapter(it, mNexTrips) }
-            resultsRecyclerView.adapter = mAdapter
-            mClickMapListener?.let { mAdapter!!.setOnClickMapListener(it) }
-        }
+        mResultsRecyclerView.layoutManager = LinearLayoutManager(getContext())
+        mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
+        		DividerItemDecoration.VERTICAL))
+        mAdapter = StopIdAdapter(getContext()!!, mNexTrips)
+        mResultsRecyclerView.adapter = mAdapter
+        mAdapter.setOnClickMapListener(mClickMapListener)
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         mNexTrips.clear()
         mNexTrips.addAll(nexTrips)
-        mAdapter?.notifyDataSetChanged()
+        mAdapter.notifyDataSetChanged()
 
-        val resultsRecyclerView = getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)
         val noResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
-            resultsRecyclerView?.setVisibility(View.GONE)
+            mResultsRecyclerView.setVisibility(View.GONE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {
             noResultsView?.setVisibility(View.GONE)
-            resultsRecyclerView?.setVisibility(View.VISIBLE)
+            mResultsRecyclerView.setVisibility(View.VISIBLE)
         }
     }
 }

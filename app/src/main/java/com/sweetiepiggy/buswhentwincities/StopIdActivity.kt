@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -42,7 +43,6 @@ import java.util.*
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
     private var mStopId: String? = null
     private var mStopDesc: String? = null
-    private var mNexTripsFragment: NexTripsFragment? = null
     private var mMapFragment: MyMapFragment? = null
     private var mMenu: Menu? = null
     private var mIsFavorite = false
@@ -72,9 +72,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         mNexTripsModel.setLoadNexTripsErrorListener(this)
 
         if (mDualPane) {
-            mNexTripsFragment = NexTripsFragment.newInstance()
             supportFragmentManager.beginTransaction()
-                    .add(R.id.nextrips_container, mNexTripsFragment!!)
+                    .add(R.id.nextrips_container, NexTripsFragment.newInstance())
                     .commit()
             mMapFragment = MyMapFragment.newInstance()
             supportFragmentManager.beginTransaction()
@@ -102,11 +101,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     private fun loadState(b: Bundle) {
         mStopId = b.getString(KEY_STOP_ID)
-    }
-
-    public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        loadState(savedInstanceState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -193,34 +187,32 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
-        val b = Bundle()
-        b.putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
-        b.putString("departureText", nexTrip.departureText)
-        b.putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
-        b.putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
+        val b = Bundle().apply {
+            putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
+            putString("departureText", nexTrip.departureText)
+            putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
+            putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
+        }
         if (!mDualPane) {
             findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
-            // supportActionBar?.let { it.selectTab(it.getTabAt(ITEM_IDX_MAP)) }
-            // supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
         }
-        mMapFragment?.updateVehicle(b)
+        mMapFragment!!.updateVehicle(b)
     }
 
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
-        override fun getItem(i: Int): Fragment? {
-            return when (i) {
-                ITEM_IDX_NEXTRIPS -> {
-                    mNexTripsFragment = NexTripsFragment.newInstance()
-                    mNexTripsFragment
-                }
-                ITEM_IDX_MAP -> {
-                    mMapFragment = MyMapFragment.newInstance()
-                    mMapFragment
-                }
+        override fun getItem(i: Int): Fragment? =
+            when (i) {
+                ITEM_IDX_NEXTRIPS -> NexTripsFragment.newInstance()
+                ITEM_IDX_MAP -> MyMapFragment.newInstance()
                 else -> null
             }
+
+        override fun instantiateItem(container: ViewGroup, i: Int): Any {
+            val fragment = super.instantiateItem(container, i)
+            if (i == ITEM_IDX_MAP) mMapFragment = fragment as MyMapFragment
+            return fragment
         }
     }
 
@@ -251,8 +243,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val KEY_STOP_ID = "stopId"
-        private val KEY_NEXTRIPS_FRAGMENT = "nexTripsFragment"
-        private val KEY_MAP_FRAGMENT = "mapFragment"
         private val ITEM_IDX_NEXTRIPS = 0
         private val ITEM_IDX_MAP = 1
     }
