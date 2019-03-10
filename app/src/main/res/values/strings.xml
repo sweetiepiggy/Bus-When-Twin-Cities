@@ -43,8 +43,9 @@
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
 
+    <string name="dismiss">Dismiss</string>
     <string name="unknown_host">Unable to connect to the internet</string>
-    <string name="unauthorized">Incorrect username or password</string>
+    <string name="unauthorized">Unauthorized</string>
     <string name="file_not_found">File not found</string>
     <string name="timed_out">Timed out</string>
 

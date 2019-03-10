@@ -23,6 +23,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBar.NAVIGATION_MODE_TABS
@@ -36,6 +37,8 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import java.util.*
 
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, ActionBar.TabListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
@@ -185,12 +188,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
                 is DownloadNexTripsTask.DownloadError.Unauthorized -> getResources().getString(R.string.unauthorized)
                 is DownloadNexTripsTask.DownloadError.OtherDownloadError -> e.message
             }
-        val alert = AlertDialog.Builder(this).apply {
-            setTitle(getResources().getString(android.R.string.dialog_alert_title))
-            message?.let { setMessage(it) }
-            setPositiveButton(android.R.string.ok) { _, _ -> }
-            show()
-        }
+        Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_INDEFINITE)
+                .setAction(getResources().getString(R.string.dismiss), object : View.OnClickListener {
+                    override fun onClick(v: View) {}
+                })
+                .show()
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
