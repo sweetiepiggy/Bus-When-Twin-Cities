@@ -32,6 +32,8 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -47,6 +49,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mDepartureText: String? = null
     private var mVehicleLatitude: Double = 0.toDouble()
     private var mVehicleLongitude: Double = 0.toDouble()
+    private var mNexTrips: List<NexTrip>? = null
 
     companion object {
         fun newInstance() = MyMapFragment()
@@ -73,6 +76,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         } else {
             loadState(savedInstanceState)
         }
+
+        val model = activity?.run {
+            ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+        model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
@@ -172,5 +180,23 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 	?.showInfoWindow()
             animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
         }
+    }
+
+    fun updateNexTrips(nexTrips: List<NexTrip>) {
+        mNexTrips = nexTrips
+
+        // mMap?.run {
+        //     clear()
+        //     val boundsBuilder = LatLngBounds.Builder()
+        //     for (nexTrip in nexTrips.filter { it.isActual }) {
+        //         val latLng = LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
+        //         addMarker(MarkerOptions().position(latLng).title(
+        //             "${nexTrip.route}${nexTrip.terminal} (${nexTrip.departureText})"
+        //         ))
+        //         boundsBuilder.include(latLng)
+        //     }
+        //     animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 0))
+        //     animateCamera(CameraUpdateFactory.zoomTo(getCameraPosition()!!.zoom - 0.5f))
+        // }
     }
 }
