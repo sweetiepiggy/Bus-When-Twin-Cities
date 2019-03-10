@@ -74,7 +74,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
         val departureTimeInMillis = parseDepartureTime(nexTrip.departureTime)
         val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
         val minutesUntilDeparture = millisUntilDeparture / 1000 / 60
-        if (departureTimeInMillis < 0 || millisUntilDeparture < 0) {
+        if (departureTimeInMillis < 0 || minutesUntilDeparture < -1) {
             holder.mDepartureTextTextView.text = translateDepartureText(nexTrip.departureText)
             holder.mDepartureTimeTextView.visibility = View.GONE
         } else if (minutesUntilDeparture < 60) {

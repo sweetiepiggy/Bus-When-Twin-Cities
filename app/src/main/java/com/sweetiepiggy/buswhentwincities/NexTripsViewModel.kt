@@ -31,7 +31,7 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
     private var mLastUpdate: Long = 0
 
-    private val nexTrips: MutableLiveData<List<NexTrip>> by lazy {
+    private val mNexTrips: MutableLiveData<List<NexTrip>> by lazy {
         MutableLiveData<List<NexTrip>>().also {
             loadNexTrips()
         }
@@ -40,7 +40,7 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
 
-    fun getNexTrips(): LiveData<List<NexTrip>> = nexTrips
+    fun getNexTrips(): LiveData<List<NexTrip>> = mNexTrips
 
     interface OnLoadNexTripsErrorListener {
         fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError)
@@ -55,6 +55,8 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
                     mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
                     mDownloadNexTripsTask?.execute()
                 }
+            } else {
+                mNexTrips.value = mNexTrips.value
             }
         } else {
             mStopId?.let { stopId ->
@@ -66,10 +68,11 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
 
     override fun onDownloaded(nexTrips: List<NexTrip>) {
         mLastUpdate = unixTime
-        this.nexTrips.value = nexTrips
+        mNexTrips.value = nexTrips
     }
 
     override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
+        if (mLastUpdate == 0L) mNexTrips.value = ArrayList<NexTrip>()
         mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
     }
 

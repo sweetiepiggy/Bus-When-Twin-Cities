@@ -60,6 +60,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/main_search_icon_content_description"
+        android:visibility="invisible"
         app:srcCompat="@drawable/ic_baseline_search_24px" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

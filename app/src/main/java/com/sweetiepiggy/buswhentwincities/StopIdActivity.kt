@@ -25,23 +25,21 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.ActionBar.NAVIGATION_MODE_TABS
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
+import com.google.android.material.tabs.TabLayout
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, ActionBar.TabListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
+class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
     private var mStopId: String? = null
     private var mStopDesc: String? = null
     private var mNexTripsFragment: NexTripsFragment? = null
@@ -64,12 +62,14 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
             loadState(savedInstanceState)
         }
 
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
         mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
                 .get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
-        mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ _ -> })
 
         if (mDualPane) {
             mNexTripsFragment = NexTripsFragment.newInstance()
@@ -81,15 +81,13 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
                     .add(R.id.map_container, mMapFragment!!)
                     .commit()
         } else {
-            supportActionBar?.navigationMode = NAVIGATION_MODE_TABS
-            val listTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_view_list_24px)
-            val mapTab = supportActionBar?.newTab()?.setIcon(R.drawable.ic_baseline_map_24px)
-            listTab?.setTabListener(this)
-            mapTab?.setTabListener(this)
-            supportActionBar?.addTab(listTab)
-            supportActionBar?.addTab(mapTab)
-            findViewById<ViewPager>(R.id.pager)!!.adapter =
-            	StopIdPagerAdapter(supportFragmentManager, this)
+            val viewPager = findViewById<ViewPager>(R.id.pager)
+            viewPager.adapter = StopIdPagerAdapter(supportFragmentManager, this)
+            findViewById<TabLayout>(R.id.tab_layout).run {
+                setupWithViewPager(viewPager)
+                getTabAt(ITEM_IDX_NEXTRIPS)?.setIcon(R.drawable.ic_baseline_view_list_24px)
+                getTabAt(ITEM_IDX_MAP)?.setIcon(R.drawable.ic_baseline_map_24px)
+            }
         }
 
         title = resources.getString(R.string.stop) + " #" + mStopId
@@ -178,14 +176,14 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         }
     }
 
-    override fun onLoadNexTripsError(e: DownloadNexTripsTask.DownloadError) {
+    override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
         val message: String? =
-            when (e) {
+            when (err) {
                 is DownloadNexTripsTask.DownloadError.UnknownHost -> getResources().getString(R.string.unknown_host)
-                is DownloadNexTripsTask.DownloadError.FileNotFound -> getResources().getString(R.string.file_not_found) + ":\n${e.message}"
-                is DownloadNexTripsTask.DownloadError.TimedOut -> getResources().getString(R.string.timed_out) + ":\n${e.message}"
+                is DownloadNexTripsTask.DownloadError.FileNotFound -> getResources().getString(R.string.file_not_found) + ":\n${err.message}"
+                is DownloadNexTripsTask.DownloadError.TimedOut -> getResources().getString(R.string.timed_out) + ":\n${err.message}"
                 is DownloadNexTripsTask.DownloadError.Unauthorized -> getResources().getString(R.string.unauthorized)
-                is DownloadNexTripsTask.DownloadError.OtherDownloadError -> e.message
+                is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
             }
         Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_INDEFINITE)
                 .setAction(getResources().getString(R.string.dismiss), object : View.OnClickListener {
@@ -203,7 +201,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
         if (!mDualPane) {
             findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
             // supportActionBar?.let { it.selectTab(it.getTabAt(ITEM_IDX_MAP)) }
-            supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
+            // supportActionBar?.setSelectedNavigationItem(ITEM_IDX_MAP)
         }
         mMapFragment?.updateVehicle(b)
     }
@@ -224,16 +222,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ac
                 else -> null
             }
         }
-    }
-
-    override fun onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
-        if (!mDualPane) findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(tab.getPosition())
-    }
-
-    override fun onTabUnselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
-    }
-
-    override fun onTabReselected(tab: ActionBar.Tab, ft: FragmentTransaction) {
     }
 
     private inner class LoadIsFavorite(): AsyncTask<Void, Void, Pair<Boolean, String?>>() {
