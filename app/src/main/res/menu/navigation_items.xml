@@ -22,7 +22,7 @@
     <item
         android:id="@+id/action_search"
         android:orderInCategory="200"
-	android:icon="@android:drawable/ic_menu_search"
+	android:icon="@drawable/ic_baseline_search_24px"
         android:title="@string/nav_search"
         app:showAsAction="ifRoom" />
     <item
