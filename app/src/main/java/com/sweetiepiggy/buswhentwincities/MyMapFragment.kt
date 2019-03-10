@@ -55,6 +55,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val KEY_DEPARTURE_TEXT = "departureText"
         private val KEY_VEHICLE_LATITUDE = "vehicleLatitude"
         private val KEY_VEHICLE_LONGITUDE = "vehicleLongitude"
+        private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
+        private val TWIN_CITIES_ZOOM = 11f
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -154,16 +156,20 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         if (mRouteAndTerminal != null) {
             val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
             mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+        } else {
+            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
         }
     }
 
     fun updateVehicle(b: Bundle) {
         loadState(b)
-        val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-        mMap?.clear()
-        mMap?.addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
-                + " (" + mDepartureText + ")"))
-                ?.showInfoWindow()
-        mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+
+        mMap?.run {
+            clear()
+            addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
+            		+ " (" + mDepartureText + ")"))
+                	?.showInfoWindow()
+            animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(mVehicleLongitude, mVehicleLongitude), 15f))
+        }
     }
 }
