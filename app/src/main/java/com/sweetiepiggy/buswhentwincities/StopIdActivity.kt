@@ -23,7 +23,6 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
@@ -36,6 +35,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import java.security.InvalidParameterException
 import java.util.*
 
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
@@ -196,11 +196,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
-        override fun getItem(i: Int): Fragment? =
-            when (i) {
+        override fun getItem(p0: Int): Fragment =
+            when (p0) {
                 ITEM_IDX_NEXTRIPS -> NexTripsFragment.newInstance()
                 ITEM_IDX_MAP -> MyMapFragment.newInstance()
-                else -> null
+                else -> throw InvalidParameterException("getItem() parameter out of range")
             }
 
         override fun instantiateItem(container: ViewGroup, i: Int): Any {

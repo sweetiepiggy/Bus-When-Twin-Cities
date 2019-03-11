@@ -35,6 +35,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
+import java.security.InvalidParameterException
 
 class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, SearchStopIdFragment.OnSearchStopIdListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private var mBnvIdx = BNV_UNINITIALIZED
@@ -187,11 +188,11 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
-        override fun getItem(i: Int): Fragment? =
-            when (i) {
+        override fun getItem(p0: Int): Fragment =
+            when (p0) {
                 ITEM_IDX_FAV -> FavoriteStopIdsFragment.newInstance()
                 ITEM_IDX_SEARCH -> SearchStopIdFragment.newInstance()
-                else -> null
+                else -> throw InvalidParameterException("getItem() parameter out of range")
             }
 
         override fun instantiateItem(container: ViewGroup, i: Int): Any {
