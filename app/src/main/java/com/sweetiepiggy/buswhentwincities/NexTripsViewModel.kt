@@ -56,7 +56,7 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
                     mDownloadNexTripsTask?.execute()
                 }
             } else {
-                mNexTrips.value = mNexTrips.value
+                mNexTrips.value = mNexTrips.value ?: ArrayList<NexTrip>()
             }
         } else {
             mStopId?.let { stopId ->

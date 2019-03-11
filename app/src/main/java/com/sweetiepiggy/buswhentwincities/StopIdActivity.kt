@@ -187,16 +187,10 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
-        val b = Bundle().apply {
-            putString("routeAndTerminal", nexTrip.route + nexTrip.terminal)
-            putString("departureText", nexTrip.departureText)
-            putDouble("vehicleLatitude", nexTrip.vehicleLatitude)
-            putDouble("vehicleLongitude", nexTrip.vehicleLongitude)
-        }
         if (!mDualPane) {
             findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
         }
-        mMapFragment!!.updateVehicle(b)
+        mMapFragment!!.selectVehicle(nexTrip.blockNumber)
     }
 
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {
