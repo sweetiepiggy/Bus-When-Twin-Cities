@@ -51,9 +51,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val mMarkers: MutableList<Marker> = mutableListOf()
     private val mBusIcon: BitmapDescriptor by lazy {
-    	BitmapDescriptorFactory.fromBitmap(
-            getDrawable(activity!!.applicationContext, R.drawable.ic_baseline_directions_bus_24px
-        )!!.toBitmap())
+        val d = getDrawable(activity!!.applicationContext, R.drawable.ic_baseline_directions_bus_24px)!!
+        d.setTint(resources.getColor(R.color.colorBusIcon))
+    	BitmapDescriptorFactory.fromBitmap(d.toBitmap())
     }
 
     companion object {
