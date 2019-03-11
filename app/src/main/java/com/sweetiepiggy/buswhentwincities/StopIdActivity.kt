@@ -35,8 +35,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.LENGTH_INDEFINITE
 import com.google.android.material.tabs.TabLayout
 import java.util.*
 
@@ -171,19 +169,21 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
+        val resources = getResources()
         val message: String? =
             when (err) {
-                is DownloadNexTripsTask.DownloadError.UnknownHost -> getResources().getString(R.string.unknown_host)
-                is DownloadNexTripsTask.DownloadError.FileNotFound -> getResources().getString(R.string.file_not_found) + ":\n${err.message}"
-                is DownloadNexTripsTask.DownloadError.TimedOut -> getResources().getString(R.string.timed_out) + ":\n${err.message}"
-                is DownloadNexTripsTask.DownloadError.Unauthorized -> getResources().getString(R.string.unauthorized)
+                is DownloadNexTripsTask.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
+                is DownloadNexTripsTask.DownloadError.FileNotFound -> resources.getString(R.string.file_not_found) + ":\n${err.message}"
+                is DownloadNexTripsTask.DownloadError.TimedOut -> resources.getString(R.string.timed_out) + ":\n${err.message}"
+                is DownloadNexTripsTask.DownloadError.Unauthorized -> resources.getString(R.string.unauthorized)
                 is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
             }
-        Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_INDEFINITE)
-                .setAction(getResources().getString(R.string.dismiss), object : View.OnClickListener {
-                    override fun onClick(v: View) {}
-                })
-                .show()
+            val alert = AlertDialog.Builder(this).apply {
+                setTitle(resources.getString(android.R.string.dialog_alert_title))
+                message?.let { setMessage(it) }
+                setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
+                show()
+            }
     }
 
     override fun onClickMap(nexTrip: NexTrip) {
