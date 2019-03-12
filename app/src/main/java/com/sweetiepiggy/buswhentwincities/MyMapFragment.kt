@@ -31,6 +31,7 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getColor
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -53,7 +54,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private val mMarkers: MutableList<Marker> = mutableListOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         val d = getDrawable(context!!, R.drawable.ic_baseline_directions_bus_24px)!!
-        d.setTint(resources.getColor(R.color.colorBusIcon))
+        d.setTint(getColor(context!!, R.color.colorBusIcon))
     	BitmapDescriptorFactory.fromBitmap(d.toBitmap())
     }
 

@@ -39,9 +39,23 @@ class DbAdapter {
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
-            when (oldVer) {
-                else -> {
-                }
+            android.util.Log.d("abc", "got here: $oldVer, $newVer")
+            // changed type of stop_id from TEXT to INTEGER, made it primary key, added timestamp
+            if (oldVer < 2) {
+                db.execSQL("DROP TABLE IF EXISTS new_fav_stops")
+                db.execSQL("""
+                	CREATE TABLE new_fav_stops (
+                        stop_id INTEGER PRIMARY KEY,
+                        stop_description TEXT,
+                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                db.execSQL("""
+                    INSERT INTO new_fav_stops (stop_id, stop_description)
+                    	SELECT stop_id, stop_description from fav_stops
+                """);
+                db.execSQL("DROP TABLE fav_stops");
+                db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops");
             }
         }
 
@@ -82,9 +96,10 @@ class DbAdapter {
 
     /** @return rowId or -1 if failed */
     fun createFavStop(stopId: Int, stopDescription: String?): Long {
-        val cv = ContentValues()
-        cv.put(KEY_STOP_ID, stopId.toString())
-        cv.put(KEY_STOP_DESCRIPTION, stopDescription)
+        val cv = ContentValues().apply {
+            put(KEY_STOP_ID, stopId)
+            put(KEY_STOP_DESCRIPTION, stopDescription)
+        }
 
         return mDbHelper!!.mDb!!.replace(TABLE_FAV_STOPS, null, cv)
     }
@@ -112,7 +127,7 @@ class DbAdapter {
 
     fun fetchFavStops(): Cursor {
         return mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, null, null, null, null, null,
-                "$KEY_ROWID DESC", null)
+                "$KEY_TIMESTAMP DESC", null)
     }
 
     fun hasAnyFavorites(): Boolean {
@@ -123,19 +138,22 @@ class DbAdapter {
     }
 
     companion object {
-        val KEY_ROWID = "_id"
         val KEY_STOP_ID = "stop_id"
         val KEY_STOP_DESCRIPTION = "stop_description"
 
-        val TABLE_FAV_STOPS = "fav_stops"
+        private val KEY_TIMESTAMP = "timestamp"
+
+        private val TABLE_FAV_STOPS = "fav_stops"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 1
+        private val DATABASE_VERSION = 2
 
-        private val DATABASE_CREATE_FAV_STOPS = "CREATE TABLE " + TABLE_FAV_STOPS + " (" +
-                KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                KEY_STOP_ID + " TEXT UNIQUE, " +
-                KEY_STOP_DESCRIPTION + " TEXT" +
-                ");"
+        private val DATABASE_CREATE_FAV_STOPS = """
+	        CREATE TABLE $TABLE_FAV_STOPS (
+                $KEY_STOP_ID INTEGER PRIMARY KEY,
+                $KEY_STOP_DESCRIPTION TEXT,
+                $KEY_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+            """
     }
 }
