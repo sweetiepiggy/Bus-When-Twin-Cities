@@ -65,14 +65,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val UNSELECTED_MARKER_ALPHA = 0.5f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
-
-        private fun wrapLines(s: String): String {
-            val wrapAt = s.indexOf(' ', 15)
-            return if (wrapAt < 0)
-                s
-            else
-                "${s.substring(0, wrapAt)}\n${wrapLines(s.substring(wrapAt + 1))}"
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -243,7 +235,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 }.apply {
                     position = nexTrip.position!!
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
-                    snippet = nexTrip.description?.let { wrapLines(it) }
+                    snippet = "${nexTrip.description}"
                     if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips!!.size == 1) {
                         showInfoWindow()
                     } else if (mVehicleBlockNumber != null) {
