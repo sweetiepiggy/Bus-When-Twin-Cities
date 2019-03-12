@@ -39,7 +39,6 @@ class DbAdapter {
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
-            android.util.Log.d("abc", "got here: $oldVer, $newVer")
             // changed type of stop_id from TEXT to INTEGER, made it primary key, added timestamp
             if (oldVer < 2) {
                 db.execSQL("DROP TABLE IF EXISTS new_fav_stops")

@@ -65,11 +65,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
-        mStopId?.let { stopId ->
-            mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(stopId))
-                    .get(NexTripsViewModel::class.java)
-            mNexTripsModel.setLoadNexTripsErrorListener(this)
-        }
+        mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
+                .get(NexTripsViewModel::class.java)
+        mNexTripsModel.setLoadNexTripsErrorListener(this)
 
         if (mDualPane) {
             supportFragmentManager.beginTransaction()
