@@ -25,10 +25,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -104,8 +104,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         mMenu = menu
         menuInflater.inflate(R.menu.menu_stop_id, menu)
-        menu.findItem(R.id.action_favorite).icon = ContextCompat.getDrawable(this,
-        	if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
+        menu.findItem(R.id.action_favorite).icon =
+        	getDrawable(this, if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         return true
     }
 
@@ -118,7 +118,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             R.id.action_favorite -> {
                 if (mIsFavorite) {
                     mIsFavorite = false
-                    item.icon = ContextCompat.getDrawable(this, IS_NOT_FAV_ICON)
+                    item.icon = getDrawable(this, IS_NOT_FAV_ICON)
                     title = resources.getString(R.string.stop) + " #" + mStopId
                     mStopId?.let { stopId ->
                         object : AsyncTask<Void, Void, Void>() {
@@ -139,7 +139,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     builder.setView(favStopIdDialog)
                     builder.setPositiveButton(android.R.string.ok) { _, _ ->
                         mIsFavorite = true
-                        item.icon = ContextCompat.getDrawable(this, IS_FAV_ICON)
+                        item.icon = getDrawable(this, IS_FAV_ICON)
                         val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
                         title = resources.getString(R.string.stop) + " #" + mStopId +
             	        	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
@@ -227,7 +227,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
             title = resources.getString(R.string.stop) + " #" + mStopId +
             	(if (!stopDesc.isNullOrEmpty()) " ($stopDesc)" else "")
-            mMenu?.findItem(R.id.action_favorite)?.icon = ContextCompat.getDrawable(applicationContext,
+            mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
         		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         }
     }

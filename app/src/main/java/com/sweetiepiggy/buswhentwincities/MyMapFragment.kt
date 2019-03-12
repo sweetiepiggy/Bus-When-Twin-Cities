@@ -54,7 +54,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         val d = getDrawable(context!!, R.drawable.ic_baseline_directions_bus_24px)!!
-        d.setTint(getColor(context!!, R.color.colorBusIcon))
+        // d.setTint(getColor(context!!, R.color.colorBusIcon))
     	BitmapDescriptorFactory.fromBitmap(d.toBitmap())
     }
 
