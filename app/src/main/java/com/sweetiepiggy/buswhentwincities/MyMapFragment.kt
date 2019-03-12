@@ -235,7 +235,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 }.apply {
                     position = nexTrip.position!!
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
-                    snippet = "${nexTrip.description}"
+                    snippet = nexTrip.description
                     if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips!!.size == 1) {
                         showInfoWindow()
                     } else if (mVehicleBlockNumber != null) {
