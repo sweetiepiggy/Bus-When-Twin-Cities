@@ -186,11 +186,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             }
     }
 
-    override fun onClickMap(nexTrip: NexTrip) {
+    override fun onClickMap(vehicleBlockNumber: Int?) {
         if (!mDualPane) {
             findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
         }
-        mMapFragment!!.selectVehicle(nexTrip.blockNumber)
+        vehicleBlockNumber?.let { mMapFragment!!.selectVehicle(it) }
     }
 
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm) {

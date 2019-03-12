@@ -30,12 +30,13 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 class NexTripsFragment : Fragment() {
     private lateinit var mClickMapListener: StopIdAdapter.OnClickMapListener
     private lateinit var mAdapter: StopIdAdapter
     private lateinit var mResultsRecyclerView: RecyclerView
-    private var mNexTrips: MutableList<NexTrip> = ArrayList<NexTrip>()
+    private var mNexTrips: MutableList<PresentableNexTrip> = ArrayList<PresentableNexTrip>()
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -61,20 +62,23 @@ class NexTripsFragment : Fragment() {
         } ?: throw Exception("Invalid Activity")
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
-        mResultsRecyclerView.layoutManager = LinearLayoutManager(getContext())
+        mResultsRecyclerView.layoutManager = LinearLayoutManager(context)
         mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
         		DividerItemDecoration.VERTICAL))
-        mAdapter = StopIdAdapter(getContext()!!, mNexTrips)
+        mAdapter = StopIdAdapter(context!!, mNexTrips)
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
+        val timeInMillis = Calendar.getInstance().timeInMillis
+        val presentableNexTrips = nexTrips.map { PresentableNexTrip(it, timeInMillis, context!!) }
+
         mNexTrips.clear()
-        mNexTrips.addAll(nexTrips)
+        mNexTrips.addAll(presentableNexTrips)
         mAdapter.notifyDataSetChanged()
 
-        val noResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
+        val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
             mResultsRecyclerView.setVisibility(View.GONE)
             noResultsView?.setVisibility(View.VISIBLE)

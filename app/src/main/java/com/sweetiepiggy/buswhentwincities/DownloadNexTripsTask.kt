@@ -42,11 +42,12 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
     override fun doInBackground(vararg params: Void): Void? {
         var retry: Boolean
         var firstError: DownloadError? = null
+        var rawNexTrips: List<RawNexTrip>? = null
 
         do {
             retry = false
             try {
-                mNexTrips = downloadNexTrips(mStopId)
+                rawNexTrips = downloadRawNexTrips(mStopId)
             } catch (e: UnknownHostException) { // probably no internet connection
             	mError = DownloadError.UnknownHost
             } catch (e: java.io.FileNotFoundException) {
@@ -79,6 +80,11 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
             mError = firstError
         }
 
+        if (!isCancelled() && rawNexTrips != null) {
+            val timeInMillis = Calendar.getInstance().timeInMillis
+            mNexTrips = rawNexTrips.map { NexTrip(it, timeInMillis) }
+        }
+
         return null
     }
 
@@ -88,36 +94,32 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class)
-    private fun downloadNexTrips(stopId: String): List<NexTrip>? {
-        var nexTrips: List<NexTrip>?
+    private fun downloadRawNexTrips(stopId: String): List<RawNexTrip>? {
+        var rawNexTrips: List<RawNexTrip>?
 
         val nexTripsUrl = ((if (mUseHttps) "https://" else "http://")
                 + NEXTRIPS_URL + stopId + "?format=json")
-
-        val url = URL(nexTripsUrl)
-        val urlConnection = url.openConnection() as HttpURLConnection
-
-        val reader = JsonReader(InputStreamReader(urlConnection.inputStream,
-                "utf-8"))
+        val urlConnection = URL(nexTripsUrl).openConnection() as HttpURLConnection
+        val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
         try {
-            nexTrips = parseNexTrips(reader)
+            rawNexTrips = parseNexTrips(reader)
         } finally {
             reader.close()
         }
 
-        return nexTrips
+        return rawNexTrips
     }
 
     @Throws(IOException::class)
-    private fun parseNexTrips(reader: JsonReader): List<NexTrip> {
-        val nexTrips = ArrayList<NexTrip>()
+    private fun parseNexTrips(reader: JsonReader): List<RawNexTrip> {
+        val rawNexTrips: MutableList<RawNexTrip> = mutableListOf()
 
         reader.beginArray()
         while (!isCancelled() && reader.hasNext()) {
             reader.beginObject()
             var actual = false
-            var blockNumber = -1
+            var blockNumber: Int? = null
             var departureText: String? = null
             var departureTime: String? = null
             var description: String? = null
@@ -125,9 +127,9 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
             var route: String? = null
             var routeDirection: String? = null
             var terminal: String? = null
-            var vehicleHeading = 0.0
-            var vehicleLatitude = 0.0
-            var vehicleLongitude = 0.0
+            var vehicleHeading: Double? = null
+            var vehicleLatitude: Double? = null
+            var vehicleLongitude: Double? = null
             while (reader.hasNext()) {
                 when (reader.nextName()) {
                     "Actual" -> actual = reader.nextBoolean()
@@ -145,7 +147,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
                     else -> reader.skipValue()
                 }
             }
-            nexTrips.add(NexTrip(actual, blockNumber, departureText,
+            rawNexTrips.add(RawNexTrip(actual, blockNumber, departureText,
                     departureTime, description, gate, route,
                     routeDirection, terminal, vehicleHeading,
                     vehicleLatitude, vehicleLongitude))
@@ -153,21 +155,15 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
         }
         reader.endArray()
 
-        return nexTrips
+        return rawNexTrips
     }
 
     sealed class DownloadError {
         object UnknownHost: DownloadError()
-        data class FileNotFound(
-            val message: String?
-        ): DownloadError()
-        data class TimedOut(
-            val message: String?
-        ): DownloadError()
+        data class FileNotFound(val message: String?): DownloadError()
+        data class TimedOut(val message: String?): DownloadError()
         object Unauthorized: DownloadError()
-        data class OtherDownloadError(
-            val message: String?
-        ): DownloadError()
+        data class OtherDownloadError(val message: String?): DownloadError()
     }
 
     companion object {

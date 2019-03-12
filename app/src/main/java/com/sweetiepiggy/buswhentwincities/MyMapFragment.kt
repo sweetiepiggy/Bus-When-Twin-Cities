@@ -42,16 +42,17 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import java.util.*
 
 class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private var mMap: GoogleMap? = null
     private var mVehicleBlockNumber: Int? = null
-    private var mNexTrips: List<NexTrip>? = null
+    private var mNexTrips: List<PresentableNexTrip>? = null
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val mMarkers: MutableList<Marker> = mutableListOf()
     private val mBusIcon: BitmapDescriptor by lazy {
-        val d = getDrawable(activity!!.applicationContext, R.drawable.ic_baseline_directions_bus_24px)!!
+        val d = getDrawable(context!!, R.drawable.ic_baseline_directions_bus_24px)!!
         d.setTint(resources.getColor(R.color.colorBusIcon))
     	BitmapDescriptorFactory.fromBitmap(d.toBitmap())
     }
@@ -79,7 +80,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             loadState(savedInstanceState)
         }
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!.getApplicationContext())
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
 
         val model = activity?.run {
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
@@ -102,21 +103,13 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        // if (mRouteAndTerminal != null) {
-        //     val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-        //     mMap?.addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
-    	//         	+ " (" + mDepartureText + ")"))
-	    //         ?.showInfoWindow()
-        // }
-        if (ContextCompat.checkSelfPermission(activity!!.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
             initCamera()
-            // zoomIncludingMyLocation()
         } else {
             ActivityCompat.requestPermissions(activity!!,
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
-            // zoomToVehicle()
         }
     }
 
@@ -126,61 +119,16 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             MY_PERMISSIONS_REQUEST_LOCATION ->
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mMap?.isMyLocationEnabled = true
-                    // zoomIncludingMyLocation()
                 }
         }
         initCamera()
     }
-    // private fun zoomIncludingMyLocation() {
-    //     val locationManager = getActivity()?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    //     val lastKnownLocation = locationManager
-    //             .getLastKnownLocation(LocationManager.GPS_PROVIDER)
-    //     if (lastKnownLocation == null) {
-    //         zoomToVehicle()
-    //     } else if (mRouteAndTerminal != null) {
-    //         val myLocationLatLng = LatLng(lastKnownLocation.latitude,
-    //                 lastKnownLocation.longitude)
-    //         val vehicleLatLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-    //         val boundsBuilder = LatLngBounds.Builder()
-    //         boundsBuilder.include(vehicleLatLng)
-    //         boundsBuilder.include(myLocationLatLng)
-    //         val bounds = boundsBuilder.build()
-    //         val tv = TypedValue()
-    //         getActivity()!!.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)
-    //         val actionBarHeight = complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics())
-    //         val width = getResources().getDisplayMetrics().widthPixels
-    //         val height = getResources().getDisplayMetrics().heightPixels - actionBarHeight
-    //         mMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0))
-    //         mMap?.moveCamera(CameraUpdateFactory.zoomTo(mMap?.getCameraPosition()!!.zoom - 0.5f))
-    //     } else {
-    //         val myLocationLatLng = LatLng(lastKnownLocation.latitude, lastKnownLocation.longitude)
-    //         mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocationLatLng, 15f))
-    //     }
-    // }
-
-    // private fun zoomToVehicle() {
-    //     if (mRouteAndTerminal != null) {
-    //         val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-    //         mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-    //     } else {
-    //         mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
-    //     }
-    // }
 
     fun selectVehicle(blockNumber: Int) {
         mVehicleBlockNumber = blockNumber
-        // mMap?.run {
-        //     val latLng = LatLng(mVehicleLatitude, mVehicleLongitude)
-        //     clear()
-        //     addMarker(MarkerOptions().position(latLng).title(mRouteAndTerminal
-        //     		+ " (" + mDepartureText + ")"))
-        //         	?.showInfoWindow()
-        //     animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-        // }
-
         mMap?.run {
             for (marker in mMarkers) {
-                val nexTrip = marker.tag as NexTrip
+                val nexTrip = marker.tag as PresentableNexTrip
                 if (blockNumber == nexTrip.blockNumber) {
                     marker.alpha = 1f
                     marker.showInfoWindow()
@@ -193,7 +141,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun initCamera() {
-        android.util.Log.d("abc", "got here: initCamera mNexTrips.isEmpty() == ${mNexTrips?.isEmpty()}")
         if (mNexTrips.isNullOrEmpty()) {
             mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
         } else {
@@ -203,28 +150,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun zoomToAllVehicles() {
-//        mMap?.run {
-//            for (marker in mMarkers) {
-//                val nexTrip = marker.tag as NexTrip
-//                if (blockNumber == nexTrip.blockNumber) {
-//                    marker.alpha = 1f
-//                    marker.showInfoWindow()
-//                    zoomToVehicle(nexTrip)
-//                } else {
-//                    marker.alpha = UNSELECTED_MARKER_ALPHA
-//                }
-//            }
-//        }
-
 	    if (mMarkers.size == 1) {
-            zoomToVehicle(mMarkers[0].tag as NexTrip)
+            zoomToVehicle(mMarkers[0].tag as PresentableNexTrip)
             return
         }
 
-    	val latLngs = mMarkers.map {
-        	val nexTrip = it.tag as NexTrip
-            LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
-        }
+    	val latLngs = mMarkers.map { (it.tag as PresentableNexTrip).position!! }
 
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
@@ -232,61 +163,27 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     val latLngsWithMyLoc = if (myLocation != null)
                     	latLngs + LatLng(myLocation.latitude, myLocation.longitude)
                     else latLngs
-                    // myLocation?.let { latLngs.add(LatLng(it.latitude, it.longitude)) }
-                    android.util.Log.d("abc", "got here: zoomToAllVehicles with location: ${latLngs.size}, ${myLocation}")
                     zoomTo(latLngsWithMyLoc, 5.236f)
                 }
             }
-            .addOnFailureListener { android.util.Log.d("abc", "got here: zoomToAllVehicles no location"); zoomTo(latLngs, 5.236f) }
+            .addOnFailureListener { zoomTo(latLngs, 5.236f) }
     }
 
-    private fun zoomToVehicle(nexTrip: NexTrip) {
-        val vehicleLatLng = LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
-
+    private fun zoomToVehicle(nexTrip: PresentableNexTrip) {
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
                 if (myLocation != null) {
-                    zoomTo(listOf(vehicleLatLng, LatLng(myLocation.latitude, myLocation.longitude)), 3f)
+                    zoomTo(listOf(nexTrip.position!!, LatLng(myLocation.latitude, myLocation.longitude)), 3f)
                 } else {
-                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(vehicleLatLng, 15f))
+                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(nexTrip.position!!, 15f))
                 }
-//                myLocation?.let { latLngs.add(LatLng(it.latitude, it.longitude)) }
-//                android.util.Log.d("abc", "got here: zoomToVehicle with location: ${myLocation}")
-//                zoomTo(latLngs)
             }
-            .addOnFailureListener {android.util.Log.d("abc", "got here: zoomToVehicle no location"); mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(vehicleLatLng, 15f)) }
-
-        // mFusedLocationClient.lastLocation
-        //     .addOnSuccessListener { myLocation: Location? ->
-        //         mMap?.run {
-        //             if (myLocation != null) {
-        //                 val bounds = LatLngBounds.Builder().apply {
-        //                     include(LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude))
-        //                     include(LatLng(myLocation.latitude, myLocation.longitude))
-        //                 }.build()
-        //                 val tv = TypedValue()
-        //                 activity!!.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
-        //                 val actionBarHeight = complexToDimensionPixelSize(tv.data, resources.displayMetrics)
-        //                 val width = resources.displayMetrics.widthPixels
-        //                 val height = resources.displayMetrics.heightPixels - actionBarHeight
-        //                 val padding = minOf(width, height) / 3
-        //                 animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-        //             } else {
-        //                 val vehicleLatLng = LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
-        //                 animateCamera(CameraUpdateFactory.newLatLngZoom(vehicleLatLng, 15f))
-        //             }
-        //         }
-        //     }
-        //     .addOnFailureListener {
-        //         mMap?.run {
-        //             val vehicleLatLng = LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
-        //             animateCamera(CameraUpdateFactory.newLatLngZoom(vehicleLatLng, 15f))
-        //         }
-        //     }
+            .addOnFailureListener {
+                mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(nexTrip.position!!, 15f))
+            }
         }
 
     private fun zoomTo(latLngs: List<LatLng>, paddingRatio: Float) {
-        android.util.Log.d("abc", "got here: zoomTo(), mMap: $mMap")
         mMap?.run {
             val bounds = LatLngBounds.Builder().apply {
                 latLngs.forEach { include(it) }
@@ -303,8 +200,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        val doInitCamera = mNexTrips == null && !nexTrips.isEmpty()
-        mNexTrips = nexTrips.filter { it.isActual }
+        val nexTripsWithActualPosition = nexTrips.filter { it.isActual && it.position != null }
+        val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
+        val timeInMillis = Calendar.getInstance().timeInMillis
+        mNexTrips = nexTripsWithActualPosition.map { PresentableNexTrip(it, timeInMillis, context!!) }
         updateMarkers()
         if (doInitCamera) initCamera()
     }
@@ -313,15 +212,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMarkers.clear()
         mMap?.run {
             clear()
-            // val boundsBuilder = LatLngBounds.Builder()
             for (nexTrip in (mNexTrips ?: listOf())) {
-                val latLng = LatLng(nexTrip.vehicleLatitude, nexTrip.vehicleLongitude)
                 val marker = addMarker(MarkerOptions()
-                        // .tag(nexTrip)
-                        // .visible(mVehicleBlockNumber == null || mVehicleBlockNumber == nexTrip.blockNumber)
                         .icon(mBusIcon)
-                        .position(latLng)
-                        .title("${nexTrip.route}${nexTrip.terminal} (${nexTrip.departureText})")
+                        .position(nexTrip.position!!)
+                        .title("${nexTrip.routeAndTerminal} (${nexTrip.departureText})")
                         .snippet("${nexTrip.description}")
                     )?.apply {
                         tag = nexTrip
@@ -332,10 +227,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         }
                     }
                 marker?.let { mMarkers.add(it) }
-                // boundsBuilder.include(latLng)
             }
-            // animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 0))
-            // animateCamera(CameraUpdateFactory.zoomTo(getCameraPosition()!!.zoom - 0.5f))
         }
     }
 }

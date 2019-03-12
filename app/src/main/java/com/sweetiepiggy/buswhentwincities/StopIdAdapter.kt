@@ -29,11 +29,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexTrip>) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<PresentableNexTrip>) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
     private var mClickMapListener: OnClickMapListener? = null
 
     interface OnClickMapListener {
-        fun onClickMap(nexTrip: NexTrip)
+        fun onClickMap(vehicleBlockNumber: Int?)
     }
 
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -54,7 +54,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
             mScheduledTextView = v.findViewById<TextView>(R.id.scheduled)
             mMapButton = v.findViewById<ImageButton>(R.id.map_button)
             mMapButton.setOnClickListener {
-                mClickMapListener!!.onClickMap(mNexTrips[adapterPosition])
+                mClickMapListener!!.onClickMap(mNexTrips[adapterPosition].blockNumber)
             }
         }
     }
@@ -67,36 +67,16 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
 
     override fun onBindViewHolder(holder: StopIdViewHolder, position: Int) {
         val nexTrip = mNexTrips[position]
-        holder.mRouteTextView.text = nexTrip.route + nexTrip.terminal
-        holder.mDirectionTextView.text = nexTrip.routeDirection?.let { translateDirection(it) }
+        holder.mRouteTextView.text = nexTrip.routeAndTerminal
+        holder.mDirectionTextView.text = nexTrip.routeDirection
         holder.mDescriptionTextView.text = nexTrip.description
-
-        val departureTimeInMillis = parseDepartureTime(nexTrip.departureTime)
-        val millisUntilDeparture = departureTimeInMillis - Calendar.getInstance().timeInMillis
-        val minutesUntilDeparture = millisUntilDeparture / 1000 / 60
-        if (departureTimeInMillis < 0 || minutesUntilDeparture < -1) {
-            holder.mDepartureTextTextView.text = translateDepartureText(nexTrip.departureText)
-            holder.mDepartureTimeTextView.visibility = View.GONE
-        } else if (minutesUntilDeparture < 60) {
-            val resources = mCtxt.resources
-            holder.mDepartureTextTextView.text = if (minutesUntilDeparture < 1)
-                 resources?.getString(R.string.due) ?: "Due"
-            else
-                 java.lang.Long.toString(minutesUntilDeparture) +
-                         " " + (resources?.getString(R.string.minutes) ?: "min")
-            holder.mDepartureTimeTextView.visibility = View.VISIBLE
-            holder.mDepartureTimeTextView.text = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
-        } else {
-            holder.mDepartureTextTextView.text = DateFormat.getTimeFormat(mCtxt).format(Date(departureTimeInMillis))
-            holder.mDepartureTimeTextView.visibility = View.GONE
-         }
-
-         holder.mMapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
-
-         holder.mScheduledTextView.text = mCtxt.resources.getString(if (nexTrip.isActual)
-             R.string.real_time
-         else
-             R.string.scheduled)
+        holder.mDepartureTextTextView.text = nexTrip.departureText
+        holder.mDepartureTimeTextView.text = nexTrip.departureTime
+        holder.mScheduledTextView.text =
+        	mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
+        holder.mDepartureTimeTextView.visibility =
+        	if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
+        holder.mMapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
     }
 
     override fun getItemCount(): Int {
@@ -105,42 +85,5 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<NexT
 
     fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
         mClickMapListener = clickMapListener
-    }
-
-    internal fun parseDepartureTime(departureTime: String?): Long {
-        if (departureTime != null && departureTime.startsWith("/Date(")) {
-            var timezoneIdx = departureTime.indexOf('-', 6)
-            if (timezoneIdx < 0) {
-                timezoneIdx = departureTime.indexOf('+', 6)
-                if (timezoneIdx < 0) {
-                    return -1
-                }
-            }
-            return java.lang.Long.parseLong(departureTime.substring(6, timezoneIdx))
-        }
-        return -1
-    }
-
-    internal fun translateDepartureText(departureText: String?): String? {
-        return if (departureText != null && departureText.endsWith(" Min")) {
-            departureText.substring(0, departureText.length - 3) + (mCtxt.resources?.getString(R.string.minutes) ?: "min")
-        } else {
-            departureText
-        }
-    }
-
-    internal fun translateDirection(dir: String): String {
-        val resources = mCtxt?.resources
-        return if (resources != null) {
-            when (dir) {
-                "SOUTHBOUND" -> resources.getString(R.string.south)
-                "EASTBOUND" -> resources.getString(R.string.east)
-                "WESTBOUND" -> resources.getString(R.string.west)
-                "NORTHBOUND" -> resources.getString(R.string.north)
-                else -> dir
-            }
-        } else {
-            dir
-        }
     }
 }
