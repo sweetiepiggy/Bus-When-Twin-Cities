@@ -74,31 +74,6 @@ class NexTripsFragment : Fragment() {
         val timeInMillis = Calendar.getInstance().timeInMillis
         val presentableNexTrips = nexTrips.map { PresentableNexTrip(it, timeInMillis, context!!) }
 
-//        val oldItr = mNexTrips.listIterator()
-//        val newItr = presentableNexTrips.listIterator()
-//        var cnt = 0
-//
-//        while (oldItr.hasNext() && newItr.hasNext()) {
-//            var oldNexTrip = oldItr.next()
-//            var newNexTrip = newItr.next()
-//
-//            // these nexTrips no longer exist
-//            while (oldNexTrip.blockNumber != newNexTrip.blockNumber &&
-//            		oldNexTrip.departureTimeInMillis < newNexTrip.departureTimeInMillis) {
-//                oldItr.remove()
-//                oldNexTrip = oldItr.next()
-//                cnt += 1
-//            }
-//            mAdapter.notifyItemRangeRemoved(0, cnt)
-//            cnt = 0
-//
-//            // these nexTrips are new
-//            while (oldNexTrip.blockNumber != newNexTrip.blockNumber &&
-//            		newNexTrip.departureTimeInMillis < oldNexTrip.departureTimeInMillis) {
-//                oldI
-//            }
-//        }
-
         mNexTrips.clear()
         mNexTrips.addAll(presentableNexTrips)
         mAdapter.notifyDataSetChanged()

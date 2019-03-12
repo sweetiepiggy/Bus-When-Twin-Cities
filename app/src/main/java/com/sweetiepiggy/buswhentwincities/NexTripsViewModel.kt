@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.*
 
-class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNexTripsTask.OnDownloadedListener {
+class NexTripsViewModel(private val mStopId: Int) : ViewModel(), DownloadNexTripsTask.OnDownloadedListener {
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
     private var mLastUpdate: Long = 0
@@ -51,18 +51,14 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
         if (downloadNextTripsTask != null) {
             if (downloadNextTripsTask.status == AsyncTask.Status.FINISHED &&
 		            unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                mStopId?.let { stopId ->
-                    mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
-                    mDownloadNexTripsTask?.execute()
-                }
+                mDownloadNexTripsTask = DownloadNexTripsTask(this, mStopId)
+                mDownloadNexTripsTask!!.execute()
             } else {
                 mNexTrips.value = mNexTrips.value ?: ArrayList<NexTrip>()
             }
         } else {
-            mStopId?.let { stopId ->
-                mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
-                mDownloadNexTripsTask!!.execute()
-            }
+            mDownloadNexTripsTask = DownloadNexTripsTask(this, mStopId)
+            mDownloadNexTripsTask!!.execute()
         }
     }
 
@@ -85,7 +81,7 @@ class NexTripsViewModel(private val mStopId: String?) : ViewModel(), DownloadNex
         mLoadNexTripsErrorListener = loadNexTripsErrorListener
     }
 
-    class NexTripsViewModelFactory(private val stopId: String?) : ViewModelProvider.NewInstanceFactory() {
+    class NexTripsViewModelFactory(private val stopId: Int) : ViewModelProvider.NewInstanceFactory() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return NexTripsViewModel(stopId) as T
         }

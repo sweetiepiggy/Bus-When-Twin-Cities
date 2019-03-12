@@ -34,11 +34,10 @@ class SearchStopIdFragment : Fragment() {
 
     companion object {
         fun newInstance() = SearchStopIdFragment()
-        private val KEY_STOP_ID = "stopId"
     }
 
     interface OnSearchStopIdListener {
-        fun onSearchStopId(stopId: String)
+        fun onSearchStopId(stopId: Int)
     }
 
     override fun onAttach(context: Context) {
@@ -72,11 +71,11 @@ class SearchStopIdFragment : Fragment() {
 
     private fun startStopIdActivity() {
         getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
-            val stopId = stopIdEntry.text.toString()
-            if (stopId.length == 0) {
+            val stopIdStr = stopIdEntry.text.toString()
+            if (stopIdStr.length == 0) {
                 stopIdEntry.error = resources.getString(R.string.enter_stop_id)
             } else {
-                mSearchStopIdListener.onSearchStopId(stopId)
+                mSearchStopIdListener.onSearchStopId(stopIdStr.toInt())
             }
         }
     }

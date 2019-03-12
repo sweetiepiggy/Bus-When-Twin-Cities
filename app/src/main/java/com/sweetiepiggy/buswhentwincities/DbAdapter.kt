@@ -81,30 +81,30 @@ class DbAdapter {
     }
 
     /** @return rowId or -1 if failed */
-    fun createFavStop(stopId: String, stopDescription: String?): Long {
+    fun createFavStop(stopId: Int, stopDescription: String?): Long {
         val cv = ContentValues()
-        cv.put(KEY_STOP_ID, stopId)
+        cv.put(KEY_STOP_ID, stopId.toString())
         cv.put(KEY_STOP_DESCRIPTION, stopDescription)
 
         return mDbHelper!!.mDb!!.replace(TABLE_FAV_STOPS, null, cv)
     }
 
-    fun deleteFavStop(stopId: String) {
-        mDbHelper!!.mDb!!.delete(TABLE_FAV_STOPS, "$KEY_STOP_ID == ?", arrayOf(stopId))
+    fun deleteFavStop(stopId: Int) {
+        mDbHelper!!.mDb!!.delete(TABLE_FAV_STOPS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
     }
 
-    fun isFavStop(stopId: String): Boolean {
+    fun isFavStop(stopId: Int): Boolean {
         val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf(KEY_STOP_ID),
-                "$KEY_STOP_ID == ?", arrayOf(stopId), null, null, null, "1")
+                "$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
 
         val found = c.moveToFirst()
         c.close()
         return found
     }
 
-    fun getStopDesc(stopId: String): String? {
+    fun getStopDesc(stopId: Int): String? {
         val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf(KEY_STOP_DESCRIPTION),
-	    	"$KEY_STOP_ID == ?", arrayOf(stopId), null, null, null, "1")
+	    	"$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
         val ret = if (c.moveToFirst()) c.getString(c.getColumnIndex(KEY_STOP_DESCRIPTION)) else null
         c.close()
         return ret

@@ -28,7 +28,7 @@ import java.net.*
 import java.util.*
 
 class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener,
-                           private val mStopId: String) : AsyncTask<Void, Int, Void>() {
+                           private val mStopId: Int) : AsyncTask<Void, Int, Void>() {
     private var mError: DownloadError? = null
     private var mNexTrips: List<NexTrip>? = null
 
@@ -94,11 +94,11 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class)
-    private fun downloadRawNexTrips(stopId: String): List<RawNexTrip>? {
+    private fun downloadRawNexTrips(stopId: Int): List<RawNexTrip>? {
         var rawNexTrips: List<RawNexTrip>?
 
         val nexTripsUrl = ((if (mUseHttps) "https://" else "http://")
-                + NEXTRIPS_URL + stopId + "?format=json")
+                + NEXTRIPS_URL + stopId.toString() + "?format=json")
         val urlConnection = URL(nexTripsUrl).openConnection() as HttpURLConnection
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 

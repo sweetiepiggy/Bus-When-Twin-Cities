@@ -39,7 +39,7 @@ import java.security.InvalidParameterException
 import java.util.*
 
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
-    private var mStopId: String? = null
+    private var mStopId: Int? = null
     private var mStopDesc: String? = null
     private var mMapFragment: MyMapFragment? = null
     private var mMenu: Menu? = null
@@ -65,9 +65,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
-        mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
-                .get(NexTripsViewModel::class.java)
-        mNexTripsModel.setLoadNexTripsErrorListener(this)
+        mStopId?.let { stopId ->
+            mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(stopId))
+                    .get(NexTripsViewModel::class.java)
+            mNexTripsModel.setLoadNexTripsErrorListener(this)
+        }
 
         if (mDualPane) {
             supportFragmentManager.beginTransaction()
@@ -87,18 +89,18 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             }
         }
 
-        title = resources.getString(R.string.stop) + " #" + mStopId
+        title = resources.getString(R.string.stop) + " #" + mStopId.toString()
 
         LoadIsFavorite().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putString(KEY_STOP_ID, mStopId)
+        mStopId?.let { savedInstanceState.putInt(KEY_STOP_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
-        mStopId = b.getString(KEY_STOP_ID)
+        mStopId = b.getInt(KEY_STOP_ID)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -233,10 +235,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     companion object {
+        val KEY_STOP_ID = "stopId"
+
         private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
-        private val KEY_STOP_ID = "stopId"
         private val ITEM_IDX_NEXTRIPS = 0
         private val ITEM_IDX_MAP = 1
     }

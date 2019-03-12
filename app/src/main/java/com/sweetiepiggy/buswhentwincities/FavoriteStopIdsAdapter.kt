@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavoriteListener, private val mFavStops: List<FavoriteStopIdsViewModel.FavoriteStopId>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
 
     interface OnClickFavoriteListener {
-        fun onClickFavorite(stopId: String)
+        fun onClickFavorite(stopId: Int)
     }
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -59,7 +59,7 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
     }
 
     override fun onBindViewHolder(holder: FavoriteStopIdsViewHolder, position: Int) {
-        holder.mStopIdTextView.text = mFavStops[position].stopId
+        holder.mStopIdTextView.text = mFavStops[position].stopId.toString()
         holder.mStopDescTextView.text = mFavStops[position].stopDesc
     }
 

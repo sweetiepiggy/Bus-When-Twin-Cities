@@ -38,7 +38,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
         LoadFavoriteStopIdsTask().execute()
     }
 
-    data class FavoriteStopId(val stopId: String, val stopDesc: String)
+    data class FavoriteStopId(val stopId: Int, val stopDesc: String)
 
     private inner class LoadFavoriteStopIdsTask() : AsyncTask<Void, Void, List<FavoriteStopId>>() {
         override fun doInBackground(vararg params: Void): List<FavoriteStopId> {
@@ -49,7 +49,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
             val stopIdIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
             val stopDescIndex = c.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
             while (c.moveToNext()) {
-                favoriteStopIds.add(FavoriteStopId(c.getString(stopIdIndex), c.getString(stopDescIndex)))
+                favoriteStopIds.add(FavoriteStopId(c.getString(stopIdIndex).toInt(), c.getString(stopDescIndex)))
             }
             c.close()
             dbHelper.close()

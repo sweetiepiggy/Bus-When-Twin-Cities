@@ -117,17 +117,17 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             else -> false
         }
 
-    override fun onClickFavorite(stopId: String) {
+    override fun onClickFavorite(stopId: Int) {
         startStopIdActivity(stopId)
     }
 
-    override fun onSearchStopId(stopId: String) {
+    override fun onSearchStopId(stopId: Int) {
         startStopIdActivity(stopId)
     }
 
-    private fun startStopIdActivity(stopId: String) {
+    private fun startStopIdActivity(stopId: Int) {
         val b = Bundle().apply {
-            putString(KEY_STOP_ID, stopId)
+            putInt(StopIdActivity.KEY_STOP_ID, stopId)
         }
         val intent = Intent(this, StopIdActivity::class.java).apply {
             putExtras(b)
@@ -204,7 +204,6 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
     companion object {
         private val SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities"
-        private val KEY_STOP_ID = "stopId"
         private val KEY_BNV_IDX = "bnvIdx"
 
         private val BNV_UNINITIALIZED = 0
