@@ -52,13 +52,13 @@ class NexTripsViewModel(private val mStopId: Int?) : ViewModel(), DownloadNexTri
             if (downloadNextTripsTask != null) {
                 if (downloadNextTripsTask.status == AsyncTask.Status.FINISHED &&
 		            	unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                    mDownloadNexTripsTask = DownloadNexTripsTask(this, mStopId)
+                    mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
                     mDownloadNexTripsTask!!.execute()
                 } else {
                     mNexTrips.value = mNexTrips.value ?: ArrayList<NexTrip>()
                 }
             } else {
-                mDownloadNexTripsTask = DownloadNexTripsTask(this, mStopId)
+                mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
                 mDownloadNexTripsTask!!.execute()
             }
         }

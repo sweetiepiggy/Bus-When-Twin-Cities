@@ -49,9 +49,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private var mMap: GoogleMap? = null
     private var mVehicleBlockNumber: Int? = null
-    private var mNexTrips: List<PresentableNexTrip>? = null
+    private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private val mMarkers: MutableList<Marker> = mutableListOf()
+    private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         val d = getDrawable(context!!, R.drawable.ic_baseline_directions_bus_24px)!!
         d.setTint(getColor(context!!, R.color.colorBusIcon))
@@ -128,7 +128,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     fun selectVehicle(blockNumber: Int) {
         mVehicleBlockNumber = blockNumber
         mMap?.run {
-            for (marker in mMarkers) {
+            for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 if (blockNumber == nexTrip.blockNumber) {
                     marker.alpha = 1f
@@ -152,11 +152,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private fun zoomToAllVehicles() {
 	    if (mMarkers.size == 1) {
-            zoomToVehicle(mMarkers[0].tag as PresentableNexTrip)
+            zoomToVehicle(mMarkers.values.elementAt(0).tag as PresentableNexTrip)
             return
         }
 
-    	val latLngs = mMarkers.map { (it.tag as PresentableNexTrip).position!! }
+    	val latLngs = mMarkers.values.map { (it.tag as PresentableNexTrip).position!! }
 
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
@@ -203,31 +203,46 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         val nexTripsWithActualPosition = nexTrips.filter { it.isActual && it.position != null }
         val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
+        if (mNexTrips == null) mNexTrips = mutableMapOf()
+        mNexTrips!!.clear()
         val timeInMillis = Calendar.getInstance().timeInMillis
-        mNexTrips = nexTripsWithActualPosition.map { PresentableNexTrip(it, timeInMillis, context!!) }
+        nexTripsWithActualPosition.forEach {
+            mNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
+        }
         updateMarkers()
         if (doInitCamera) initCamera()
     }
 
     private fun updateMarkers() {
-        mMarkers.clear()
+        val blockNumbersToRemove = mutableListOf<Int?>()
+        for ((blockNumber, marker) in mMarkers) {
+            if (!mNexTrips!!.containsKey(blockNumber)) {
+                marker.remove()
+                blockNumbersToRemove.add(blockNumber)
+            }
+        }
+        blockNumbersToRemove.forEach { mMarkers.remove(it) }
+
         mMap?.run {
-            clear()
-            for (nexTrip in (mNexTrips ?: listOf())) {
-                val marker = addMarker(MarkerOptions()
+            for (nexTrip in mNexTrips!!.values) {
+                val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
+                    mMarkers[nexTrip.blockNumber]!!
+                } else {
+                    addMarker(MarkerOptions()
                         .icon(mBusIcon)
                         .position(nexTrip.position!!)
-                        .title("${nexTrip.routeAndTerminal} (${nexTrip.departureText})")
-                        .snippet("${nexTrip.description}")
-                    )?.apply {
-                        tag = nexTrip
-                        if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips?.size == 1) {
-                            showInfoWindow()
-                        } else if (mVehicleBlockNumber != null) {
-                            alpha = UNSELECTED_MARKER_ALPHA
-                        }
+                    ).apply { tag = nexTrip }
+                }.apply {
+                    position = nexTrip.position!!
+                    title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
+                    snippet = "${nexTrip.description}"
+                    if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips!!.size == 1) {
+                        showInfoWindow()
+                    } else if (mVehicleBlockNumber != null) {
+                        alpha = UNSELECTED_MARKER_ALPHA
                     }
-                marker?.let { mMarkers.add(it) }
+                }
+                mMarkers[nexTrip.blockNumber] = marker
             }
         }
     }
