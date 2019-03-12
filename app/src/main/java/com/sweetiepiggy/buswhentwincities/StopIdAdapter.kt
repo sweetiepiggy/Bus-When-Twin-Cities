@@ -87,7 +87,8 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<Pres
         return mNexTrips.size
     }
 
-    override fun getItemId(position: Int): Long = mNexTrips[position].blockNumber?.toLong() ?: RecyclerView.NO_ID
+    override fun getItemId(position: Int): Long =
+    	mNexTrips[position].blockNumber?.toLong() ?: RecyclerView.NO_ID
 
     fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
         mClickMapListener = clickMapListener

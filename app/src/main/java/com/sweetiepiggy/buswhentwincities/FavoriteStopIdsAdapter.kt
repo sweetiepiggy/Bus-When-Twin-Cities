@@ -48,6 +48,10 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
         }
     }
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder {
         val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.fav_stop_id_item, parent, false)
@@ -62,6 +66,8 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
     override fun getItemCount(): Int {
         return mFavStops.size
     }
+
+    override fun getItemId(position: Int): Long = mFavStops[position].stopId.toLong()
 
     companion object {
         private val KEY_STOP_ID = "stopId"
