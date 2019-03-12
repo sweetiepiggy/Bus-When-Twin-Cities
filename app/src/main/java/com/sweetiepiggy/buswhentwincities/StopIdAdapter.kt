@@ -59,6 +59,10 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<Pres
         }
     }
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopIdAdapter.StopIdViewHolder {
         val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.stop_id_item, parent, false)
@@ -82,6 +86,8 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<Pres
     override fun getItemCount(): Int {
         return mNexTrips.size
     }
+
+    override fun getItemId(position: Int): Long = mNexTrips[position].blockNumber?.toLong() ?: RecyclerView.NO_ID
 
     fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
         mClickMapListener = clickMapListener

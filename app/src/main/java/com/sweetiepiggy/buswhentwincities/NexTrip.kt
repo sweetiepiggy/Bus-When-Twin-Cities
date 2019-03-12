@@ -106,6 +106,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val routeAndTerminal: String? = nexTrip.route?.let { it + (nexTrip.terminal ?: "") }
     val routeDirection: String? = translateDirection(nexTrip.routeDirection, context.resources)
     val position: LatLng? = nexTrip.position
+    val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
 
     val departureText: String?
 	val departureTime: String?
