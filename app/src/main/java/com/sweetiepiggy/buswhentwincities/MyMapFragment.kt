@@ -240,7 +240,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for (nexTrip in mNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
-                    mMarkers[nexTrip.blockNumber]!!
+                    mMarkers[nexTrip.blockNumber]!!.apply {
+                        AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
+                    }
                 } else {
                     addMarker(MarkerOptions()
                         .icon(getBusIcon(nexTrip.routeDirection))
@@ -248,7 +250,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     )
                 }.apply {
                     tag = nexTrip
-                    position = nexTrip.position!!
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
                     snippet = nexTrip.description
                     if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips!!.size == 1) {
