@@ -23,11 +23,12 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -89,6 +90,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         title = resources.getString(R.string.stop) + " #" + mStopId.toString()
 
+        findViewById<View>(R.id.fab)?.setOnClickListener { mNexTripsModel.loadNexTrips() }
         LoadIsFavorite().execute()
     }
 
@@ -111,10 +113,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_refresh -> {
-                mNexTripsModel.loadNexTrips()
-                return true
-            }
             R.id.action_favorite -> {
                 if (mIsFavorite) {
                     mIsFavorite = false
