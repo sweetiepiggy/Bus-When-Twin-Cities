@@ -72,7 +72,7 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<Pres
     override fun onBindViewHolder(holder: StopIdViewHolder, position: Int) {
         val nexTrip = mNexTrips[position]
         holder.mRouteTextView.text = nexTrip.routeAndTerminal
-        holder.mDirectionTextView.text = nexTrip.routeDirection
+        holder.mDirectionTextView.text = nexTrip.routeDirectionStr
         holder.mDescriptionTextView.text = nexTrip.description
         holder.mDepartureTextTextView.text = nexTrip.departureText
         holder.mDepartureTimeTextView.text = nexTrip.departureTime

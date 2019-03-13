@@ -20,6 +20,7 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -31,7 +32,6 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getColor
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -53,9 +53,19 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
-        val d = getDrawable(context!!, R.drawable.ic_baseline_directions_bus_24px)!!
-        // d.setTint(getColor(context!!, R.color.colorBusIcon))
-    	BitmapDescriptorFactory.fromBitmap(d.toBitmap())
+        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
+    }
+    private val mBusSouthIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_south_30px)
+    }
+    private val mBusEastIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_east_36px)
+    }
+    private val mBusWestIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_west_36px)
+    }
+    private val mBusNorthIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_north_30px)
     }
 
     companion object {
@@ -65,6 +75,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val UNSELECTED_MARKER_ALPHA = 0.5f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
+
+        private fun drawableToBitmap(context: Context, id: Int): BitmapDescriptor =
+            BitmapDescriptorFactory.fromBitmap(getDrawable(context, id)?.toBitmap())
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -229,10 +243,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     mMarkers[nexTrip.blockNumber]!!
                 } else {
                     addMarker(MarkerOptions()
-                        .icon(mBusIcon)
+                        .icon(getBusIcon(nexTrip.routeDirection))
                         .position(nexTrip.position!!)
-                    ).apply { tag = nexTrip }
+                    )
                 }.apply {
+                    tag = nexTrip
                     position = nexTrip.position!!
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
                     snippet = nexTrip.description
@@ -246,4 +261,13 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             }
         }
     }
+
+    private fun getBusIcon(direction: NexTrip.Direction?): BitmapDescriptor =
+    	when (direction) {
+            NexTrip.Direction.SOUTH -> mBusSouthIcon
+            NexTrip.Direction.EAST  -> mBusEastIcon
+            NexTrip.Direction.WEST  -> mBusWestIcon
+            NexTrip.Direction.NORTH -> mBusNorthIcon
+            else -> mBusIcon
+        }
 }
