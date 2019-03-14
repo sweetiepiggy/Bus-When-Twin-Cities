@@ -49,7 +49,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
             val stopIdIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
             val stopDescIndex = c.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
             while (c.moveToNext()) {
-                favoriteStopIds.add(FavoriteStopId(c.getString(stopIdIndex).toInt(), c.getString(stopDescIndex)))
+                favoriteStopIds.add(FavoriteStopId(c.getInt(stopIdIndex), c.getString(stopDescIndex)))
             }
             c.close()
             dbHelper.close()
