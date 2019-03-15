@@ -34,37 +34,6 @@ sealed class NexTripChange {
     companion object {
         fun getNexTripChanges(origNexTrips: List<PresentableNexTrip>,
                 newNexTrips: List<PresentableNexTrip>): List<NexTripChange> {
-            // val structuralChanges: MutableList<NexTripChange> = mutableListOf()
-            // val itemChanges: MutableList<NexTripChange> = mutableListOf()
-
-            android.util.Log.d("abc", "got here orig: $origNexTrips")
-            android.util.Log.d("abc", "got here new: $newNexTrips")
-
-            // val origItr = origNexTrips.listIterator().withIndex()
-            // val newItr = newNexTrips.listIterator().withIndex()
-
-            // var done = !(origItr.hasNext() && newItr.hasNext())
-
-            // while (!done) {
-            //     var (origIdx, origNexTrip) = origItr.next()
-            //     val (newIdx, newNexTrip) = newItr.next()
-
-            //     if (!isSameNexTrip(origNexTrip, newNexTrip)) {
-            //         dumpOrig.add(origNexTrip)
-            //         if (origItr.hasNext()) {
-            //             (origIdx, origNexTrip) = origItr.next()
-            //         }
-            //     } else if (!nexTripsAppearSame(origNexTrip, newNexTrip)) {
-            //         itemChanges.add(NexTripChange.ItemChanged(newIdx))
-            //         if (origItr.hasNext()) {
-            //             (origIdx, origNexTrip) = origItr.next()
-            //         }
-            //         if (newItr.hasNext()) {
-            //             (newIdx, newNexTrip) = newItr.next()
-            //         }
-            //     }
-            // }
-
             val removes: MutableList<NexTripChange.ItemRemoved> = mutableListOf()
             val movesAndInserts: MutableList<Either<NexTripChange.ItemMoved, NexTripChange.ItemInserted>> =
                 mutableListOf()
@@ -137,28 +106,6 @@ sealed class NexTripChange {
             while (newItr.hasNext()) {
                 movesAndInserts.add(Either.Right(NexTripChange.ItemInserted(newItr.next().index)))
             }
-
-//            // find nexTrips that have been removed
-//            for ((origIdx, origNexTrip) in origNexTrips.listIterator().withIndex()) {
-//                if (!containsByBlockNumber(origNexTrip, newNexTrips)) {
-//                    structuralChanges.add(NexTripChange.ItemRemoved(origIdx))
-//                }
-//            }
-//
-//            // find nexTrips that have been added
-//            for ((newIdx, newNexTrip) in newNexTrips.listIterator().withIndex()) {
-//                val (origIdx, origNexTrip) = indexOfByBlockNumber(newNexTrip, origNexTrips)
-//                if (origIdx < 0) {
-//                    structuralChanges.add(NexTripChange.ItemInserted(newIdx))
-//                } else {
-//                    if (origIdx != newIdx) {
-//                        structuralChanges.add(NexTripChange.ItemMoved(origIdx, newIdx))
-//                    }
-//                    if (!nexTripsAppearSame(newNexTrip, origNexTrip!!)) {
-//                        itemChanges.add(NexTripChange.ItemChanged(newIdx))
-//                    }
-//                }
-//            }
 
             return groupRemoves(removes) + groupMovesAndInserts(movesAndInserts) + groupChanges(changes)
         }
@@ -285,20 +232,6 @@ sealed class NexTripChange {
         	a.blockNumber == b.blockNumber && (a.departureTimeInMillis == b.departureTimeInMillis ||
                 // turns out blockNumber is not unique, but hopefully it is unique per 10 minutes
         		abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 10 * 60 * 1000)
-
-//        private fun containsByBlockNumber(nexTrip: PresentableNexTrip, nexTrips: List<PresentableNexTrip>): Boolean =
-//            indexOfByBlockNumber(nexTrip, nexTrips).first >= 0
-//
-//        private fun indexOfByBlockNumber(nexTrip: PresentableNexTrip, nexTrips: List<PresentableNexTrip>): Pair<Int, PresentableNexTrip?> {
-//            for ((idx, n) in nexTrips.listIterator().withIndex()) {
-//                if (n.blockNumber == nexTrip.blockNumber && (n.departureTimeInMillis == nexTrip.departureTimeInMillis ||
-//                		// turns out blockNumber is not unique, but hopefully it is unique per half hour
-//                		abs(n.departureTimeInMillis!! - nexTrip.departureTimeInMillis!!) < 30 * 60 * 1000)) {
-//                    return Pair(idx, n)
-//                }
-//            }
-//            return Pair(-1, null)
-//        }
 
         fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip): Boolean =
             nexTrip1.departureText == nexTrip2.departureText &&
