@@ -72,7 +72,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         fun newInstance() = MyMapFragment()
         private val MY_PERMISSIONS_REQUEST_LOCATION = 0
         private val KEY_BLOCK_NUMBER = "blockNumber"
-        private val UNSELECTED_MARKER_ALPHA = 0.5f
+        private val UNSELECTED_MARKER_ALPHA = 0.4f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
 
@@ -118,6 +118,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        googleMap.uiSettings.setMapToolbarEnabled(false)
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
             initCamera()

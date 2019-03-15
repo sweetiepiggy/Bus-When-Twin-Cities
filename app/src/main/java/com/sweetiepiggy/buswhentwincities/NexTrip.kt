@@ -21,6 +21,7 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.content.Context
 import android.content.res.Resources
+import android.location.Location
 import android.text.format.DateFormat
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
@@ -47,7 +48,9 @@ class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
     val vehicleHeading: Double? = rawNexTrip.vehicleLatitude
     val position: LatLng? = rawNexTrip.vehicleLatitude?.let { latitude ->
         rawNexTrip.vehicleLongitude?.let { longitude ->
-            LatLng(latitude, longitude)
+            LatLng(latitude, longitude).let {
+                if (distanceBetweenIsSmall(it, ORIGIN_LAT_LNG)) null else it
+            }
         }
     }
 
@@ -57,8 +60,8 @@ class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
             fun from(strDirection: String?): Direction? =
             	when(strDirection) {
                     "SOUTHBOUND" -> SOUTH
-                    "EASTBOUND" -> EAST
-                    "WESTBOUND" -> WEST
+                    "EASTBOUND"  -> EAST
+                    "WESTBOUND"  -> WEST
                     "NORTHBOUND" -> NORTH
                     else -> null
                 }
@@ -94,6 +97,19 @@ class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
             } else {
                 null
             }
+
+        fun distanceBetweenIsSmall(pos1: LatLng?, pos2: LatLng?): Boolean =
+            (pos1 == pos2) || (distanceBetween(pos1!!, pos2!!)?.let { it < 1 } ?: false)
+
+        /** @return distance in meters between the two positions */
+        private fun distanceBetween(pos1: LatLng, pos2: LatLng): Float? {
+            var results: FloatArray = floatArrayOf(0f)
+            Location.distanceBetween(pos1.latitude, pos1.longitude,
+        		pos2.latitude, pos2.longitude, results)
+            return results[0]
+        }
+
+        private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
     }
 }
 
@@ -146,4 +162,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
                 else -> null
             }
     }
+
+    override fun toString(): String =
+      "($departureText, $departureTime, $isActual, $blockNumber, $description, $routeAndTerminal, $routeDirection, $departureTimeInMillis)"
 }

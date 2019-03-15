@@ -29,8 +29,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<PresentableNexTrip>) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
+class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
     private var mClickMapListener: OnClickMapListener? = null
+    private var mNexTrips: List<PresentableNexTrip> = listOf()
 
     interface OnClickMapListener {
         fun onClickMap(vehicleBlockNumber: Int?)
@@ -89,6 +90,11 @@ class StopIdAdapter(private val mCtxt: Context, private val mNexTrips: List<Pres
 
     override fun getItemId(position: Int): Long =
     	mNexTrips[position].blockNumber?.toLong() ?: RecyclerView.NO_ID
+
+
+    fun setNexTrips(nexTrips: List<PresentableNexTrip>) {
+        mNexTrips = nexTrips
+    }
 
     fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
         mClickMapListener = clickMapListener

@@ -68,24 +68,27 @@ class FavoriteStopIdsFragment : Fragment() {
             ViewModelProviders.of(this).get(FavoriteStopIdsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        mModel.getFavoriteStopIds().observe(this, Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ favoriteStopIds ->
-            mFavoriteStopIds.clear()
-            mFavoriteStopIds.addAll(favoriteStopIds)
-            mAdapter.notifyDataSetChanged()
-
-            val resultsRecyclerView = getActivity()?.findViewById<View>(R.id.favoritesRecyclerView)
-            val noResultsView = getActivity()?.findViewById<View>(R.id.no_results_textview)
-            if (favoriteStopIds.isEmpty()) {
-                resultsRecyclerView?.setVisibility(View.GONE)
-                noResultsView?.setVisibility(View.VISIBLE)
-            } else {
-                noResultsView?.setVisibility(View.GONE)
-                resultsRecyclerView?.setVisibility(View.VISIBLE)
-            }
-        })
+        mModel.getFavoriteStopIds().observe(this,
+        	Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ updateFavoriteStopIds(it) })
     }
 
     fun refresh() {
         mModel.loadFavoriteStopIds()
+    }
+
+    private fun updateFavoriteStopIds(favoriteStopIds: List<FavoriteStopIdsViewModel.FavoriteStopId>) {
+        mFavoriteStopIds.clear()
+        mFavoriteStopIds.addAll(favoriteStopIds)
+        mAdapter.notifyDataSetChanged()
+
+        val resultsRecyclerView = activity?.findViewById<View>(R.id.favoritesRecyclerView)
+        val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
+        if (favoriteStopIds.isEmpty()) {
+            resultsRecyclerView?.setVisibility(View.GONE)
+            noResultsView?.setVisibility(View.VISIBLE)
+        } else {
+            noResultsView?.setVisibility(View.GONE)
+            resultsRecyclerView?.setVisibility(View.VISIBLE)
+        }
     }
 }

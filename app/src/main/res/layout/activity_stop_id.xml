@@ -43,8 +43,9 @@
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:tabMaxWidth="0dp"
             app:tabGravity="fill"
+            app:tabIndicatorColor="@color/common_google_signin_btn_text_dark_default"
+            app:tabMaxWidth="0dp"
             app:tabMode="fixed"></com.google.android.material.tabs.TabLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
