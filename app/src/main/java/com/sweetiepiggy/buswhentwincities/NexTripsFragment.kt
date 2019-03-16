@@ -37,6 +37,7 @@ class NexTripsFragment : Fragment() {
     private lateinit var mAdapter: StopIdAdapter
     private lateinit var mResultsRecyclerView: RecyclerView
     private var mNexTrips: List<PresentableNexTrip> = listOf()
+    private var mHiddenRoutes: MutableSet<String> = mutableSetOf()
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -66,6 +67,7 @@ class NexTripsFragment : Fragment() {
         mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
         		DividerItemDecoration.VERTICAL))
         mAdapter = StopIdAdapter(context!!)
+        mHiddenRoutes = model.hiddenRoutes
         mAdapter.setHiddenRoutes(model.hiddenRoutes)
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
@@ -75,7 +77,7 @@ class NexTripsFragment : Fragment() {
         val timeInMillis = Calendar.getInstance().timeInMillis
         val newNexTrips = nexTrips.map { PresentableNexTrip(it, timeInMillis, context!!) }
 
-        val nexTripChanges = NexTripChange.getNexTripChanges(mNexTrips, newNexTrips)
+        val nexTripChanges = NexTripChange.getNexTripChanges(mNexTrips, newNexTrips, mHiddenRoutes)
 
         mNexTrips = newNexTrips
         mAdapter.setNexTrips(newNexTrips)

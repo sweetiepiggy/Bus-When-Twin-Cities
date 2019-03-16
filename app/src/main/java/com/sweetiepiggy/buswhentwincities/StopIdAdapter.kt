@@ -64,25 +64,26 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
 
     override fun onBindViewHolder(holder: StopIdViewHolder, position: Int) {
         val nexTrip = mNexTrips[position]
+        holder.routeTextView.text = nexTrip.routeAndTerminal
+        holder.directionTextView.text = nexTrip.routeDirectionStr
+        holder.descriptionTextView.text = nexTrip.description
+        holder.departureTextTextView.text = nexTrip.departureText
+        holder.departureTimeTextView.text = nexTrip.departureTime
+        holder.scheduledTextView.text =
+        	mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
+        holder.departureTimeTextView.visibility =
+        	if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
+        holder.mapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
+
+        holder.minimalRouteTextView.text = nexTrip.routeAndTerminal
+        holder.minimalDescriptionTextView.text = nexTrip.description
+        holder.minimalDepartureTextTextView.text = nexTrip.departureText
 
         if (mHiddenRoutes.contains(nexTrip.routeAndTerminal)) {
             holder.fullView.visibility = View.GONE
-            holder.minimalRouteTextView.text = nexTrip.routeAndTerminal
-            holder.minimalDescriptionTextView.text = nexTrip.description
-            holder.minimalDepartureTextTextView.text = nexTrip.departureText
             holder.minimalView.visibility = View.VISIBLE
         } else {
             holder.minimalView.visibility = View.GONE
-            holder.routeTextView.text = nexTrip.routeAndTerminal
-            holder.directionTextView.text = nexTrip.routeDirectionStr
-            holder.descriptionTextView.text = nexTrip.description
-            holder.departureTextTextView.text = nexTrip.departureText
-            holder.departureTimeTextView.text = nexTrip.departureTime
-            holder.scheduledTextView.text =
-        		mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
-            holder.departureTimeTextView.visibility =
-        		if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
-            holder.mapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
             holder.fullView.visibility = View.VISIBLE
         }
     }

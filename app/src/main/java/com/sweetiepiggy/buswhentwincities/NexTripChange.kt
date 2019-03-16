@@ -33,7 +33,7 @@ sealed class NexTripChange {
 
     companion object {
         fun getNexTripChanges(origNexTrips: List<PresentableNexTrip>,
-                newNexTrips: List<PresentableNexTrip>): List<NexTripChange> {
+                newNexTrips: List<PresentableNexTrip>, hiddenRoutes: Set<String>): List<NexTripChange> {
             val removes: MutableList<NexTripChange.ItemRemoved> = mutableListOf()
             val movesAndInserts: MutableList<Either<NexTripChange.ItemMoved, NexTripChange.ItemInserted>> =
                 mutableListOf()
@@ -69,7 +69,8 @@ sealed class NexTripChange {
                             movesAndInserts.add(Either.Left(NexTripChange.ItemMoved(origIdx + insertedCnt - dumpOrig.size, newIdx)))
                         }
                         // origNexTrip is still in list, make note if it changed
-                        if (!nexTripsAppearSame(origNexTrip, newNexTrip)) {
+                        if (!nexTripsAppearSame(origNexTrip, newNexTrip,
+                        		hiddenRoutes.contains(origNexTrip.routeAndTerminal))) {
                             changes.add(NexTripChange.ItemChanged(newIdx))
                         }
                         if (newItr.hasNext()) {
@@ -233,14 +234,16 @@ sealed class NexTripChange {
                 // turns out blockNumber is not unique, but hopefully it is unique per 10 minutes
         		abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 10 * 60 * 1000)
 
-        fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip): Boolean =
+        fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip,
+    			isHidden: Boolean): Boolean =
             nexTrip1.departureText == nexTrip2.departureText &&
-            nexTrip1.departureTime == nexTrip2.departureTime &&
-            nexTrip1.isActual == nexTrip2.isActual &&
-            nexTrip1.description == nexTrip2.description &&
-            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
-            nexTrip1.routeDirection == nexTrip2.routeDirection &&
-    		(nexTrip1.position == null) == (nexTrip2.position == null)
+        	nexTrip1.description == nexTrip2.description &&
+        	(isHidden ||
+        	    (nexTrip1.departureTime == nexTrip2.departureTime &&
+                nexTrip1.isActual == nexTrip2.isActual &&
+                nexTrip1.routeDirection == nexTrip2.routeDirection &&
+	            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
+    		    (nexTrip1.position == null) == (nexTrip2.position == null)))
         }
 }
 

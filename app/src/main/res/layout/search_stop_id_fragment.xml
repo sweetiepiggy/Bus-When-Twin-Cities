@@ -45,7 +45,7 @@
       android:layout_gravity="center_horizontal"
       android:layout_marginStart="@dimen/text_margin"
       android:layout_marginEnd="@dimen/text_margin"
-      android:ems="20"
+      android:ems="30"
       android:hint="@string/stop_id_hint"
       android:inputType="number"
       android:minHeight="@android:dimen/app_icon_size" />

@@ -72,7 +72,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         fun newInstance() = MyMapFragment()
         private val MY_PERMISSIONS_REQUEST_LOCATION = 0
         private val KEY_BLOCK_NUMBER = "blockNumber"
-        private val UNSELECTED_MARKER_ALPHA = 0.4f
+        private val UNSELECTED_MARKER_ALPHA = 0.3f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
 
@@ -157,9 +157,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun initCamera() {
-        if (mNexTrips.isNullOrEmpty()) {
-            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
-        } else {
+        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
+        if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
             zoomToAllVehicles()
         }
