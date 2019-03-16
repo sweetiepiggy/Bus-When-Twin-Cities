@@ -37,6 +37,8 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.google.android.material.tabs.TabLayout
 import java.security.InvalidParameterException
 import java.util.*
@@ -50,6 +52,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mIsFavorite = false
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
+    private var mNexTrips: List<NexTrip> = listOf()
     private var mRoutes: SortedSet<String> = sortedSetOf()
 
     private val unixTime: Long
@@ -125,7 +128,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
 
     override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
-        val resources = getResources()
         val message: String? =
             when (err) {
                 is DownloadNexTripsTask.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
@@ -134,11 +136,19 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 is DownloadNexTripsTask.DownloadError.Unauthorized -> resources.getString(R.string.unauthorized)
                 is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
             }
-            AlertDialog.Builder(this).apply {
-                setTitle(resources.getString(android.R.string.dialog_alert_title))
-                message?.let { setMessage(it) }
-                setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
-            }.show()
+            if (mNexTrips.isEmpty()) {
+                AlertDialog.Builder(this).apply {
+                    setTitle(resources.getString(android.R.string.dialog_alert_title))
+                    message?.let { setMessage(it) }
+                    setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
+                }.show()
+            } else {
+                mNexTripsFragment?.updateNexTrips(mNexTrips)
+                Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_LONG)
+                	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
+                        override fun onClick(v: View) {}
+            		}).show()
+            }
     }
 
     private fun onClickFilter() {
@@ -271,6 +281,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     fun updateRoutes(nexTrips: List<NexTrip>) {
+        mNexTrips = nexTrips
         mRoutes = nexTrips.filter { it.routeAndTerminal != null }.map { it.routeAndTerminal!! }.toSortedSet()
     }
 
