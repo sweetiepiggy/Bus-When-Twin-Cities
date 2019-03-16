@@ -18,7 +18,7 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -34,11 +34,7 @@
 		android:clipToPadding="false"
 		android:contentDescription="@null"
 		android:paddingBottom="80dp"
-		android:scrollbars="vertical"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+		android:scrollbars="vertical" />
 
 	<TextView
 		android:id="@+id/no_results_textview"
@@ -47,9 +43,5 @@
 		android:layout_height="match_parent"
 		android:gravity="center"
 		android:text="@string/no_nextrips_found"
-		android:visibility="gone"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+		android:visibility="gone" />
+</LinearLayout>

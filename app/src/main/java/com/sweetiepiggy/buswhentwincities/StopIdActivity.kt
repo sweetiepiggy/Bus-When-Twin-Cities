@@ -19,6 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.content.DialogInterface
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
@@ -33,6 +34,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -43,10 +45,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mStopId: Int? = null
     private var mStopDesc: String? = null
     private var mMapFragment: MyMapFragment? = null
+    private var mNexTripsFragment: NexTripsFragment? = null
     private var mMenu: Menu? = null
     private var mIsFavorite = false
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
+    private var mRoutes: SortedSet<String> = sortedSetOf()
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -69,10 +73,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
                 .get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
+        mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
 
         if (mDualPane) {
+            mNexTripsFragment = NexTripsFragment.newInstance()
             supportFragmentManager.beginTransaction()
-                    .add(R.id.nextrips_container, NexTripsFragment.newInstance())
+                    .add(R.id.nextrips_container, mNexTripsFragment!!)
                     .commit()
             mMapFragment = MyMapFragment.newInstance()
             supportFragmentManager.beginTransaction()
@@ -107,64 +113,16 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         mMenu = menu
         menuInflater.inflate(R.menu.menu_stop_id, menu)
         menu.findItem(R.id.action_favorite).icon =
-        	getDrawable(this, if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
+            getDrawable(this, if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
-            R.id.action_favorite -> {
-                if (mIsFavorite) {
-                    mIsFavorite = false
-                    item.icon = getDrawable(this, IS_NOT_FAV_ICON)
-                    title = resources.getString(R.string.stop) + " #" + mStopId
-                    mStopId?.let { stopId ->
-                        object : AsyncTask<Void, Void, Void>() {
-                            override fun doInBackground(vararg params: Void): Void? {
-                                DbAdapter().apply {
-                                    openReadWrite(applicationContext)
-                                    deleteFavStop(stopId)
-                                    close()
-                                }
-                                return null
-                            }
-                            override fun onPostExecute(result: Void?) {}
-                        }.execute()
-                    }
-                } else {
-                    val builder = AlertDialog.Builder(this)
-                    val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
-                    builder.setView(favStopIdDialog)
-                    builder.setPositiveButton(android.R.string.ok) { _, _ ->
-                        mIsFavorite = true
-                        item.icon = getDrawable(this, IS_FAV_ICON)
-                        val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
-                        title = resources.getString(R.string.stop) + " #" + mStopId +
-            	        	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
-                        mStopId?.let { stopId ->
-                            object : AsyncTask<Void, Void, Void>() {
-                                override fun doInBackground(vararg params: Void): Void? {
-                                    DbAdapter().apply {
-                                        openReadWrite(applicationContext)
-                                        createFavStop(stopId, stopName)
-                                        close()
-                                    }
-                                    return null
-                                }
-                                override fun onPostExecute(result: Void?) {}
-                            }.execute()
-                        }
-                    }
-                    builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
-                            .setTitle(R.string.enter_stop_name_dialog_title)
-                            .show()
-                }
-
-                return true
-            }
-            else -> return super.onOptionsItemSelected(item)
+            R.id.action_filter -> { onClickFilter(); true }
+            R.id.action_favorite -> { onClickFavorite(item); true }
+            else -> super.onOptionsItemSelected(item)
         }
-    }
 
     override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
         val resources = getResources()
@@ -176,12 +134,91 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 is DownloadNexTripsTask.DownloadError.Unauthorized -> resources.getString(R.string.unauthorized)
                 is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
             }
-            val alert = AlertDialog.Builder(this).apply {
+            AlertDialog.Builder(this).apply {
                 setTitle(resources.getString(android.R.string.dialog_alert_title))
                 message?.let { setMessage(it) }
                 setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
-                show()
+            }.show()
+    }
+
+    private fun onClickFilter() {
+        AlertDialog.Builder(this).apply {
+            setTitle(R.string.select_routes)
+
+            val routes = mRoutes.toTypedArray()
+            val routesDoShow = routes.map { !mNexTripsModel.hiddenRoutes.contains(it) }.toBooleanArray()
+            setMultiChoiceItems(routes, routesDoShow,
+            	DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
+                    routesDoShow[which] = isChecked
+                })
+            setPositiveButton(android.R.string.ok) { _, _ ->
+                val changedRoutes = mutableListOf<String>()
+                for ((idx, doShow) in routesDoShow.iterator().withIndex()) {
+                    val route = routes[idx]
+                    if (doShow) {
+                        if (mNexTripsModel.hiddenRoutes.contains(route)) {
+                            changedRoutes.add(route)
+                            mNexTripsModel.hiddenRoutes.remove(route)
+                        }
+                    } else {
+                        if (!mNexTripsModel.hiddenRoutes.contains(route)){
+                            changedRoutes.add(route)
+                            mNexTripsModel.hiddenRoutes.add(route)
+                        }
+                    }
+                }
+                mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
             }
+            setNegativeButton(android.R.string.cancel) { _, _ -> }
+        }.show()
+    }
+
+    private fun onClickFavorite(item: MenuItem) {
+        if (mIsFavorite) {
+            mIsFavorite = false
+            item.icon = getDrawable(this, IS_NOT_FAV_ICON)
+            title = resources.getString(R.string.stop) + " #" + mStopId
+            mStopId?.let { stopId ->
+                object : AsyncTask<Void, Void, Void>() {
+                    override fun doInBackground(vararg params: Void): Void? {
+                        DbAdapter().apply {
+                            openReadWrite(applicationContext)
+                            deleteFavStop(stopId)
+                            close()
+                        }
+                        return null
+                    }
+                    override fun onPostExecute(result: Void?) {}
+                }.execute()
+            }
+        } else {
+            AlertDialog.Builder(this).apply {
+                val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
+                setTitle(R.string.enter_stop_name_dialog_title)
+                setView(favStopIdDialog)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    mIsFavorite = true
+                    item.icon = getDrawable(context, IS_FAV_ICON)
+                    val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
+                    title = resources.getString(R.string.stop) + " #" + mStopId +
+                    	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
+                    mStopId?.let { stopId ->
+                        object : AsyncTask<Void, Void, Void>() {
+                            override fun doInBackground(vararg params: Void): Void? {
+                                DbAdapter().apply {
+                                    openReadWrite(applicationContext)
+                                    createFavStop(stopId, stopName)
+                                    close()
+                                }
+                                return null
+                            }
+                            override fun onPostExecute(result: Void?) {}
+                        }.execute()
+                    }
+                }
+                setNegativeButton(android.R.string.cancel) { _, _ -> }
+            }.show()
+        }
     }
 
     override fun onClickMap(vehicleBlockNumber: Int?) {
@@ -203,7 +240,10 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         override fun instantiateItem(container: ViewGroup, i: Int): Any {
             val fragment = super.instantiateItem(container, i)
-            if (i == ITEM_IDX_MAP) mMapFragment = fragment as MyMapFragment
+            when (i) {
+                ITEM_IDX_NEXTRIPS -> mNexTripsFragment = fragment as NexTripsFragment
+                ITEM_IDX_MAP -> mMapFragment = fragment as MyMapFragment
+            }
             return fragment
         }
     }
@@ -228,6 +268,10 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
         		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         }
+    }
+
+    fun updateRoutes(nexTrips: List<NexTrip>) {
+        mRoutes = nexTrips.filter { it.routeAndTerminal != null }.map { it.routeAndTerminal!! }.toSortedSet()
     }
 
     companion object {

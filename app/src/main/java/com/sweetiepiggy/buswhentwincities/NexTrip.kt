@@ -54,6 +54,9 @@ class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
         }
     }
 
+    val routeAndTerminal: String?
+    	get() = route?.let { it + (terminal ?: "") }
+
     enum class Direction {
         SOUTH, EAST, WEST, NORTH;
         companion object {

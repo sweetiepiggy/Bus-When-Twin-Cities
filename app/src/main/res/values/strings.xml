@@ -40,9 +40,11 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
     <string name="action_search">Search</string>
+    <string name="action_filter">Filter</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
+    <string name="select_routes">Select routes to show</string>
 
     <string name="dismiss">Dismiss</string>
     <string name="unknown_host">Unable to connect to the internet</string>
@@ -65,6 +67,6 @@
       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
       "GNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License"
     "along with Bus When? (Twin Cities); if not, see http://www.gnu.org/licenses/.\n\nIf"
-    "you find this app useful and wish to support our work, you can do so on"
-    "Patreon at https://patreon.com/sweetiepiggyapps"</string>
+    "you find this app useful and wish to support our work, you can find more"
+    "information at https://patreon.com/sweetiepiggyapps"</string>
 </resources>

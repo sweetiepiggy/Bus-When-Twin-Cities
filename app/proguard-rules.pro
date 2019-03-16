@@ -11,7 +11,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep class com.google.android.gms.** { *; }
+#-keep class com.google.android.gms.maps.model.LatLng { public *; }
+-keep class com.google.android.gms.maps.model.Marker { public LatLng position; }
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

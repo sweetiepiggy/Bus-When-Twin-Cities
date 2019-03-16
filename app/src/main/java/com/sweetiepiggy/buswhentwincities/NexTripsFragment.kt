@@ -36,7 +36,7 @@ class NexTripsFragment : Fragment() {
     private lateinit var mClickMapListener: StopIdAdapter.OnClickMapListener
     private lateinit var mAdapter: StopIdAdapter
     private lateinit var mResultsRecyclerView: RecyclerView
-    private var mNexTrips: List<PresentableNexTrip> = ArrayList<PresentableNexTrip>()
+    private var mNexTrips: List<PresentableNexTrip> = listOf()
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -66,6 +66,7 @@ class NexTripsFragment : Fragment() {
         mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
         		DividerItemDecoration.VERTICAL))
         mAdapter = StopIdAdapter(context!!)
+        mAdapter.setHiddenRoutes(model.hiddenRoutes)
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
     }
@@ -78,8 +79,31 @@ class NexTripsFragment : Fragment() {
 
         mNexTrips = newNexTrips
         mAdapter.setNexTrips(newNexTrips)
+        notifyAdapter(nexTripChanges)
 
-        mAdapter.apply {
+        val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
+        if (nexTrips.isEmpty()) {
+            mResultsRecyclerView.setVisibility(View.GONE)
+            noResultsView?.setVisibility(View.VISIBLE)
+        } else {
+            noResultsView?.setVisibility(View.GONE)
+            mResultsRecyclerView.setVisibility(View.VISIBLE)
+        }
+    }
+
+    fun onChangeHiddenRoutes(changedRoutes: List<String>) {
+        val itemChanges = mutableListOf<NexTripChange.ItemChanged>()
+        for ((idx, nexTrip) in mNexTrips.listIterator().withIndex()) {
+            if (changedRoutes.contains(nexTrip.routeAndTerminal)) {
+                itemChanges.add(NexTripChange.ItemChanged(idx))
+            }
+        }
+
+        notifyAdapter(NexTripChange.groupChanges(itemChanges))
+    }
+
+    private fun notifyAdapter(nexTripChanges: List<NexTripChange>) =
+        mAdapter.run {
             nexTripChanges.forEach {
                 when (it) {
                     is NexTripChange.ItemInserted      -> notifyItemInserted(it.pos)
@@ -92,14 +116,4 @@ class NexTripsFragment : Fragment() {
                 }
             }
         }
-
-        val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
-        if (nexTrips.isEmpty()) {
-            mResultsRecyclerView.setVisibility(View.GONE)
-            noResultsView?.setVisibility(View.VISIBLE)
-        } else {
-            noResultsView?.setVisibility(View.GONE)
-            mResultsRecyclerView.setVisibility(View.VISIBLE)
-        }
-    }
 }

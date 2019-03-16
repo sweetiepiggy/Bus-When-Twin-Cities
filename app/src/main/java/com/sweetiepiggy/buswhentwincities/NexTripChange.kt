@@ -196,7 +196,7 @@ sealed class NexTripChange {
             return groupedMovesAndInserts
         }
 
-        private fun groupChanges(changes: List<NexTripChange.ItemChanged>): List<NexTripChange> {
+        fun groupChanges(changes: List<NexTripChange.ItemChanged>): List<NexTripChange> {
             if (changes.isEmpty()) {
                 return changes
             }

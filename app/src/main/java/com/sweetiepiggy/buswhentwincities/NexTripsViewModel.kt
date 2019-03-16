@@ -37,6 +37,8 @@ class NexTripsViewModel(private val mStopId: Int?) : ViewModel(), DownloadNexTri
         }
     }
 
+    val hiddenRoutes: MutableSet<String> = mutableSetOf()
+
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
 
@@ -84,9 +86,9 @@ class NexTripsViewModel(private val mStopId: Int?) : ViewModel(), DownloadNexTri
     }
 
     class NexTripsViewModelFactory(private val stopId: Int?) : ViewModelProvider.NewInstanceFactory() {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return NexTripsViewModel(stopId) as T
-        }
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            NexTripsViewModel(stopId) as T
     }
 
     companion object {

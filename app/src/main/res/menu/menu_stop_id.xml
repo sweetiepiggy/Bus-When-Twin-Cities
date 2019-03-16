@@ -27,4 +27,10 @@
         android:orderInCategory="100"
         android:title="@string/action_favorite"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_baseline_filter_list_24px"
+        android:orderInCategory="200"
+        android:title="@string/action_filter"
+        app:showAsAction="ifRoom" />
 </menu>
