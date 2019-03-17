@@ -99,7 +99,10 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         title = resources.getString(R.string.stop) + " #" + mStopId.toString()
 
-        findViewById<View>(R.id.fab)?.setOnClickListener { mNexTripsModel.loadNexTrips() }
+        findViewById<View>(R.id.fab)?.setOnClickListener {
+            mNexTripsFragment?.setRefreshing(true)
+            mNexTripsModel.loadNexTrips()
+        }
         LoadIsFavorite().execute()
     }
 
@@ -288,7 +291,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     companion object {
         val KEY_STOP_ID = "stopId"
 
-        private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val ITEM_IDX_NEXTRIPS = 0

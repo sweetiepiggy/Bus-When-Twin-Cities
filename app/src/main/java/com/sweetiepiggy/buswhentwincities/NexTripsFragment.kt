@@ -30,12 +30,14 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.util.*
 
 class NexTripsFragment : Fragment() {
     private lateinit var mClickMapListener: StopIdAdapter.OnClickMapListener
     private lateinit var mAdapter: StopIdAdapter
     private lateinit var mResultsRecyclerView: RecyclerView
+    private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
     private var mNexTrips: List<PresentableNexTrip> = listOf()
     private var mHiddenRoutes: MutableSet<String> = mutableSetOf()
 
@@ -52,6 +54,7 @@ class NexTripsFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.nextrips_fragment, container, false)
 		mResultsRecyclerView = v.findViewById<RecyclerView>(R.id.results_recycler_view)!!
+        mSwipeRefreshLayout = v.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)!!
         return v
     }
 
@@ -71,6 +74,7 @@ class NexTripsFragment : Fragment() {
         mAdapter.setHiddenRoutes(model.hiddenRoutes)
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
+        mSwipeRefreshLayout.setOnRefreshListener { model.loadNexTrips() }
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
@@ -91,7 +95,10 @@ class NexTripsFragment : Fragment() {
             noResultsView?.setVisibility(View.GONE)
             mResultsRecyclerView.setVisibility(View.VISIBLE)
         }
+        mSwipeRefreshLayout.setRefreshing(false)
     }
+
+    fun setRefreshing(refreshing: Boolean) = mSwipeRefreshLayout.setRefreshing(refreshing)
 
     fun onChangeHiddenRoutes(changedRoutes: List<String>) {
         val itemChanges = mutableListOf<NexTripChange.ItemChanged>()

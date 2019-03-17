@@ -27,19 +27,24 @@
     android:orientation="vertical"
     tools:context=".NexTripsFragment">
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/results_recycler_view"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:contentDescription="@null"
-		android:scrollbars="vertical" />
+  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+      android:id="@+id/swiperefresh"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" >
+    <androidx.recyclerview.widget.RecyclerView
+	android:id="@+id/results_recycler_view"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:contentDescription="@null"
+	android:scrollbars="vertical" />
+  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-	<TextView
-		android:id="@+id/no_results_textview"
-		style="@android:style/TextAppearance.Medium"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:gravity="center"
-		android:text="@string/no_nextrips_found"
-		android:visibility="gone" />
+  <TextView
+      android:id="@+id/no_results_textview"
+      style="@android:style/TextAppearance.Medium"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:text="@string/no_nextrips_found"
+      android:visibility="gone" />
 </LinearLayout>
