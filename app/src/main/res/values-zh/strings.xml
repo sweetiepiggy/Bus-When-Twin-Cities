@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+    This file is part of Bus When? (Twin Cities).
+
+    Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    <string name="app_name">公交车何时？（双城）</string>
+
+    <string name="stop_number">公交站＃</string>
+    <string name="stop_id">公交站号码？</string>
+    <string name="stop_id_hint">例如：17922</string>
+    <string name="enter_stop_id">输入公交站号码</string>
+    <string name="real_time">即时</string>
+    <string name="scheduled">规划时间</string>
+    <string name="north">北向</string>
+    <string name="south">南向</string>
+    <string name="east">东向</string>
+    <string name="west">西向</string>
+    <string name="minutes">分钟</string>
+    <string name="due">过时了</string>
+    <string name="past_due">逾时</string>
+    <string name="action_about">关于</string>
+    <string name="nav_favorites">收藏</string>
+    <string name="nav_search">搜索</string>
+    <string name="action_source">代码来源</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_favorite">喜爱</string>
+    <string name="action_search">搜索</string>
+    <string name="action_filter">过滤</string>
+
+    <string name="enter_stop_name_dialog_title">保存为收藏夹</string>
+    <string name="enter_stop_name_dialog_message">输入公交站的名称</string>
+    <string name="select_routes">选择路线</string>
+
+    <string name="dismiss">删除</string>
+    <string name="unknown_host">无法连接互联网</string>
+    <string name="unauthorized">擅自</string>
+    <string name="file_not_found">文件未找到</string>
+    <string name="timed_out">时间到</string>
+
+    <string name="no_nextrips_found">没有即将到来的旅</string>
+    <string name="no_favorites_found">这里没有收藏</string>
+
+    <string name="main_search_icon_content_description">搜索公交号码</string>
+    <string name="favorite_stop_ids_content_description">最喜欢的公交号码</string>
+    <string name="about_email_icon_content_description">给开发者发邮件</string>
+    <string name="license">
+版權所有(C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com
+
+\n\n公交车何时？（双城）爲自由軟體；您可依據自由軟體基金會所發表的GNU通用公共授權條款，對本程式再次發佈和/或修改；無論您依據的是本授權的第三版，或（您可選的）任一日後發行的版本。
+
+\n\n公交车何时？（双城）是基於使用目的而加以發佈，然而不負任何擔保責任；亦無對適售性或特定目的適用性所爲的默示性擔保。詳情請參照GNU通用公共授權。
+
+\n\n您應已收到附隨於公交车何时？（双城）的GNU通用公共授權的副本；如果沒有，請參照http://www.gnu.org/licenses/ 。
+
+\n\n如果此应用程序对您有帮助并希望 给予支持，您可以通过此处https://patreon.com/sweetiepiggyapps给予赞助。
+	</string>
+</resources>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+    This file is part of Bus When? (Twin Cities).
+
+    Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    <string name="app_name">Bus Cuándo? (Ciudades Gemelas)</string>
+
+    <string name="stop_number">Parada #</string>
+    <string name="stop_id">¿Número de parada?</string>
+    <string name="stop_id_hint">por ejemplo: 17922</string>
+    <string name="enter_stop_id">Introduzca número de parada</string>
+    <string name="real_time">tiempo real</string>
+    <string name="scheduled">programado</string>
+    <string name="north">norte</string>
+    <string name="south">sur</string>
+    <string name="east">este</string>
+    <string name="west">oeste</string>
+    <string name="minutes">min</string>
+    <string name="due">Esperado</string>
+    <string name="past_due">Atrasado</string>
+    <string name="action_about">Sobre</string>
+    <string name="nav_favorites">Mis paradas</string>
+    <string name="nav_search">Buscar</string>
+    <string name="action_source">Ver código fuente</string>
+    <string name="action_refresh">Refrescar</string>
+    <string name="action_favorite">Favorita</string>
+    <string name="action_search">Buscar</string>
+    <string name="action_filter">Filtrar</string>
+
+    <string name="enter_stop_name_dialog_title">Guardar como favorita</string>
+    <string name="enter_stop_name_dialog_message">Ingresa un nombre para esta parada</string>
+    <string name="select_routes">Selecciona rutas para mostrar</string>
+
+    <string name="dismiss">Despedir</string>
+    <string name="unknown_host">Incapaz de conectarse a Internet</string>
+    <string name="unauthorized">No autorizado</string>
+    <string name="file_not_found">Archivo no encontrado</string>
+    <string name="timed_out">Desconectado</string>
+
+    <string name="no_nextrips_found">Actualmente no hay datos para la parada</string>
+    <string name="no_favorites_found">No hay favoritas aquí todavía</string>
+
+    <string name="main_search_icon_content_description">buscar tu parada</string>
+    <string name="favorite_stop_ids_content_description">paradas favoritas</string>
+    <string name="about_email_icon_content_description">envía un correo electrónico al desarrollador</string>
+    <string name="license">
+      "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"
+      "bajo los términos de la Licencia Pública General GNU publicada"
+      "por la Fundación para el Software Libre (Free Software Foundation), ya"
+      "sea la versión 3 de la Licencia, o (a su elección) cualquier versión posterior.\n\nBus Cuándo? (Ciudades Gemelas) se distribuye con la esperanza de que sea útil,"
+      "pero SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita"
+      "MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO. Consulte los"
+      "detalles de la Licencia Pública General GNU para obtener una información más detallada.\n\nDebería haber recibido una copia de la Licencia Pública General GNU"
+    "junto a Bus Cuándo? (Ciudades Gemelas). En caso contrario, consulte http://www.gnu.org/licenses/.\n\nApóyanos en"
+    "Patreon https://patreon.com/sweetiepiggyapps"</string>
+</resources>

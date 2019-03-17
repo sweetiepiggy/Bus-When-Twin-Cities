@@ -97,7 +97,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             }
         }
 
-        title = resources.getString(R.string.stop) + " #" + mStopId.toString()
+        title = resources.getString(R.string.stop_number) + mStopId.toString()
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
             mNexTripsFragment?.setRefreshing(true)
@@ -190,7 +190,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         if (mIsFavorite) {
             mIsFavorite = false
             item.icon = getDrawable(this, IS_NOT_FAV_ICON)
-            title = resources.getString(R.string.stop) + " #" + mStopId
+            title = resources.getString(R.string.stop_number) + mStopId
             mStopId?.let { stopId ->
                 object : AsyncTask<Void, Void, Void>() {
                     override fun doInBackground(vararg params: Void): Void? {
@@ -213,7 +213,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     mIsFavorite = true
                     item.icon = getDrawable(context, IS_FAV_ICON)
                     val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
-                    title = resources.getString(R.string.stop) + " #" + mStopId +
+                    title = resources.getString(R.string.stop_number) + mStopId +
                     	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
                     mStopId?.let { stopId ->
                         object : AsyncTask<Void, Void, Void>() {
@@ -276,7 +276,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mIsFavorite = isFavorite
             mStopDesc = stopDesc
 
-            title = resources.getString(R.string.stop) + " #" + mStopId +
+            title = resources.getString(R.string.stop_number) + mStopId +
             	(if (!stopDesc.isNullOrEmpty()) " ($stopDesc)" else "")
             mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
         		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
