@@ -48,5 +48,6 @@
       android:ems="30"
       android:hint="@string/stop_id_hint"
       android:inputType="number"
-      android:minHeight="@android:dimen/app_icon_size" />
+      android:minHeight="@android:dimen/app_icon_size"
+      android:textColorHint="@color/colorHint" />
 </LinearLayout>
