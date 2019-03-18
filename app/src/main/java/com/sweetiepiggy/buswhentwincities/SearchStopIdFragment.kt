@@ -75,7 +75,11 @@ class SearchStopIdFragment : Fragment() {
             if (stopIdStr.length == 0) {
                 stopIdEntry.error = resources.getString(R.string.enter_stop_id)
             } else {
-                mSearchStopIdListener.onSearchStopId(stopIdStr.toInt())
+                try {
+                    mSearchStopIdListener.onSearchStopId(stopIdStr.toInt())
+                } catch (e: NumberFormatException) {
+                    stopIdEntry.error = resources.getString(R.string.must_be_number)
+                }
             }
         }
     }

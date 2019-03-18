@@ -25,6 +25,7 @@
     <string name="stop_id">¿Número de parada?</string>
     <string name="stop_id_hint">por ejemplo: 17922</string>
     <string name="enter_stop_id">Introduzca número de parada</string>
+    <string name="must_be_number">Tiene que ser un número</string>
     <string name="real_time">tiempo real</string>
     <string name="scheduled">programado</string>
     <string name="north">norte</string>
@@ -43,7 +44,7 @@
     <string name="action_search">Buscar</string>
     <string name="action_filter">Filtrar</string>
 
-    <string name="enter_stop_name_dialog_title">Guardar como favorita</string>
+    <string name="enter_stop_name_dialog_title">Guardar en favoritos</string>
     <string name="enter_stop_name_dialog_message">Ingresa un nombre para esta parada</string>
     <string name="select_routes">Selecciona rutas para mostrar</string>
 
@@ -56,7 +57,7 @@
     <string name="no_nextrips_found">Actualmente no hay datos para la parada</string>
     <string name="no_favorites_found">No hay favoritas aquí todavía</string>
 
-    <string name="main_search_icon_content_description">buscar tu parada</string>
+    <string name="main_search_icon_content_description">busca tu parada</string>
     <string name="favorite_stop_ids_content_description">paradas favoritas</string>
     <string name="about_email_icon_content_description">envía un correo electrónico al desarrollador</string>
     <string name="license">
