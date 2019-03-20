@@ -199,7 +199,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
 
     private fun zoomTo(latLngs: List<LatLng>, paddingRatio: Float) {
-        mMap?.run {
+        if (!latLngs.isEmpty()) mMap?.run {
             val bounds = LatLngBounds.Builder().apply {
                 latLngs.forEach { include(it) }
             }.build()
