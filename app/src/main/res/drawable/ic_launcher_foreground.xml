@@ -45,4 +45,11 @@
       android:fillColor="#ffffff"
       android:strokeColor="#00000000"
       android:fillAlpha="1"/>
+  <path
+      android:pathData="M9.5512,14.5259h3.7042v3.9688h-3.7042z"
+      android:strokeAlpha="1"
+      android:strokeWidth="0.03012415"
+      android:fillColor="#b3d2ef"
+      android:strokeColor="#00000000"
+      android:fillAlpha="1"/>
 </vector>
