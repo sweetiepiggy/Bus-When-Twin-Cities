@@ -101,7 +101,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         title = resources.getString(R.string.stop_number) + (mStopId?.toString() ?: "")
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
-            mNexTripsFragment?.setRefreshing(true)
+            // mNexTripsFragment?.setRefreshing(true)
             mNexTripsModel.loadNexTrips()
         }
         LoadIsFavorite().execute()

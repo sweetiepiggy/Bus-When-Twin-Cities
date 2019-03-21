@@ -65,7 +65,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                 mDownloadNexTripsTask!!.execute()
             } else {
                 // too soon to download again, just refresh the displayed times
-                mNexTrips.value = mNexTrips.value ?: ArrayList<NexTrip>()
+                mNexTrips.value = mNexTrips.value?.let {
+                    filterOldNexTrips(it, unixTime, mLastUpdate)
+                } ?: ArrayList<NexTrip>()
             }
         }
     }
@@ -147,5 +149,23 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         // don't display NexTrips that were due a minute or more before now
         private val SECONDS_BEFORE_NOW_TO_IGNORE = 60
         private val SECONDS_BEFORE_SUPPRESS_LOCATIONS = 30
+
+        private fun filterOldNexTrips(nexTrips: List<NexTrip>, curTime: Long, lastUpdate: Long): List<NexTrip> {
+            val results: MutableList<NexTrip> = mutableListOf()
+            val ignoreCutoffTime = curTime - SECONDS_BEFORE_NOW_TO_IGNORE
+            val suppressLocations = (curTime - lastUpdate) >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
+
+            for (nexTrip in nexTrips) {
+                if (nexTrip.departureTimeInMillis != null &&
+                		nexTrip.departureTimeInMillis / 1000 >= ignoreCutoffTime) {
+                    results.add(if (suppressLocations)
+                		NexTrip.suppressLocation(nexTrip)
+                	else
+                		nexTrip)
+                }
+            }
+
+            return results
+        }
     }
 }

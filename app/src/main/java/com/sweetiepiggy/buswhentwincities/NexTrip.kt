@@ -78,6 +78,11 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
             )
         }
 
+        fun suppressLocation(nexTrip: NexTrip): NexTrip =
+        	NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
+        		nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
+        		nexTrip.terminal, null, null, null)
+
         /** @return departure time in millis since 1970 */
         private fun parseDepartureTime(departureTime: String?): Long? =
             if (departureTime != null && departureTime.startsWith("/Date(")) {
@@ -146,7 +151,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
         if (nexTrip.departureTimeInMillis == null) {
             departureText = null
             departureTime = null
-        } else if (nexTrip.departureTimeInMillis < 0 || minutesUntilDeparture < -1) {
+        } else if (nexTrip.departureTimeInMillis < 0 || minutesUntilDeparture < 0) {
             departureText = context.resources.getString(R.string.past_due)
             departureTime = null
         } else if (minutesUntilDeparture < 60) {
