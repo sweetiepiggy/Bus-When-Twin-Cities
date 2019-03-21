@@ -51,6 +51,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mVehicleBlockNumber: Int? = null
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private var mHiddenRoutes: MutableSet<String> = mutableSetOf()
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
@@ -101,6 +102,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
+        mHiddenRoutes = model.hiddenRoutes
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
@@ -113,7 +115,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun loadState(b: Bundle) {
-        mVehicleBlockNumber = b.getInt(KEY_BLOCK_NUMBER)
+        if (b.containsKey(KEY_BLOCK_NUMBER)) {
+            mVehicleBlockNumber = b.getInt(KEY_BLOCK_NUMBER)
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -127,6 +131,15 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
         }
+        googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(marker: Marker): Boolean {
+                if (mVehicleBlockNumber != null &&
+            			mVehicleBlockNumber != (marker.tag as PresentableNexTrip).blockNumber) {
+                    deselectVehicle()
+                }
+                return false
+            }
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -152,6 +165,19 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 } else {
                     marker.alpha = UNSELECTED_MARKER_ALPHA
                 }
+            }
+        }
+    }
+
+    private fun deselectVehicle() {
+        mVehicleBlockNumber = null
+        mMap?.run {
+            for (marker in mMarkers.values) {
+                val nexTrip = marker.tag as PresentableNexTrip
+                marker.alpha = if (mHiddenRoutes.contains(nexTrip.routeAndTerminal))
+                	UNSELECTED_MARKER_ALPHA
+                else
+                	1f
             }
         }
     }
@@ -247,18 +273,31 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     addMarker(MarkerOptions()
                         .icon(getBusIcon(nexTrip.routeDirection))
                         .position(nexTrip.position!!)
-                    )
+                    ).apply { if (mVehicleBlockNumber != null) alpha = UNSELECTED_MARKER_ALPHA }
                 }.apply {
                     tag = nexTrip
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
                     snippet = nexTrip.description
-                    if (mVehicleBlockNumber == nexTrip.blockNumber || mNexTrips!!.size == 1) {
+                    // force title to refresh
+                    if (isInfoWindowShown()) {
                         showInfoWindow()
-                    } else if (mVehicleBlockNumber != null) {
-                        alpha = UNSELECTED_MARKER_ALPHA
                     }
                 }
                 mMarkers[nexTrip.blockNumber] = marker
+            }
+        }
+    }
+
+    fun onChangeHiddenRoutes(changedRoutes: List<String>) {
+        if (mVehicleBlockNumber == null) {
+            for (marker in mMarkers.values) {
+                val nexTrip = marker.tag as PresentableNexTrip
+                if (changedRoutes.contains(nexTrip.routeAndTerminal)) {
+                    marker.alpha = if (mHiddenRoutes.contains(nexTrip.routeAndTerminal))
+        	        	UNSELECTED_MARKER_ALPHA
+                    else
+            	    	1f
+                }
             }
         }
     }

@@ -97,7 +97,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             }
         }
 
-        title = resources.getString(R.string.stop_number) + mStopId.toString()
+        title = resources.getString(R.string.stop_number) + (mStopId?.toString() ?: "")
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
             mNexTripsFragment?.setRefreshing(true)
@@ -112,7 +112,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     private fun loadState(b: Bundle) {
-        mStopId = b.getInt(KEY_STOP_ID)
+        if (b.containsKey(KEY_STOP_ID)) {
+            mStopId = b.getInt(KEY_STOP_ID)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -181,6 +183,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     }
                 }
                 mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
+                mMapFragment?.onChangeHiddenRoutes(changedRoutes)
             }
             setNegativeButton(android.R.string.cancel) { _, _ -> }
         }.show()

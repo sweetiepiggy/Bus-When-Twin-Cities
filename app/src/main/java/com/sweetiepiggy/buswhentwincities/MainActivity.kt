@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     private fun loadState(b: Bundle) {
-        mBnvIdx = b.getInt(KEY_BNV_IDX)
+        mBnvIdx = b.getInt(KEY_BNV_IDX, BNV_UNINITIALIZED)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
