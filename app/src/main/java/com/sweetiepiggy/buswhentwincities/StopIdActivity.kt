@@ -149,7 +149,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
                 }.show()
             } else {
-                mNexTripsFragment?.updateNexTrips(mNexTrips)
+                // mNexTripsFragment?.updateNexTrips(mNexTrips)
                 Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_LONG)
                 	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
                         override fun onClick(v: View) {}
