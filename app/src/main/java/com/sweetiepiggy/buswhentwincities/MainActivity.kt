@@ -69,6 +69,8 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             }
             else -> SelectDefaultBnv().execute()
         }
+
+        DeletePastDueNexTripsTask().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -185,6 +187,18 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
     }
 
+    private inner class DeletePastDueNexTripsTask(): AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg params: Void): Void? {
+            DbAdapter().run {
+                openReadWrite(applicationContext)
+                deletePastDueNexTrips(SECONDS_BEFORE_NOW_TO_DELETE)
+                close()
+            }
+            return null
+        }
+        override fun onPostExecute(result: Void?) { }
+    }
+
     private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
         override fun getCount(): Int = 2
 
@@ -214,5 +228,8 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         private val ITEM_IDX_SEARCH = 1
 
         private val ACTIVITY_STOP_ID = 0
+
+        // delete NexTrips that were due two minutes or more before now
+        private val SECONDS_BEFORE_NOW_TO_DELETE = 120
     }
 }

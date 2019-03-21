@@ -73,7 +73,8 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         	mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
         holder.departureTimeTextView.visibility =
         	if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
-        holder.mapButton.visibility = if (nexTrip.isActual) View.VISIBLE else View.GONE
+        holder.mapButton.visibility = if (nexTrip.isActual && nexTrip.position != null)
+        	View.VISIBLE else View.GONE
 
         holder.minimalRouteTextView.text = nexTrip.routeAndTerminal
         holder.minimalDescriptionTextView.text = nexTrip.description

@@ -82,7 +82,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
 
         if (!isCancelled() && rawNexTrips != null) {
             val timeInMillis = Calendar.getInstance().timeInMillis
-            mNexTrips = rawNexTrips.map { NexTrip(it, timeInMillis) }
+            mNexTrips = rawNexTrips.map { NexTrip.from(it, timeInMillis) }
         }
 
         return null

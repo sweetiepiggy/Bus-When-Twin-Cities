@@ -25,6 +25,7 @@ import android.database.Cursor
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.android.gms.maps.model.LatLng
 
 class DbAdapter {
 
@@ -35,7 +36,12 @@ class DbAdapter {
 
         override fun onCreate(db: SQLiteDatabase) {
             db.execSQL("DROP TABLE IF EXISTS $TABLE_FAV_STOPS")
+            db.execSQL("DROP TABLE IF EXISTS $TABLE_NEXTRIPS")
+            db.execSQL("DROP TABLE IF EXISTS $TABLE_LAST_UPDATE")
             db.execSQL(DATABASE_CREATE_FAV_STOPS)
+            db.execSQL(DATABASE_CREATE_NEXTRIPS)
+            db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)
+            db.execSQL(DATABASE_CREATE_LAST_UPDATE)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
@@ -55,6 +61,11 @@ class DbAdapter {
                 """);
                 db.execSQL("DROP TABLE fav_stops");
                 db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops");
+            }
+            if (oldVer < 3) {
+                db.execSQL(DATABASE_CREATE_NEXTRIPS)
+                db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)
+                db.execSQL(DATABASE_CREATE_LAST_UPDATE)
             }
         }
 
@@ -136,16 +147,126 @@ class DbAdapter {
         return found
     }
 
+    fun deletePastDueNexTrips(secondsBeforeNowToDelete: Int) {
+        mDbHelper!!.mDb!!.delete(TABLE_NEXTRIPS, "$KEY_DEPARTURE_UNIX_TIME < strftime(\"%s\", 'now') - ?",
+    		arrayOf(secondsBeforeNowToDelete.toString()))
+    }
+
+    fun getLastUpdate(stopId: Int): Long? {
+        val c = mDbHelper!!.mDb!!.query(TABLE_LAST_UPDATE, arrayOf(KEY_LAST_UPDATE),
+	        "$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1");
+        val ret = if (c.moveToFirst()) c.getLong(c.getColumnIndex(KEY_LAST_UPDATE)) else null
+        c.close()
+        return ret
+    }
+
+    private fun setLastUpdate(stopId: Int, lastUpdate: Long) {
+        val cv = ContentValues().apply {
+            put(KEY_STOP_ID, stopId)
+            put(KEY_LAST_UPDATE, lastUpdate)
+        }
+
+        mDbHelper!!.mDb!!.replace(TABLE_LAST_UPDATE, null, cv)
+    }
+
+    fun updateNexTrips(stopId: Int, nexTrips: List<NexTrip>, lastUpdate: Long) {
+        val db = mDbHelper!!.mDb!!
+        db.beginTransaction();
+        try {
+            db.delete(TABLE_NEXTRIPS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+            for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
+                val cv = ContentValues().apply {
+                    put(KEY_STOP_ID, stopId)
+                    put(KEY_IS_ACTUAL, nexTrip.isActual)
+                    put(KEY_BLOCK_NUMBER, nexTrip.blockNumber)
+                    put(KEY_DEPARTURE_UNIX_TIME, nexTrip.departureTimeInMillis!! / 1000)
+                    put(KEY_DESCRIPTION, nexTrip.description)
+                    put(KEY_GATE, nexTrip.gate)
+                    put(KEY_ROUTE, nexTrip.route)
+                    directionToInt(nexTrip.routeDirection)?.let { put(KEY_ROUTE_DIRECTION, it) }
+                    put(KEY_TERMINAL, nexTrip.terminal)
+                    put(KEY_VEHICLE_HEADING, nexTrip.vehicleHeading)
+                    put(KEY_VEHICLE_LATITUDE, nexTrip.position?.latitude)
+                    put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
+                }
+                db.insert(TABLE_NEXTRIPS, null, cv)
+            }
+            setLastUpdate(stopId, lastUpdate)
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    fun getNexTrips(stopId: Int, secondsBeforeNowToIgnore: Int, suppressLocations: Boolean): List<NexTrip> {
+        val nexTrips: MutableList<NexTrip> = mutableListOf()
+        val c = mDbHelper!!.mDb!!.query(TABLE_NEXTRIPS,
+        	arrayOf(KEY_IS_ACTUAL, KEY_BLOCK_NUMBER, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
+    			KEY_GATE, KEY_ROUTE, KEY_ROUTE_DIRECTION, KEY_TERMINAL, KEY_VEHICLE_HEADING,
+    		    KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE),
+        	"$KEY_STOP_ID == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
+        	arrayOf(stopId.toString(), secondsBeforeNowToIgnore.toString()), null, null,
+        	"$KEY_DEPARTURE_UNIX_TIME ASC", null)
+        val isActualIndex = c.getColumnIndex(KEY_IS_ACTUAL)
+        val blockNumberIndex = c.getColumnIndex(KEY_BLOCK_NUMBER)
+        val departureUnixTimeIndex = c.getColumnIndex(KEY_DEPARTURE_UNIX_TIME)
+        val descriptionIndex = c.getColumnIndex(KEY_DESCRIPTION)
+        val gateIndex = c.getColumnIndex(KEY_GATE)
+        val routeIndex = c.getColumnIndex(KEY_ROUTE)
+        val routeDirectionIndex = c.getColumnIndex(KEY_ROUTE_DIRECTION)
+        val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
+        val vehicleHeadingIndex = c.getColumnIndex(KEY_VEHICLE_HEADING)
+        val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
+        val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
+        while (c.moveToNext()) {
+            val isActual = c.getInt(isActualIndex) != 0
+            val blockNumber = c.getInt(blockNumberIndex)
+            val departureTimeInMillis = c.getLong(departureUnixTimeIndex) * 1000
+            val description = c.getString(descriptionIndex)
+            val gate = c.getString(gateIndex)
+            val route = c.getString(routeIndex)
+            val routeDirection = directionFromInt(c.getInt(routeDirectionIndex))
+            val terminal = c.getString(terminalIndex)
+            val vehicleHeading = if (suppressLocations) null else c.getDouble(vehicleHeadingIndex)
+            val vehicleLatitude = if (suppressLocations) null else c.getDouble(vehicleLatitudeIndex)
+            val vehicleLongitude = if (suppressLocations) null else c.getDouble(vehicleLongitudeIndex)
+            nexTrips.add(NexTrip(
+                isActual, blockNumber, departureTimeInMillis, description,
+                gate, route, routeDirection, terminal, vehicleHeading,
+                vehicleLatitude, vehicleLongitude
+            ))
+        }
+        c.close()
+        return nexTrips
+    }
+
     companion object {
         val KEY_STOP_ID = "stop_id"
         val KEY_STOP_DESCRIPTION = "stop_description"
 
+        private val KEY_IS_ACTUAL = "is_actual"
+        private val KEY_BLOCK_NUMBER = "block_number"
+        private val KEY_DEPARTURE_UNIX_TIME = "departure_time"
+        private val KEY_DESCRIPTION = "description"
+        private val KEY_GATE = "gate"
+        private val KEY_ROUTE = "route"
+        private val KEY_ROUTE_DIRECTION = "route_direction"
+        private val KEY_TERMINAL = "terminal"
+        private val KEY_VEHICLE_HEADING = "vehicle_heading"
+        private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
+        private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
+
         private val KEY_TIMESTAMP = "timestamp"
+        private val KEY_LAST_UPDATE = "last_update"
 
         private val TABLE_FAV_STOPS = "fav_stops"
+        private val TABLE_NEXTRIPS = "nextrips"
+        private val TABLE_LAST_UPDATE = "last_update"
+
+        private val INDEX_NEXTRIPS = "index_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 2
+        private val DATABASE_VERSION = 3
 
         private val DATABASE_CREATE_FAV_STOPS = """
 	        CREATE TABLE $TABLE_FAV_STOPS (
@@ -154,5 +275,56 @@ class DbAdapter {
                 $KEY_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
             )
             """
+
+        private val DATABASE_CREATE_NEXTRIPS = """
+	        CREATE TABLE $TABLE_NEXTRIPS (
+                $KEY_STOP_ID INTEGER NOT NULL,
+                $KEY_IS_ACTUAL BOOLEAN NOT NULL,
+                $KEY_BLOCK_NUMBER INTEGER,
+                $KEY_DEPARTURE_UNIX_TIME DATETIME NOT NULL,
+                $KEY_DESCRIPTION TEXT,
+                $KEY_GATE TEXT,
+                $KEY_ROUTE TEXT,
+                $KEY_ROUTE_DIRECTION INTEGER,
+                $KEY_TERMINAL TEXT,
+                $KEY_VEHICLE_HEADING DOUBLE,
+                $KEY_VEHICLE_LATITUDE DOUBLE,
+                $KEY_VEHICLE_LONGITUDE DOUBLE
+            )
+            """
+
+        private val DATABASE_CREATE_NEXTRIPS_INDEX = """
+	        CREATE INDEX $INDEX_NEXTRIPS ON $TABLE_NEXTRIPS ($KEY_STOP_ID)
+            """
+
+        private val DATABASE_CREATE_LAST_UPDATE = """
+	        CREATE TABLE $TABLE_LAST_UPDATE (
+                $KEY_STOP_ID INTEGER PRIMARY KEY,
+                $KEY_LAST_UPDATE DATETIME
+            )
+            """
+
+        private val DIRECTION_SOUTH = 0
+        private val DIRECTION_EAST = 1
+        private val DIRECTION_WEST = 2
+        private val DIRECTION_NORTH = 3
+
+        private fun directionToInt(dir: NexTrip.Direction?): Int? =
+            when (dir) {
+                NexTrip.Direction.SOUTH -> DIRECTION_SOUTH
+                NexTrip.Direction.EAST  -> DIRECTION_EAST
+                NexTrip.Direction.WEST  -> DIRECTION_WEST
+                NexTrip.Direction.NORTH -> DIRECTION_NORTH
+                else -> null
+            }
+
+        private fun directionFromInt(dir: Int): NexTrip.Direction? =
+            when (dir) {
+                DIRECTION_SOUTH -> NexTrip.Direction.SOUTH
+                DIRECTION_EAST  -> NexTrip.Direction.EAST
+                DIRECTION_WEST  -> NexTrip.Direction.WEST
+                DIRECTION_NORTH -> NexTrip.Direction.NORTH
+                else -> null
+            }
     }
 }

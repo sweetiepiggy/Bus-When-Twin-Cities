@@ -34,20 +34,13 @@ data class RawNexTrip(val isActual: Boolean, val blockNumber: Int?, val departur
               val vehicleLongitude: Double?)
 
 // processed data, replace String with Int/enum, etc.
-class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
-    val isActual: Boolean = rawNexTrip.isActual
-    val blockNumber: Int? = rawNexTrip.blockNumber
-    // if we're not given departureTime then try to compute it from departureText
-    val departureTimeInMillis: Long? = parseDepartureTime(rawNexTrip.departureTime) ?:
-    	parseDepartureText(rawNexTrip.departureText, timeInMillis)
-    val description: String? = rawNexTrip.description
-    val gate: String? = rawNexTrip.gate
-    val route: String? = rawNexTrip.route
-    val routeDirection: Direction? = Direction.from(rawNexTrip.routeDirection)
-    val terminal: String? = rawNexTrip.terminal
-    val vehicleHeading: Double? = rawNexTrip.vehicleLatitude
-    val position: LatLng? = rawNexTrip.vehicleLatitude?.let { latitude ->
-        rawNexTrip.vehicleLongitude?.let { longitude ->
+class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInMillis: Long?,
+			val description: String?, val gate: String?, val route: String?,
+			val routeDirection: Direction?, val terminal: String?, val vehicleHeading: Double?,
+        	vehicleLatitude: Double?, vehicleLongitude: Double?) {
+
+    val position: LatLng? = vehicleLatitude?.let { latitude ->
+        vehicleLongitude?.let { longitude ->
             LatLng(latitude, longitude).let {
                 if (distanceBetweenIsSmall(it, ORIGIN_LAT_LNG)) null else it
             }
@@ -72,6 +65,19 @@ class NexTrip(rawNexTrip: RawNexTrip, timeInMillis: Long) {
     }
 
     companion object {
+        fun from(rawNexTrip: RawNexTrip, timeInMillis: Long): NexTrip {
+            // if we're not given departureTime then try to compute it from departureText
+            val departureTimeInMillis: Long? = parseDepartureTime(rawNexTrip.departureTime) ?:
+    	    	parseDepartureText(rawNexTrip.departureText, timeInMillis)
+
+        	return NexTrip(
+                rawNexTrip.isActual, rawNexTrip.blockNumber, departureTimeInMillis,
+                rawNexTrip.description, rawNexTrip.gate, rawNexTrip.route,
+                Direction.from(rawNexTrip.routeDirection), rawNexTrip.terminal,
+                rawNexTrip.vehicleHeading, rawNexTrip.vehicleLatitude, rawNexTrip.vehicleLongitude
+            )
+        }
+
         /** @return departure time in millis since 1970 */
         private fun parseDepartureTime(departureTime: String?): Long? =
             if (departureTime != null && departureTime.startsWith("/Date(")) {

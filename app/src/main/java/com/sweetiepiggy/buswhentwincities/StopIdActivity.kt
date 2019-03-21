@@ -73,8 +73,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
-        mNexTripsModel = ViewModelProviders.of(this, NexTripsViewModel.NexTripsViewModelFactory(mStopId))
-                .get(NexTripsViewModel::class.java)
+        mNexTripsModel = ViewModelProviders.of(this,
+        	NexTripsViewModel.NexTripsViewModelFactory(mStopId, applicationContext)
+        ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
         mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
 
