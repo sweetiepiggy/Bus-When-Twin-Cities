@@ -214,6 +214,20 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             if (i == ITEM_IDX_FAV) mFavStopIdsFragment = fragment as FavoriteStopIdsFragment
             return fragment
         }
+
+        override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) {
+        	when (position) {
+                ITEM_IDX_FAV -> {
+                    mBnvIdx = BNV_FAV
+                    selectBnvFav()
+                }
+                ITEM_IDX_SEARCH -> {
+                    mBnvIdx = BNV_SEARCH
+                    selectBnvSearch()
+                }
+            }
+            super.setPrimaryItem(container, position, obj)
+        }
     }
 
     companion object {
