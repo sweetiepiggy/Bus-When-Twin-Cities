@@ -134,6 +134,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
 
     override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
+        if (isFinishing()) {
+            return
+        }
         val message: String? =
             when (err) {
                 is DownloadNexTripsTask.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
@@ -142,19 +145,19 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 is DownloadNexTripsTask.DownloadError.Unauthorized -> resources.getString(R.string.unauthorized)
                 is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
             }
-            if (mNexTrips.isEmpty()) {
-                AlertDialog.Builder(this).apply {
-                    setTitle(resources.getString(android.R.string.dialog_alert_title))
-                    message?.let { setMessage(it) }
-                    setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
-                }.show()
-            } else {
-                mNexTripsFragment?.updateNexTrips(mNexTrips)
-                Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_LONG)
-                	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
-                        override fun onClick(v: View) {}
-            		}).show()
-            }
+        if (mNexTrips.isEmpty()) {
+            AlertDialog.Builder(this).apply {
+                setTitle(resources.getString(android.R.string.dialog_alert_title))
+                message?.let { setMessage(it) }
+                setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
+            }.show()
+        } else {
+            mNexTripsFragment?.updateNexTrips(mNexTrips)
+            Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_LONG)
+            	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
+                    override fun onClick(v: View) {}
+        		}).show()
+        }
     }
 
     private fun onClickFilter() {
