@@ -19,7 +19,8 @@
 -->
 
 <resources>
-    <string name="app_name">Bus When? (Twin Cities)</string>
+    <string name="app_name">Bus When?</string>
+    <string name="app_name_long">Bus When? (Twin Cities)</string>
 
     <string name="stop_number">Stop #</string>
     <string name="stop_id">Stop ID?</string>
