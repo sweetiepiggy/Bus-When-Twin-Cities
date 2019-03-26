@@ -89,8 +89,10 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedListener
     }
 
     override fun onPostExecute(result: Void?) {
-        mError?.let { mDownloadedListener.onDownloadError(it) }
-        mNexTrips?.let { mDownloadedListener.onDownloaded(it) }
+        if (!isCancelled) {
+            mError?.let { mDownloadedListener.onDownloadError(it) }
+            mNexTrips?.let { mDownloadedListener.onDownloaded(it) }
+        }
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class)

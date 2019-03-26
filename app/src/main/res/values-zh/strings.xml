@@ -60,6 +60,8 @@
     <string name="main_search_icon_content_description">搜索公交号码</string>
     <string name="favorite_stop_ids_content_description">最喜欢的公交号码</string>
     <string name="about_email_icon_content_description">给开发者发邮件</string>
+    <string name="reorder_favorites_content_description">重新排序</string>
+
     <string name="license">
 版權所有(C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com
 

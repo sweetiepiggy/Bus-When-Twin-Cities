@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsAdapter
@@ -61,6 +62,7 @@ class FavoriteStopIdsFragment : Fragment() {
         getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView)?.apply {
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            mAdapter.attachToRecyclerView(this)
             adapter = mAdapter
         }
 

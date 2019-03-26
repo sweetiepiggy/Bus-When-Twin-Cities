@@ -35,9 +35,6 @@ class DbAdapter {
         var mDb: SQLiteDatabase? = null
 
         override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_FAV_STOPS")
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_NEXTRIPS")
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_LAST_UPDATE")
             db.execSQL(DATABASE_CREATE_FAV_STOPS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)

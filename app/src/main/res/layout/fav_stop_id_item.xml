@@ -20,6 +20,7 @@
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -35,20 +36,31 @@
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintBottom_toBottomOf="parent" />
+
   <TextView
       android:id="@+id/stop_desc"
       style="@android:style/TextAppearance.Large"
-      android:gravity="center"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:gravity="center"
       android:paddingLeft="@dimen/text_margin"
       android:paddingRight="@dimen/text_margin"
       android:singleLine="false"
       app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintEnd_toEndOf="@id/reorder"
       app:layout_constraintHorizontal_bias="0.5"
       app:layout_constraintStart_toEndOf="@id/stop_id"
       app:layout_constraintTop_toTopOf="parent" />
+
+  <ImageView
+      android:id="@+id/reorder"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:contentDescription="@string/reorder_favorites_content_description"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:srcCompat="@drawable/ic_reorder_black_24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

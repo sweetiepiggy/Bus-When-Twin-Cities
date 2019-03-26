@@ -60,6 +60,8 @@
     <string name="main_search_icon_content_description">busca tu parada</string>
     <string name="favorite_stop_ids_content_description">paradas favoritas</string>
     <string name="about_email_icon_content_description">envía un correo electrónico al desarrollador</string>
+    <string name="reorder_favorites_content_description">reordenar paradas favoritas</string>
+
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"
       "bajo los términos de la Licencia Pública General GNU publicada"

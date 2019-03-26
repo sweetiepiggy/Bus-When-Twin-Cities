@@ -19,31 +19,38 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
+import android.view.KeyEvent.ACTION_DOWN
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 
-class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavoriteListener, private val mFavStops: List<FavoriteStopIdsViewModel.FavoriteStopId>) : RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavoriteListener,
+		private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStopId>) :
+			RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+
+    val mItemTouchHelper = ItemTouchHelper(FavoriteStopIdsItemTouchHelperCallback())
 
     interface OnClickFavoriteListener {
         fun onClickFavorite(stopId: Int)
     }
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        var mStopIdTextView: TextView
-        var mStopDescTextView: TextView
-
-        init {
-            mStopIdTextView = v.findViewById<TextView>(R.id.stop_id)
-            mStopDescTextView = v.findViewById<TextView>(R.id.stop_desc)
-            v.setOnClickListener {
-                val stopId = mFavStops[adapterPosition].stopId
-                mClickFavoriteListener.onClickFavorite(stopId)
+        var mStopIdTextView: TextView = v.findViewById<TextView>(R.id.stop_id)
+        var mStopDescTextView: TextView = v.findViewById<TextView>(R.id.stop_desc).apply {
+            setOnClickListener {
+                mClickFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
+            }
+        }
+        var mReorderView: View = v.findViewById<View>(R.id.reorder).apply {
+            setOnTouchListener onTouchListener@{ _, event ->
+                if (event.getActionMasked() == ACTION_DOWN) {
+                    mItemTouchHelper.startDrag(this@FavoriteStopIdsViewHolder)
+                }
+                return@onTouchListener false
             }
         }
     }
@@ -51,6 +58,8 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
     init {
         setHasStableIds(true)
     }
+
+    fun attachToRecyclerView(v: RecyclerView) = mItemTouchHelper.attachToRecyclerView(v)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder {
         val v = LayoutInflater.from(parent.context)
@@ -69,7 +78,30 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
 
     override fun getItemId(position: Int): Long = mFavStops[position].stopId.toLong()
 
-    companion object {
-        private val KEY_STOP_ID = "stopId"
+    private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {
+        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
+        	makeMovementFlags(UP or DOWN, END)
+
+        override fun isLongPressDragEnabled() = false
+
+        override fun isItemViewSwipeEnabled() = true
+
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
+        		target: RecyclerView.ViewHolder): Boolean {
+
+            val fromPosition = viewHolder.getAdapterPosition()
+            val toPosition = target.getAdapterPosition()
+            val updatedToPosition = toPosition - if (fromPosition < toPosition) 0 else 1
+
+            mFavStops.add(toPosition, mFavStops.removeAt(fromPosition))
+
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val position = viewHolder.getAdapterPosition()
+            mFavStops.removeAt(position)
+            notifyItemRemoved(position)
+        }
     }
 }
