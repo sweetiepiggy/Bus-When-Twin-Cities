@@ -19,6 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.os.AsyncTask
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.LayoutInflater
 import android.view.View
@@ -28,7 +29,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 
-class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavoriteListener,
+class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListener,
 		private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStopId>) :
 			RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
 
@@ -36,13 +37,15 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
 
     interface OnClickFavoriteListener {
         fun onClickFavorite(stopId: Int)
+        fun onMoveFavorite(fromPosition: Int, toPosition: Int)
+        fun onDeleteFavorite(position: Int)
     }
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var mStopIdTextView: TextView = v.findViewById<TextView>(R.id.stop_id)
         var mStopDescTextView: TextView = v.findViewById<TextView>(R.id.stop_desc).apply {
             setOnClickListener {
-                mClickFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
+                mFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
             }
         }
         var mReorderView: View = v.findViewById<View>(R.id.reorder).apply {
@@ -91,10 +94,12 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
 
             val fromPosition = viewHolder.getAdapterPosition()
             val toPosition = target.getAdapterPosition()
-            val updatedToPosition = toPosition - if (fromPosition < toPosition) 0 else 1
+            // val updatedToPosition = toPosition - if (fromPosition < toPosition) 1 else 0
 
-            mFavStops.add(updatedToPosition, mFavStops.removeAt(fromPosition))
-
+            mFavStops.add(toPosition, mFavStops.removeAt(fromPosition))
+            // note: positions in adapter are reversed from positions in database
+			mFavoriteListener.onMoveFavorite(mFavStops.size - fromPosition - 1,
+                    mFavStops.size - toPosition - 1)
             return true
         }
 
@@ -102,6 +107,8 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
             val position = viewHolder.getAdapterPosition()
             mFavStops.removeAt(position)
             notifyItemRemoved(position)
+            // note: positions in adapter are reversed from positions in database
+            mFavoriteListener.onDeleteFavorite(mFavStops.size - position)
         }
     }
 }

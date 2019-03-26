@@ -46,7 +46,7 @@ class DbAdapter {
             if (oldVer < 2) {
                 db.execSQL("DROP TABLE IF EXISTS new_fav_stops")
                 db.execSQL("""
-                	CREATE TABLE new_fav_stops (
+                    CREATE TABLE new_fav_stops (
                         stop_id INTEGER PRIMARY KEY,
                         stop_description TEXT,
                         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -54,15 +54,66 @@ class DbAdapter {
                 """)
                 db.execSQL("""
                     INSERT INTO new_fav_stops (stop_id, stop_description)
-                    	SELECT stop_id, stop_description from fav_stops
-                """);
-                db.execSQL("DROP TABLE fav_stops");
-                db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops");
+                        SELECT stop_id, stop_description from fav_stops
+                """)
+                db.execSQL("DROP TABLE fav_stops")
+                db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops")
             }
             if (oldVer < 3) {
-                db.execSQL(DATABASE_CREATE_NEXTRIPS)
-                db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)
-                db.execSQL(DATABASE_CREATE_LAST_UPDATE)
+                db.execSQL("""
+                    CREATE TABLE nextrips (
+                        stop_id INTEGER NOT NULL,
+                        is_actual BOOLEAN NOT NULL,
+                        block_number INTEGER,
+                        departure_time DATETIME NOT NULL,
+                        description TEXT,
+                        gate TEXT,
+                        route TEXT,
+                        route_direction INTEGER,
+                        terminal TEXT,
+                        vehicle_heading DOUBLE,
+                        vehicle_latitude DOUBLE,
+                        vehicle_longitude DOUBLE
+                    )
+                """)
+                db.execSQL("""
+                    CREATE INDEX index_nextrips ON nextrips (stop_id)
+                """)
+                db.execSQL("""
+                    CREATE TABLE last_update (
+                        stop_id INTEGER PRIMARY KEY,
+                        last_update DATETIME
+                    )
+                """)
+            }
+            if (oldVer < 4) {
+                db.execSQL("DROP TABLE IF EXISTS new_fav_stops")
+                db.execSQL("""
+                    CREATE TABLE new_fav_stops (
+                        stop_id INTEGER PRIMARY KEY,
+                        stop_description TEXT,
+                        position INTEGER
+                    )
+                """)
+                val c =  db.query("fav_stops", arrayOf("stop_id", "stop_description"),
+                	null, null, null, null, "timestamp DESC", null)
+                val stopIdIndex = c.getColumnIndex("stop_id")
+                val stopDescriptionIndex = c.getColumnIndex("stop_description")
+                var position = 0
+                while (c.moveToNext()) {
+                    val stopId = c.getInt(stopIdIndex)
+                    val stopDescription = c.getString(stopDescriptionIndex)
+                    val cv = ContentValues().apply {
+                        put("stop_id", stopId)
+                        put("stop_description", stopDescription)
+                        put("position", position)
+                    }
+
+                    db.insert("new_fav_stops", null, cv)
+                    position += 1
+                }
+                db.execSQL("DROP TABLE fav_stops")
+                db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops")
             }
         }
 
@@ -106,13 +157,66 @@ class DbAdapter {
         val cv = ContentValues().apply {
             put(KEY_STOP_ID, stopId)
             put(KEY_STOP_DESCRIPTION, stopDescription)
+            put(KEY_POSITION, getNewFavPosition())
         }
 
-        return mDbHelper!!.mDb!!.replace(TABLE_FAV_STOPS, null, cv)
+        return mDbHelper!!.mDb!!.insert(TABLE_FAV_STOPS, null, cv)
+    }
+
+    private fun getNewFavPosition(): Int {
+        val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf("COALESCE(MAX($KEY_POSITION) + 1, 0)"),
+	    	null, null, null, null, null, null)
+        val ret = if (c.moveToFirst()) c.getInt(0) else 0
+        c.close()
+        return ret
     }
 
     fun deleteFavStop(stopId: Int) {
-        mDbHelper!!.mDb!!.delete(TABLE_FAV_STOPS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+        val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf(KEY_POSITION),
+	    		"$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
+        if (c.moveToFirst()) {
+            deleteFavStopAtPosition(c.getInt(c.getColumnIndex(KEY_POSITION)))
+        }
+        c.close()
+    }
+
+    fun deleteFavStopAtPosition(position: Int) {
+        val db = mDbHelper!!.mDb!!
+        db.beginTransaction();
+        try {
+            db.delete(TABLE_FAV_STOPS, "$KEY_POSITION == ?", arrayOf(position.toString()))
+            db.execSQL("UPDATE $TABLE_FAV_STOPS SET $KEY_POSITION = $KEY_POSITION - 1 WHERE $KEY_POSITION > ?",
+            	arrayOf(position.toString()))
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    fun moveFavStop(fromPosition: Int, toPosition: Int) {
+        val db = mDbHelper!!.mDb!!
+        val c = db.query(TABLE_FAV_STOPS, arrayOf(KEY_STOP_ID), "$KEY_POSITION == ?",
+        	arrayOf(fromPosition.toString()), null, null, null, "1")
+        if (c.moveToFirst()) {
+            db.beginTransaction();
+            try {
+                val stopId = c.getInt(c.getColumnIndex(KEY_STOP_ID))
+                if (fromPosition < toPosition){
+                    db.execSQL("UPDATE $TABLE_FAV_STOPS SET $KEY_POSITION = $KEY_POSITION - 1 WHERE ? < $KEY_POSITION AND $KEY_POSITION <= ?",
+        				arrayOf(fromPosition.toString(), toPosition.toString()))
+                } else {
+                    db.execSQL("UPDATE $TABLE_FAV_STOPS SET $KEY_POSITION = $KEY_POSITION + 1 WHERE ? <= $KEY_POSITION AND $KEY_POSITION < ?",
+        				arrayOf(toPosition.toString(), fromPosition.toString()))
+                }
+
+                val cv = ContentValues().apply { put(KEY_POSITION, toPosition) }
+                db.update(TABLE_FAV_STOPS, cv, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+        }
+        c.close()
     }
 
     fun isFavStop(stopId: Int): Boolean {
@@ -134,7 +238,7 @@ class DbAdapter {
 
     fun fetchFavStops(): Cursor {
         return mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, null, null, null, null, null,
-                "$KEY_TIMESTAMP DESC", null)
+                "$KEY_POSITION DESC", null)
     }
 
     fun hasAnyFavorites(): Boolean {
@@ -253,7 +357,7 @@ class DbAdapter {
         private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
         private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
 
-        private val KEY_TIMESTAMP = "timestamp"
+        private val KEY_POSITION = "position"
         private val KEY_LAST_UPDATE = "last_update"
 
         private val TABLE_FAV_STOPS = "fav_stops"
@@ -263,13 +367,13 @@ class DbAdapter {
         private val INDEX_NEXTRIPS = "index_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 3
+        private val DATABASE_VERSION = 4
 
         private val DATABASE_CREATE_FAV_STOPS = """
 	        CREATE TABLE $TABLE_FAV_STOPS (
                 $KEY_STOP_ID INTEGER PRIMARY KEY,
                 $KEY_STOP_DESCRIPTION TEXT,
-                $KEY_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
+                $KEY_POSITION INTEGER
             )
             """
 

@@ -123,6 +123,36 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startStopIdActivity(stopId)
     }
 
+    override fun onMoveFavorite(fromPosition: Int, toPosition: Int) {
+        object : AsyncTask<Void, Void, Void>() {
+            override fun doInBackground(vararg params: Void): Void? {
+                DbAdapter().apply {
+                    openReadWrite(applicationContext)
+                    moveFavStop(fromPosition, toPosition)
+                    close()
+                }
+                return null
+            }
+            override fun onPostExecute(result: Void?) { }
+        }.execute()
+    }
+
+    override fun onDeleteFavorite(position: Int) {
+        object : AsyncTask<Void, Void, Void>() {
+            override fun doInBackground(vararg params: Void): Void? {
+                DbAdapter().apply {
+                    openReadWrite(applicationContext)
+                    deleteFavStopAtPosition(position)
+                    close()
+                }
+                return null
+            }
+            override fun onPostExecute(result: Void?) {
+                mFavStopIdsFragment?.updateFavoriteStopIdsMessage()
+            }
+        }.execute()
+    }
+
     override fun onSearchStopId(stopId: Int) {
         startStopIdActivity(stopId)
     }

@@ -82,10 +82,13 @@ class FavoriteStopIdsFragment : Fragment() {
         mFavoriteStopIds.clear()
         mFavoriteStopIds.addAll(favoriteStopIds)
         mAdapter.notifyDataSetChanged()
+        updateFavoriteStopIdsMessage()
+    }
 
+    fun updateFavoriteStopIdsMessage() {
         val resultsRecyclerView = activity?.findViewById<View>(R.id.favoritesRecyclerView)
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
-        if (favoriteStopIds.isEmpty()) {
+        if (mFavoriteStopIds.isEmpty()) {
             resultsRecyclerView?.setVisibility(View.GONE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {
