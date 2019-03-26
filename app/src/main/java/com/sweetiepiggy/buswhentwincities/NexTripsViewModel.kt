@@ -31,6 +31,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
     private var mLastUpdate: Long = 0
+    private var mDbLastUpdate: Long = 0
+    private var mDbNexTrips: List<NexTrip>? = null
 
     private val mNexTrips: MutableLiveData<List<NexTrip>> by lazy {
         MutableLiveData<List<NexTrip>>().also {
@@ -65,7 +67,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                 mDownloadNexTripsTask!!.execute()
             } else {
                 // too soon to download again, just refresh the displayed times
-                mNexTrips.value = mNexTrips.value ?: ArrayList<NexTrip>()
+                mNexTrips.value = mNexTrips.value?.let {
+                    filterOldNexTrips(it, unixTime, mLastUpdate)
+                } ?: ArrayList<NexTrip>()
             }
         }
     }
@@ -77,7 +81,17 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     }
 
     override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
-        if (mLastUpdate == 0L) mNexTrips.value = ArrayList<NexTrip>()
+        if (mLastUpdate == 0L) {
+            // fall back to nexTrips from database if they exist
+            if (mDbNexTrips != null) {
+                mLastUpdate = mDbLastUpdate
+                mNexTrips.value = mDbNexTrips
+            } else {
+                mNexTrips.value = ArrayList<NexTrip>()
+            }
+        } else mNexTrips.value?.let { nexTrips ->
+        	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
+        }
         mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
     }
 
@@ -103,7 +117,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                 DbAdapter().apply {
                     openReadWrite(mContext)
                     getLastUpdate(stopId)?.let { lastUpdate ->
-                        mLastUpdate = lastUpdate
+                        mDbLastUpdate = lastUpdate
                         val suppressLocations = unixTime - lastUpdate >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
                         nexTrips = getNexTrips(stopId, SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
                     }
@@ -114,15 +128,17 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         }
 
         override fun onPostExecute(result: List<NexTrip>?) {
-            if (result != null) {
-                mNexTrips.value = result
-            }
+            mDbNexTrips = result
 
-            if (unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+            // download nexTrips if no or not-fresh results in database
+            if (result == null || unixTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
                 mStopId?.let { stopId ->
                     mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
                     mDownloadNexTripsTask!!.execute()
                 }
+            // show results from database if they exist and are fresh
+            } else if (result != null) {
+                mNexTrips.value = result
             }
         }
     }
@@ -147,5 +163,23 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         // don't display NexTrips that were due a minute or more before now
         private val SECONDS_BEFORE_NOW_TO_IGNORE = 60
         private val SECONDS_BEFORE_SUPPRESS_LOCATIONS = 30
+
+        private fun filterOldNexTrips(nexTrips: List<NexTrip>, curTime: Long, lastUpdate: Long): List<NexTrip> {
+            val results: MutableList<NexTrip> = mutableListOf()
+            val ignoreCutoffTime = curTime - SECONDS_BEFORE_NOW_TO_IGNORE
+            val suppressLocations = (curTime - lastUpdate) >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
+
+            for (nexTrip in nexTrips) {
+                if (nexTrip.departureTimeInMillis != null &&
+                		nexTrip.departureTimeInMillis / 1000 >= ignoreCutoffTime) {
+                    results.add(if (suppressLocations)
+                		NexTrip.suppressLocation(nexTrip)
+                	else
+                		nexTrip)
+                }
+            }
+
+            return results
+        }
     }
 }

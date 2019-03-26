@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
         when (mBnvIdx) {
             BNV_FAV -> {
-                bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
+                bnv.menu.findItem(R.id.action_favorites)?.isChecked = true
                 selectBnvFav()
             }
             BNV_SEARCH -> {
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             val bnv = findViewById<BottomNavigationView>(R.id.bnv)
             when (mBnvIdx) {
                 BNV_FAV -> {
-                    bnv.menu.findItem(R.id.action_favorite)?.isChecked = true
+                    bnv.menu.findItem(R.id.action_favorites)?.isChecked = true
                     selectBnvFav()
                 }
                 BNV_SEARCH -> {
@@ -216,13 +216,16 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
 
         override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) {
+            val bnv = findViewById<BottomNavigationView>(R.id.bnv)
         	when (position) {
                 ITEM_IDX_FAV -> {
                     mBnvIdx = BNV_FAV
+                    bnv.menu.findItem(R.id.action_favorites)?.isChecked = true
                     selectBnvFav()
                 }
                 ITEM_IDX_SEARCH -> {
                     mBnvIdx = BNV_SEARCH
+                    bnv.menu.findItem(R.id.action_search)?.isChecked = true
                     selectBnvSearch()
                 }
             }

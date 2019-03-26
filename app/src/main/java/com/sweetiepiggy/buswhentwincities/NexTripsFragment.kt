@@ -87,15 +87,16 @@ class NexTripsFragment : Fragment() {
         mAdapter.setNexTrips(newNexTrips)
         notifyAdapter(nexTripChanges)
 
+        mSwipeRefreshLayout.setRefreshing(false)
+
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
-            mResultsRecyclerView.setVisibility(View.GONE)
+            mSwipeRefreshLayout.setVisibility(View.GONE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {
             noResultsView?.setVisibility(View.GONE)
-            mResultsRecyclerView.setVisibility(View.VISIBLE)
+            mSwipeRefreshLayout.setVisibility(View.VISIBLE)
         }
-        mSwipeRefreshLayout.setRefreshing(false)
     }
 
     fun setRefreshing(refreshing: Boolean) = mSwipeRefreshLayout.setRefreshing(refreshing)
