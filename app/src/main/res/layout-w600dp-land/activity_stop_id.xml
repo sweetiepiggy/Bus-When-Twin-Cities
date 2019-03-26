@@ -51,9 +51,7 @@
             android:id="@+id/nextrips_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-    
-        </FrameLayout>
+            android:layout_weight="1" />
     
         <FrameLayout
             android:id="@+id/map_container"
@@ -61,6 +59,15 @@
             android:layout_weight="1.618"
             android:layout_height="match_parent" />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="visible" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

@@ -93,7 +93,7 @@ class FavoriteStopIdsAdapter(private val mClickFavoriteListener: OnClickFavorite
             val toPosition = target.getAdapterPosition()
             val updatedToPosition = toPosition - if (fromPosition < toPosition) 0 else 1
 
-            mFavStops.add(toPosition, mFavStops.removeAt(fromPosition))
+            mFavStops.add(updatedToPosition, mFavStops.removeAt(fromPosition))
 
             return true
         }

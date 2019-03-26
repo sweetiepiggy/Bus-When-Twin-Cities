@@ -88,6 +88,7 @@ class NexTripsFragment : Fragment() {
         notifyAdapter(nexTripChanges)
 
         mSwipeRefreshLayout.setRefreshing(false)
+        activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
 
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
@@ -99,7 +100,12 @@ class NexTripsFragment : Fragment() {
         }
     }
 
-    fun setRefreshing(refreshing: Boolean) = mSwipeRefreshLayout.setRefreshing(refreshing)
+    fun setRefreshing(refreshing: Boolean) {
+        // mSwipeRefreshLayout.setRefreshing(refreshing)
+        activity?.findViewById<View>(R.id.progressBar)?.setVisibility(
+            if (refreshing) View.VISIBLE else View.INVISIBLE
+        )
+    }
 
     fun onChangeHiddenRoutes(changedRoutes: List<String>) {
         val itemChanges = mutableListOf<NexTripChange.ItemChanged>()

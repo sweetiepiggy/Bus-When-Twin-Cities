@@ -44,7 +44,7 @@
 				android:layout_height="match_parent"
 				android:gravity="center"
 				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintLeft_toLeftOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent" />
 
 			<TextView
@@ -57,7 +57,7 @@
 				android:paddingRight="@dimen/text_margin"
 				android:singleLine="false"
 				app:layout_constraintBottom_toBottomOf="parent"
-				app:layout_constraintEnd_toEndOf="@id/reorder"
+				app:layout_constraintEnd_toStartOf="@id/reorder"
 				app:layout_constraintHorizontal_bias="0.5"
 				app:layout_constraintStart_toEndOf="@id/stop_id"
 				app:layout_constraintTop_toTopOf="parent" />
