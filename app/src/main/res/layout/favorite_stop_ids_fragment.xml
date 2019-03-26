@@ -18,21 +18,20 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".FavoriteStopIdsFragment" >
+    tools:context=".FavoriteStopIdsFragment">
 
   <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/favoritesRecyclerView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:scrollbars="vertical"
-      android:contentDescription="@string/favorite_stop_ids_content_description" />
+      android:contentDescription="@string/favorite_stop_ids_content_description"
+      android:scrollbars="vertical" />
 
   <TextView
       android:id="@+id/no_results_textview"

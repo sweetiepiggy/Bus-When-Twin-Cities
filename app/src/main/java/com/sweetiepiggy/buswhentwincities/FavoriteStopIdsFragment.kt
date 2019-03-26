@@ -61,7 +61,7 @@ class FavoriteStopIdsFragment : Fragment() {
         mAdapter = FavoriteStopIdsAdapter(mClickFavoriteListener, mFavoriteStopIds)
         getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView)?.apply {
             layoutManager = LinearLayoutManager(context)
-            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             mAdapter.attachToRecyclerView(this)
             adapter = mAdapter
         }
