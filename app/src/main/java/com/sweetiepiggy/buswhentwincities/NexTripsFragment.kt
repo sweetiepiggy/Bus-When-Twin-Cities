@@ -67,8 +67,8 @@ class NexTripsFragment : Fragment() {
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
         mResultsRecyclerView.layoutManager = LinearLayoutManager(context)
-        mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
-        		DividerItemDecoration.VERTICAL))
+        // mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
+        // 		DividerItemDecoration.VERTICAL))
         mAdapter = StopIdAdapter(context!!)
         mHiddenRoutes = model.hiddenRoutes
         mAdapter.setHiddenRoutes(model.hiddenRoutes)
