@@ -273,6 +273,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     addMarker(MarkerOptions()
                         .icon(getBusIcon(nexTrip.routeDirection))
                         .position(nexTrip.position!!)
+                    	.flat(true)
                     ).apply { if (mVehicleBlockNumber != null) alpha = UNSELECTED_MARKER_ALPHA }
                 }.apply {
                     tag = nexTrip
