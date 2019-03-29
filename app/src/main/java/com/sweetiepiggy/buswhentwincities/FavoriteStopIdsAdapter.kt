@@ -43,17 +43,19 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var mStopIdTextView: TextView = v.findViewById<TextView>(R.id.stop_id)
-        var mStopDescTextView: TextView = v.findViewById<TextView>(R.id.stop_desc).apply {
-            setOnClickListener {
-                mFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
-            }
-        }
+        var mStopDescTextView: TextView = v.findViewById<TextView>(R.id.stop_desc)
         var mReorderView: View = v.findViewById<View>(R.id.reorder).apply {
             setOnTouchListener onTouchListener@{ _, event ->
                 if (event.getActionMasked() == ACTION_DOWN) {
                     mItemTouchHelper.startDrag(this@FavoriteStopIdsViewHolder)
                 }
                 return@onTouchListener false
+            }
+        }
+
+        init {
+            v.setOnClickListener {
+                mFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
             }
         }
     }
