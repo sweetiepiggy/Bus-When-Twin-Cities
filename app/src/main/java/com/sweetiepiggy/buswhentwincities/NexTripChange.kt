@@ -70,7 +70,7 @@ sealed class NexTripChange {
                         }
                         // origNexTrip is still in list, make note if it changed
                         if (!nexTripsAppearSame(origNexTrip, newNexTrip,
-                        		doShowRoutes.getOrDefault(origNexTrip.routeAndTerminal, false))) {
+                        		doShowRoutes.get(origNexTrip.routeAndTerminal) ?: false)) {
                             changes.add(NexTripChange.ItemChanged(newIdx))
                         }
                         if (newItr.hasNext()) {

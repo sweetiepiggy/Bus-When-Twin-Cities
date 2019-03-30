@@ -80,12 +80,12 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         holder.minimalDescriptionTextView.text = nexTrip.description
         holder.minimalDepartureTextTextView.text = nexTrip.departureText
 
-        if (!mDoShowRoutes.getOrDefault(nexTrip.routeAndTerminal, true)) {
-            holder.fullView.visibility = View.GONE
-            holder.minimalView.visibility = View.VISIBLE
-        } else {
+        if (mDoShowRoutes.get(nexTrip.routeAndTerminal) ?: true) {
             holder.minimalView.visibility = View.GONE
             holder.fullView.visibility = View.VISIBLE
+        } else {
+            holder.fullView.visibility = View.GONE
+            holder.minimalView.visibility = View.VISIBLE
         }
     }
 

@@ -177,12 +177,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 for ((idx, doShow) in routesDoShow.iterator().withIndex()) {
                     val route = routes[idx]
                     if (doShow) {
-                        if (!mDoShowRoutes.getOrDefault(route, false)) {
+                        if (!(mDoShowRoutes.get(route) ?: false)) {
                             changedRoutes.add(route)
                             mDoShowRoutes[route] = true
                         }
                     } else {
-                        if (mDoShowRoutes.getOrDefault(route, true)){
+                        if (mDoShowRoutes.get(route) ?: true){
                             changedRoutes.add(route)
                             mDoShowRoutes[route] = false
                         }

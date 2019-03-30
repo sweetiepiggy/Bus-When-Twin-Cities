@@ -27,13 +27,25 @@
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/minimal_view"
             android:visibility="gone"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+	    android:layout_gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="18dp"
             android:paddingTop="6dp"
             android:paddingRight="18dp"
             android:paddingBottom="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:ems="40"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
             <TextView
                     android:id="@+id/minimal_route"
                     style="@android:style/TextAppearance.Small"
@@ -94,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="false"
-                android:ems="30"
+                android:ems="40"
                 android:focusableInTouchMode="false"
                 android:gravity="center"
                 android:visibility="invisible"

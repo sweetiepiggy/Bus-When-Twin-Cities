@@ -174,7 +174,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
-                marker.alpha = if (mDoShowRoutes.getOrDefault(nexTrip.routeAndTerminal, true))
+                marker.alpha = if (mDoShowRoutes.get(nexTrip.routeAndTerminal) ?: true)
                 	1f
                 else
                 	UNSELECTED_MARKER_ALPHA
@@ -298,7 +298,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 if (changedRoutes.contains(nexTrip.routeAndTerminal)) {
-                    marker.alpha = if (mDoShowRoutes.getOrDefault(nexTrip.routeAndTerminal, true))
+                    marker.alpha = if (mDoShowRoutes.get(nexTrip.routeAndTerminal) ?: true)
             	    	1f
                     else
         	        	UNSELECTED_MARKER_ALPHA
