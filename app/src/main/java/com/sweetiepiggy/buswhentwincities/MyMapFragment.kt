@@ -51,7 +51,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mVehicleBlockNumber: Int? = null
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private var mHiddenRoutes: MutableSet<String> = mutableSetOf()
+    private var mDoShowRoutes: Map<String?, Boolean> = mapOf()
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
@@ -102,7 +102,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
-        mHiddenRoutes = model.hiddenRoutes
+        model.getDoShowRoutes().observe(this, Observer<Map<String?, Boolean>>{ updateDoShowRoutes(it) })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
@@ -174,10 +174,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
-                marker.alpha = if (mHiddenRoutes.contains(nexTrip.routeAndTerminal))
-                	UNSELECTED_MARKER_ALPHA
-                else
+                marker.alpha = if (mDoShowRoutes.getOrDefault(nexTrip.routeAndTerminal, true))
                 	1f
+                else
+                	UNSELECTED_MARKER_ALPHA
             }
         }
     }
@@ -253,6 +253,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         if (doInitCamera) initCamera()
     }
 
+    fun updateDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+        mDoShowRoutes = doShowRoutes
+    }
+
     private fun updateMarkers() {
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, marker) in mMarkers) {
@@ -289,15 +293,15 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
     }
 
-    fun onChangeHiddenRoutes(changedRoutes: List<String>) {
+    fun onChangeHiddenRoutes(changedRoutes: Set<String>) {
         if (mVehicleBlockNumber == null) {
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 if (changedRoutes.contains(nexTrip.routeAndTerminal)) {
-                    marker.alpha = if (mHiddenRoutes.contains(nexTrip.routeAndTerminal))
-        	        	UNSELECTED_MARKER_ALPHA
-                    else
+                    marker.alpha = if (mDoShowRoutes.getOrDefault(nexTrip.routeAndTerminal, true))
             	    	1f
+                    else
+        	        	UNSELECTED_MARKER_ALPHA
                 }
             }
         }

@@ -39,7 +39,7 @@ class NexTripsFragment : Fragment() {
     private lateinit var mResultsRecyclerView: RecyclerView
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
     private var mNexTrips: List<PresentableNexTrip> = listOf()
-    private var mHiddenRoutes: MutableSet<String> = mutableSetOf()
+    private var mDoShowRoutes: Map<String?, Boolean> = mapOf()
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -67,21 +67,19 @@ class NexTripsFragment : Fragment() {
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
         mResultsRecyclerView.layoutManager = LinearLayoutManager(context)
-        // mResultsRecyclerView.addItemDecoration(DividerItemDecoration(mResultsRecyclerView.context,
-        // 		DividerItemDecoration.VERTICAL))
         mAdapter = StopIdAdapter(context!!)
-        mHiddenRoutes = model.hiddenRoutes
-        mAdapter.setHiddenRoutes(model.hiddenRoutes)
+        mAdapter.setDoShowRoutes(mDoShowRoutes)
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
         mSwipeRefreshLayout.setOnRefreshListener { model.loadNexTrips() }
+        model.getDoShowRoutes().observe(this, Observer<Map<String?, Boolean>>{ updateDoShowRoutes(it) })
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         val timeInMillis = Calendar.getInstance().timeInMillis
         val newNexTrips = nexTrips.map { PresentableNexTrip(it, timeInMillis, context!!) }
 
-        val nexTripChanges = NexTripChange.getNexTripChanges(mNexTrips, newNexTrips, mHiddenRoutes)
+        val nexTripChanges = NexTripChange.getNexTripChanges(mNexTrips, newNexTrips, mDoShowRoutes)
 
         mNexTrips = newNexTrips
         mAdapter.setNexTrips(newNexTrips)
@@ -100,14 +98,18 @@ class NexTripsFragment : Fragment() {
         }
     }
 
+    fun updateDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+        mDoShowRoutes = doShowRoutes
+        mAdapter.setDoShowRoutes(doShowRoutes)
+    }
+
     fun setRefreshing(refreshing: Boolean) {
-        // mSwipeRefreshLayout.setRefreshing(refreshing)
         activity?.findViewById<View>(R.id.progressBar)?.setVisibility(
             if (refreshing) View.VISIBLE else View.INVISIBLE
         )
     }
 
-    fun onChangeHiddenRoutes(changedRoutes: List<String>) {
+    fun onChangeHiddenRoutes(changedRoutes: Set<String>) {
         val itemChanges = mutableListOf<NexTripChange.ItemChanged>()
         for ((idx, nexTrip) in mNexTrips.listIterator().withIndex()) {
             if (changedRoutes.contains(nexTrip.routeAndTerminal)) {

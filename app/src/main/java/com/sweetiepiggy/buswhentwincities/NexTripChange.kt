@@ -33,7 +33,7 @@ sealed class NexTripChange {
 
     companion object {
         fun getNexTripChanges(origNexTrips: List<PresentableNexTrip>,
-                newNexTrips: List<PresentableNexTrip>, hiddenRoutes: Set<String>): List<NexTripChange> {
+                newNexTrips: List<PresentableNexTrip>, doShowRoutes: Map<String?, Boolean>): List<NexTripChange> {
             val removes: MutableList<NexTripChange.ItemRemoved> = mutableListOf()
             val movesAndInserts: MutableList<Either<NexTripChange.ItemMoved, NexTripChange.ItemInserted>> =
                 mutableListOf()
@@ -70,7 +70,7 @@ sealed class NexTripChange {
                         }
                         // origNexTrip is still in list, make note if it changed
                         if (!nexTripsAppearSame(origNexTrip, newNexTrip,
-                        		hiddenRoutes.contains(origNexTrip.routeAndTerminal))) {
+                        		doShowRoutes.getOrDefault(origNexTrip.routeAndTerminal, false))) {
                             changes.add(NexTripChange.ItemChanged(newIdx))
                         }
                         if (newItr.hasNext()) {

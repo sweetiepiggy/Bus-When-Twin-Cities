@@ -33,26 +33,33 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     private var mLastUpdate: Long = 0
     private var mDbLastUpdate: Long = 0
     private var mDbNexTrips: List<NexTrip>? = null
+    private var mLoadingNexTrips: Boolean = false
 
     private val mNexTrips: MutableLiveData<List<NexTrip>> by lazy {
-        MutableLiveData<List<NexTrip>>().also {
-            loadNexTrips()
-        }
+        MutableLiveData<List<NexTrip>>().also { loadNexTrips() }
     }
 
-    val hiddenRoutes: MutableSet<String> = mutableSetOf()
+    private val mDoShowRoutes: MutableLiveData<Map<String?, Boolean>> by lazy {
+        MutableLiveData<Map<String?, Boolean>>()
+    }
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
 
     fun getNexTrips(): LiveData<List<NexTrip>> = mNexTrips
 
+    fun getDoShowRoutes(): LiveData<Map<String?, Boolean>> = mDoShowRoutes
+    fun setDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+        mDoShowRoutes.value = doShowRoutes
+    }
+
     interface OnLoadNexTripsErrorListener {
         fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError)
     }
 
     fun loadNexTrips() {
-        mStopId?.let { stopId ->
+        if (!mLoadingNexTrips) mStopId?.let { stopId ->
+            mLoadingNexTrips = true
             val downloadNextTripsTask = mDownloadNexTripsTask
             if (mLastUpdate == 0L) {
                 // this is the first time we're loading nexTrips,
@@ -70,6 +77,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                 mNexTrips.value = mNexTrips.value?.let {
                     filterOldNexTrips(it, unixTime, mLastUpdate)
                 } ?: ArrayList<NexTrip>()
+                mLoadingNexTrips = false
             }
         }
     }
@@ -78,6 +86,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         mLastUpdate = unixTime
         mNexTrips.value = nexTrips
         StoreNexTripsInDbTask(nexTrips).execute()
+        mLoadingNexTrips = false
     }
 
     override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
@@ -93,6 +102,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
         }
         mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
+        mLoadingNexTrips = false
     }
 
     override fun onCleared() {
@@ -115,7 +125,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
             var nexTrips: List<NexTrip>? = null
             mStopId?.let { stopId ->
                 DbAdapter().apply {
-                    openReadWrite(mContext)
+                    open(mContext)
                     getLastUpdate(stopId)?.let { lastUpdate ->
                         mDbLastUpdate = lastUpdate
                         val suppressLocations = unixTime - lastUpdate >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
@@ -137,8 +147,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                     mDownloadNexTripsTask!!.execute()
                 }
             // show results from database if they exist and are fresh
-            } else if (result != null) {
+            } else {
                 mNexTrips.value = result
+                mLoadingNexTrips = false
             }
         }
     }

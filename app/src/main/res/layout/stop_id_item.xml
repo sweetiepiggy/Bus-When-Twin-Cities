@@ -90,15 +90,17 @@
             android:paddingRight="12dp"
             android:paddingBottom="7dp">
 
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="wrap_content"
-	      android:ems="30"
-	      android:visibility="invisible"
-	      android:gravity="center"
-	      app:layout_constraintBottom_toBottomOf="parent"
-	      app:layout_constraintStart_toStartOf="parent"
-	      app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:ems="30"
+                android:focusableInTouchMode="false"
+                android:gravity="center"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <LinearLayout
                 android:id="@+id/route_layout"

@@ -36,6 +36,7 @@ class DbAdapter {
 
         override fun onCreate(db: SQLiteDatabase) {
             db.execSQL(DATABASE_CREATE_FAV_STOPS)
+            db.execSQL(DATABASE_CREATE_FILTERS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)
             db.execSQL(DATABASE_CREATE_LAST_UPDATE)
@@ -115,6 +116,17 @@ class DbAdapter {
                 db.execSQL("DROP TABLE fav_stops")
                 db.execSQL("ALTER TABLE new_fav_stops RENAME TO fav_stops")
             }
+            if (oldVer < 5) {
+                db.execSQL("""
+                    CREATE TABLE filters (
+                        stop_id INTEGER NOT NULL,
+                        route_and_terminal TEXT NOT NULL,
+                        do_show BOOLEAN NOT NULL,
+                        FOREIGN KEY(stop_id) REFERENCES fav_stops(stop_id),
+                        PRIMARY KEY(stop_id, route_and_terminal)
+                    )
+                """)
+            }
         }
 
         fun open() {
@@ -172,7 +184,9 @@ class DbAdapter {
     }
 
     fun deleteFavStop(stopId: Int) {
-        val c = mDbHelper!!.mDb!!.query(TABLE_FAV_STOPS, arrayOf(KEY_POSITION),
+        val db = mDbHelper!!.mDb!!
+        db.delete(TABLE_FILTERS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+        val c = db.query(TABLE_FAV_STOPS, arrayOf(KEY_POSITION),
 	    		"$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
         if (c.moveToFirst()) {
             deleteFavStopAtPosition(c.getInt(c.getColumnIndex(KEY_POSITION)))
@@ -341,6 +355,41 @@ class DbAdapter {
         return nexTrips
     }
 
+    fun updateDoShowRoutes(stopId: Int, doShowRoutes: Map<String?, Boolean>) {
+        val db = mDbHelper!!.mDb!!
+        db.beginTransaction();
+        try {
+            db.delete(TABLE_FILTERS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+            for ((routeAndTerminal, doShow) in doShowRoutes) {
+                val cv = ContentValues().apply {
+                    put(KEY_STOP_ID, stopId)
+                    put(KEY_ROUTE_AND_TERMINAL, routeAndTerminal)
+                    put(KEY_DO_SHOW, doShow)
+                }
+                db.insert(TABLE_FILTERS, null, cv)
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    fun getDoShowRoutes(stopId: Int): Map<String?, Boolean> {
+        val doShowRoutes: MutableMap<String?, Boolean> = mutableMapOf()
+        val c = mDbHelper!!.mDb!!.query(TABLE_FILTERS,
+        	arrayOf(KEY_ROUTE_AND_TERMINAL, KEY_DO_SHOW), "$KEY_STOP_ID == ?",
+        	arrayOf(stopId.toString()), null, null, null, null)
+        val routeAndTerminalIndex = c.getColumnIndex(KEY_ROUTE_AND_TERMINAL)
+        val doShowIndex = c.getColumnIndex(KEY_DO_SHOW)
+        while (c.moveToNext()) {
+            val routeAndTerminal = c.getString(routeAndTerminalIndex)
+            val doShow = c.getInt(doShowIndex) != 0
+            doShowRoutes[routeAndTerminal] = doShow
+        }
+        c.close()
+        return doShowRoutes
+    }
+
     companion object {
         val KEY_STOP_ID = "stop_id"
         val KEY_STOP_DESCRIPTION = "stop_description"
@@ -356,24 +405,37 @@ class DbAdapter {
         private val KEY_VEHICLE_HEADING = "vehicle_heading"
         private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
         private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
+        private val KEY_ROUTE_AND_TERMINAL = "route_and_terminal"
+        private val KEY_DO_SHOW = "do_show"
 
         private val KEY_POSITION = "position"
         private val KEY_LAST_UPDATE = "last_update"
 
         private val TABLE_FAV_STOPS = "fav_stops"
         private val TABLE_NEXTRIPS = "nextrips"
+        private val TABLE_FILTERS = "filters"
         private val TABLE_LAST_UPDATE = "last_update"
 
         private val INDEX_NEXTRIPS = "index_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 4
+        private val DATABASE_VERSION = 5
 
         private val DATABASE_CREATE_FAV_STOPS = """
 	        CREATE TABLE $TABLE_FAV_STOPS (
                 $KEY_STOP_ID INTEGER PRIMARY KEY,
                 $KEY_STOP_DESCRIPTION TEXT,
                 $KEY_POSITION INTEGER
+            )
+            """
+
+        private val DATABASE_CREATE_FILTERS = """
+	        CREATE TABLE $TABLE_FILTERS (
+                $KEY_STOP_ID INTEGER NOT NULL,
+                $KEY_ROUTE_AND_TERMINAL TEXT NOT NULL,
+                $KEY_DO_SHOW BOOLEAN NOT NULL,
+                FOREIGN KEY($KEY_STOP_ID) REFERENCES $TABLE_FAV_STOPS($KEY_STOP_ID),
+                PRIMARY KEY($KEY_STOP_ID, $KEY_ROUTE_AND_TERMINAL)
             )
             """
 

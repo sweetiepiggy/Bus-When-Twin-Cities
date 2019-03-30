@@ -53,7 +53,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
     private var mNexTrips: List<NexTrip> = listOf()
-    private var mRoutes: SortedSet<String> = sortedSetOf()
+    private var mDoShowRoutes: MutableMap<String?, Boolean> = mutableMapOf()
+    private var mFilteredButWasntFavorite = false
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -105,6 +106,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mNexTripsModel.loadNexTrips()
         }
         LoadIsFavorite().execute()
+        LoadDoShowRoutesTask().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -164,30 +166,37 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         AlertDialog.Builder(this).apply {
             setTitle(R.string.select_routes)
 
-            val routes = mRoutes.toTypedArray()
-            val routesDoShow = routes.map { !mNexTripsModel.hiddenRoutes.contains(it) }.toBooleanArray()
+            val routes = mDoShowRoutes.keys.filter { it != null}.map { it!! }.toSortedSet().toTypedArray()
+            val routesDoShow = routes.map { mDoShowRoutes[it]!! }.toBooleanArray()
             setMultiChoiceItems(routes, routesDoShow,
             	DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
                     routesDoShow[which] = isChecked
                 })
             setPositiveButton(android.R.string.ok) { _, _ ->
-                val changedRoutes = mutableListOf<String>()
+                val changedRoutes = mutableSetOf<String>()
                 for ((idx, doShow) in routesDoShow.iterator().withIndex()) {
                     val route = routes[idx]
                     if (doShow) {
-                        if (mNexTripsModel.hiddenRoutes.contains(route)) {
+                        if (!mDoShowRoutes.getOrDefault(route, false)) {
                             changedRoutes.add(route)
-                            mNexTripsModel.hiddenRoutes.remove(route)
+                            mDoShowRoutes[route] = true
                         }
                     } else {
-                        if (!mNexTripsModel.hiddenRoutes.contains(route)){
+                        if (mDoShowRoutes.getOrDefault(route, true)){
                             changedRoutes.add(route)
-                            mNexTripsModel.hiddenRoutes.add(route)
+                            mDoShowRoutes[route] = false
                         }
                     }
                 }
-                mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
-                mMapFragment?.onChangeHiddenRoutes(changedRoutes)
+                if (!changedRoutes.isEmpty()) {
+                    mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
+                    mMapFragment?.onChangeHiddenRoutes(changedRoutes)
+                    mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
+                    if (mIsFavorite) {
+                        StoreDoShowRoutesInDbTask(mDoShowRoutes).execute()
+                    }
+                    mFilteredButWasntFavorite = true
+                }
             }
             setNegativeButton(android.R.string.cancel) { _, _ -> }
         }.show()
@@ -234,6 +243,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                             }
                             override fun onPostExecute(result: Void?) {}
                         }.execute()
+                    }
+                    if (mFilteredButWasntFavorite) {
+                        StoreDoShowRoutesInDbTask(mDoShowRoutes).execute()
                     }
                 }
                 setNegativeButton(android.R.string.cancel) { _, _ -> }
@@ -290,10 +302,58 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
     }
 
+    private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<String?, Boolean>>() {
+        override fun doInBackground(vararg params: Void): Map<String?, Boolean> {
+            var doShowRoutes: Map<String?, Boolean> = mapOf()
+        	mStopId?.let { stopId ->
+                DbAdapter().run {
+                    open(applicationContext)
+                    doShowRoutes = getDoShowRoutes(stopId)
+                    close()
+                }
+            }
+            return doShowRoutes
+        }
+
+        override fun onPostExecute(result: Map<String?, Boolean>) {
+            mDoShowRoutes = result.toMutableMap()
+            mNexTripsModel.setDoShowRoutes(result)
+            updateRoutes(mNexTrips)
+        }
+    }
+
+    private inner class StoreDoShowRoutesInDbTask(private val doShowRoutes: Map<String?, Boolean>): AsyncTask<Void, Void, Void?>() {
+        override fun doInBackground(vararg params: Void): Void? {
+        	mStopId?.let { stopId ->
+                DbAdapter().run {
+                    openReadWrite(applicationContext)
+                    updateDoShowRoutes(stopId, doShowRoutes)
+                    close()
+                }
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) { }
+    }
+
     fun updateRoutes(nexTrips: List<NexTrip>) {
         mNexTrips = nexTrips
-        mRoutes = nexTrips.filter { it.routeAndTerminal != null }.map { it.routeAndTerminal!! }.toSortedSet()
+        val changedRoutes: MutableSet<String> = mutableSetOf()
+        for (nexTrip in nexTrips.filter { it.routeAndTerminal != null} ) {
+            if (!mDoShowRoutes.contains(nexTrip.routeAndTerminal)) {
+                mDoShowRoutes[nexTrip.routeAndTerminal] = guessDoShow(nexTrip.routeAndTerminal)
+                changedRoutes.add(nexTrip.routeAndTerminal!!)
+            }
+        }
+        if (!changedRoutes.isEmpty()) {
+            mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
+            mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
+            mMapFragment?.onChangeHiddenRoutes(changedRoutes)
+        }
     }
+
+    private fun guessDoShow(routeAndTerminal: String?) = true
 
     companion object {
         val KEY_STOP_ID = "stopId"
