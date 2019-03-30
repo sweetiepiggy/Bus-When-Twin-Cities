@@ -30,9 +30,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/text_margin"
+            android:paddingLeft="18dp"
             android:paddingTop="6dp"
-            android:paddingRight="@dimen/text_margin"
+            android:paddingRight="18dp"
             android:paddingBottom="6dp">
             <TextView
                     android:id="@+id/minimal_route"
@@ -71,97 +71,112 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
-            android:id="@+id/full_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="3dp"
-            app:cardCornerRadius="4dp">
-    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/full_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+	android:layout_gravity="center"
+	android:layout_marginLeft="6dp"
+	android:layout_marginRight="6dp"
+	android:layout_marginTop="3dp"
+	android:layout_marginBottom="3dp"
+        app:cardCornerRadius="6dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="13dp"
+            android:paddingLeft="12dp"
             android:paddingTop="7dp"
-            android:paddingRight="13dp"
+            android:paddingRight="12dp"
             android:paddingBottom="7dp">
-    
+
+	  <TextView
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:ems="30"
+	      android:visibility="invisible"
+	      android:gravity="center"
+	      app:layout_constraintBottom_toBottomOf="parent"
+	      app:layout_constraintStart_toStartOf="parent"
+	      app:layout_constraintTop_toTopOf="parent" />
+
             <LinearLayout
-                    android:id="@+id/route_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-    
-                    <TextView
-                            android:id="@+id/route"
-                            style="@android:style/TextAppearance.Large"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:minEms="2" />
-    
-                    <TextView
-                            android:id="@+id/direction"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center" />
-            </LinearLayout>
-    
-            <TextView
-                    android:id="@+id/description"
-                    style="@android:style/TextAppearance.Medium"
-                    android:layout_width="0dp"
+                android:id="@+id/route_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/route"
+                    style="@android:style/TextAppearance.Large"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:paddingLeft="@dimen/text_margin"
-                    android:paddingRight="@dimen/text_margin"
-                    android:singleLine="false"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/departure_layout"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@id/route_layout"
-                    app:layout_constraintTop_toTopOf="parent" />
-    
-            <LinearLayout
-                    android:id="@+id/departure_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-    
-                    <TextView
-                            android:id="@+id/departure_text"
-                            style="@android:style/TextAppearance.Large"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:gravity="end"
-                            android:minEms="2" />
-    
-                    <TextView
-                            android:id="@+id/departure_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end" />
-    
-                    <TextView
-                            android:id="@+id/scheduled"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end" />
-    
-                    <ImageButton
-                            android:id="@+id/map_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            app:srcCompat="@drawable/ic_baseline_my_location_24px" />
+                    android:minEms="2" />
+
+                <TextView
+                    android:id="@+id/direction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center" />
             </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-  </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/description"
+                style="@android:style/TextAppearance.Medium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="@dimen/text_margin"
+                android:paddingRight="@dimen/text_margin"
+                android:singleLine="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/departure_layout"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@id/route_layout"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/departure_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/departure_text"
+                    style="@android:style/TextAppearance.Large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:gravity="end"
+                    android:minEms="2" />
+
+                <TextView
+                    android:id="@+id/departure_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end" />
+
+                <TextView
+                    android:id="@+id/scheduled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end" />
+
+                <ImageButton
+                    android:id="@+id/map_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    app:srcCompat="@drawable/ic_baseline_my_location_24px" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
 </FrameLayout>
