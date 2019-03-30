@@ -19,8 +19,7 @@
 -->
 
 <resources>
-    <string name="app_name">公交车何时？</string>
-    <string name="app_name_long">公交车何时？（双城）</string>
+    <string name="app_name">公交车何时？（双城）</string>
 
     <string name="stop_number">公交站＃</string>
     <string name="stop_id">公交站号码？</string>

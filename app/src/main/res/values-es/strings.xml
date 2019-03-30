@@ -19,8 +19,7 @@
 -->
 
 <resources>
-    <string name="app_name">Bus Cuándo?</string>
-    <string name="app_name_long">Bus Cuándo? (Ciudades Gemelas)</string>
+    <string name="app_name">Bus Cuándo? (Ciudades Gemelas)</string>
 
     <string name="stop_number">Parada #</string>
     <string name="stop_id">¿Número de parada?</string>
