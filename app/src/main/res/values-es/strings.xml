@@ -39,7 +39,6 @@
     <string name="action_about">Sobre</string>
     <string name="nav_favorites">Mis paradas</string>
     <string name="nav_search">Buscar</string>
-    <string name="action_source">Ver código fuente</string>
     <string name="action_refresh">Refrescar</string>
     <string name="action_favorite">Favorita</string>
     <string name="action_search">Buscar</string>
@@ -63,6 +62,10 @@
     <string name="about_email_icon_content_description">envía un correo electrónico al desarrollador</string>
     <string name="reorder_favorites_content_description">reordenar paradas favoritas</string>
 
+    <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
+    <string name="simple_useful">Aplicaciones simples, útiles, libres y de código abierto para los Minnesotanos</string>
+    <string name="about_us">"Apóyanos en Patreon https://patreon.com/sweetiepiggyapps\n\nEl código fuente de esta aplicación está disponible en https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    <string name="license_title">Licensia</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"
       "bajo los términos de la Licencia Pública General GNU publicada"
@@ -70,7 +73,5 @@
       "sea la versión 3 de la Licencia, o (a su elección) cualquier versión posterior.\n\nBus Cuándo? (Ciudades Gemelas) se distribuye con la esperanza de que sea útil,"
       "pero SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita"
       "MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO. Consulte los"
-      "detalles de la Licencia Pública General GNU para obtener una información más detallada.\n\nDebería haber recibido una copia de la Licencia Pública General GNU"
-    "junto a Bus Cuándo? (Ciudades Gemelas). En caso contrario, consulte http://www.gnu.org/licenses/.\n\nApóyanos en"
-    "Patreon https://patreon.com/sweetiepiggyapps"</string>
+      "detalles de la Licencia Pública General GNU para obtener una información más detallada.\n\nhttps://www.gnu.org/licenses</string>
 </resources>

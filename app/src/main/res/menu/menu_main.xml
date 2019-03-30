@@ -27,9 +27,4 @@
 	android:icon="@drawable/ic_baseline_info_24px"
         android:title="@string/action_about"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_source"
-        android:orderInCategory="200"
-        android:title="@string/action_source"
-        app:showAsAction="never" />
 </menu>

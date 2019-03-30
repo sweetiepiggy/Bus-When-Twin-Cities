@@ -38,7 +38,7 @@
 
         <activity
             android:name=".AboutActivity"
-            android:label="@string/action_about"
+            android:label="@string/sweetiepiggyapps"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

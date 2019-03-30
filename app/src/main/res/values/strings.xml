@@ -39,7 +39,6 @@
     <string name="action_about">About</string>
     <string name="nav_favorites">Favorites</string>
     <string name="nav_search">Search</string>
-    <string name="action_source">View source code</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
     <string name="action_search">Search</string>
@@ -63,6 +62,16 @@
     <string name="about_email_icon_content_description">email the app developer</string>
     <string name="reorder_favorites_content_description">reorder favorite stop IDs</string>
 
+    <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
+    <string name="simple_useful">Simple, useful, free and open-source apps for Minnesotans</string>
+    <string name="about_us">
+    "We develop simple Android apps with the goal of modestly improving the"
+    "daily lives of the people in our community.\n\nIf you find this app "
+    "useful and wish to support our work, you can find more"
+    "information at https://patreon.com/sweetiepiggyapps\n\nFor those of you"
+    "familiar with computer programming, the source code"
+    "for this app is available at https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    <string name="license_title">License</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus When? (Twin Cities) is free software; you can redistribute it and/or modify"
       "it under the terms of the GNU General Public License as published by"
@@ -70,8 +79,5 @@
       "(at your option) any later version.\n\nBus When? (Twin Cities) is distributed in the hope that it will be useful,"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of"
       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-      "GNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License"
-    "along with Bus When? (Twin Cities); if not, see http://www.gnu.org/licenses/.\n\nIf"
-    "you find this app useful and wish to support our work, you can find more"
-    "information at https://patreon.com/sweetiepiggyapps"</string>
+      "GNU General Public License for more details.\n\nhttps://www.gnu.org/licenses"</string>
 </resources>

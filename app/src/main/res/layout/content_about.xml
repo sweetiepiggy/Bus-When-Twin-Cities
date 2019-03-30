@@ -27,6 +27,33 @@
     tools:context=".AboutActivity"
     tools:showIn="@layout/activity_about">
 
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical">
+
+    <TextView
+      style="@style/TextAppearance.AppCompat.Title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="@dimen/text_margin"
+      android:text="@string/simple_useful" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@android:style/TextAppearance.Medium"
+	android:autoLink="web|email"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/about_us" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_margin="@dimen/text_margin"
+        android:text="@string/license_title" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,5 +61,5 @@
 	android:autoLink="web|email"
         android:layout_margin="@dimen/text_margin"
         android:text="@string/license" />
-
+  </LinearLayout>
 </androidx.core.widget.NestedScrollView>

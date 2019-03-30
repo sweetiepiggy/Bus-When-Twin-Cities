@@ -94,13 +94,6 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 startActivity(intent)
                 true
             }
-            R.id.action_source -> {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(SOURCE_URL), "text/html")
-                }
-                startActivity(Intent.createChooser(intent, null))
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
 
@@ -264,7 +257,6 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     companion object {
-        private val SOURCE_URL = "https://github.com/sweetiepiggy/Bus-When-Twin-Cities"
         private val KEY_BNV_IDX = "bnvIdx"
 
         private val BNV_UNINITIALIZED = 0

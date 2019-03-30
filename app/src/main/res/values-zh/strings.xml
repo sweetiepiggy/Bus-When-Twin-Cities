@@ -39,7 +39,6 @@
     <string name="action_about">关于</string>
     <string name="nav_favorites">收藏</string>
     <string name="nav_search">搜索</string>
-    <string name="action_source">代码来源</string>
     <string name="action_refresh">刷新</string>
     <string name="action_favorite">喜爱</string>
     <string name="action_search">搜索</string>
@@ -63,6 +62,14 @@
     <string name="about_email_icon_content_description">给开发者发邮件</string>
     <string name="reorder_favorites_content_description">重新排序</string>
 
+    <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
+    <string name="simple_useful">为明尼苏达居民提供简单，实用，免费和开源的应用程序</string>
+    <string name="about_us">
+如果此应用程序对您有帮助并希望 给予支持，您可以通过此处 https://patreon.com/sweetiepiggyapps给予赞助 。
+
+\n\n这是一个免费的开源应用程序。 源代码可通过 https://github.com/sweetiepiggy/Bus-When-Twin-Cities 的GPLv3+许可证获得。</string>
+
+    <string name="license_title">许可</string>
     <string name="license">
 版權所有(C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com
 
@@ -70,8 +77,6 @@
 
 \n\n公交车何时？（双城）是基於使用目的而加以發佈，然而不負任何擔保責任；亦無對適售性或特定目的適用性所爲的默示性擔保。詳情請參照GNU通用公共授權。
 
-\n\n您應已收到附隨於公交车何时？（双城）的GNU通用公共授權的副本；如果沒有，請參照http://www.gnu.org/licenses/ 。
-
-\n\n如果此应用程序对您有帮助并希望 给予支持，您可以通过此处https://patreon.com/sweetiepiggyapps给予赞助。
+\n\nhttps://www.gnu.org/licenses
 	</string>
 </resources>

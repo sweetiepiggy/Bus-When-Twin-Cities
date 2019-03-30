@@ -33,17 +33,6 @@ class AboutActivity : AppCompatActivity() {
         setContentView(R.layout.activity_about)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-
-        val fab = findViewById<FloatingActionButton>(R.id.fab)
-        fab.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO,
-                    Uri.fromParts("mailto", EMAIL_ADDRESS, null))
-            startActivity(Intent.createChooser(intent, null))
-        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
-    companion object {
-        private val EMAIL_ADDRESS = "sweetiepiggyapps@gmail.com"
     }
 }
