@@ -127,6 +127,19 @@ class DbAdapter {
                     )
                 """)
             }
+            if (oldVer < 6) {
+                db.execSQL("DROP TABLE filters")
+                db.execSQL("""
+                    CREATE TABLE filters (
+                        stop_id INTEGER NOT NULL,
+                        route TEXT,
+                        terminal TEXT,
+                        do_show BOOLEAN NOT NULL,
+                        FOREIGN KEY(stop_id) REFERENCES fav_stops(stop_id),
+                        PRIMARY KEY(stop_id, route, terminal)
+                    )
+                """)
+            }
         }
 
         fun open() {
@@ -355,7 +368,7 @@ class DbAdapter {
         return nexTrips
     }
 
-    fun updateDoShowRoutes(stopId: Int, doShowRoutes: Map<String?, Boolean>) {
+    fun updateDoShowRoutes(stopId: Int, doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         val db = mDbHelper!!.mDb!!
         db.beginTransaction();
         try {
@@ -363,7 +376,8 @@ class DbAdapter {
             for ((routeAndTerminal, doShow) in doShowRoutes) {
                 val cv = ContentValues().apply {
                     put(KEY_STOP_ID, stopId)
-                    put(KEY_ROUTE_AND_TERMINAL, routeAndTerminal)
+                    put(KEY_ROUTE, routeAndTerminal.first)
+                    put(KEY_TERMINAL, routeAndTerminal.second)
                     put(KEY_DO_SHOW, doShow)
                 }
                 db.insert(TABLE_FILTERS, null, cv)
@@ -374,17 +388,19 @@ class DbAdapter {
         }
     }
 
-    fun getDoShowRoutes(stopId: Int): Map<String?, Boolean> {
-        val doShowRoutes: MutableMap<String?, Boolean> = mutableMapOf()
+    fun getDoShowRoutes(stopId: Int): Map<Pair<String?, String?>, Boolean> {
+        val doShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_FILTERS,
-        	arrayOf(KEY_ROUTE_AND_TERMINAL, KEY_DO_SHOW), "$KEY_STOP_ID == ?",
+        	arrayOf(KEY_ROUTE, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_STOP_ID == ?",
         	arrayOf(stopId.toString()), null, null, null, null)
-        val routeAndTerminalIndex = c.getColumnIndex(KEY_ROUTE_AND_TERMINAL)
+        val routeIndex = c.getColumnIndex(KEY_ROUTE)
+        val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val doShowIndex = c.getColumnIndex(KEY_DO_SHOW)
         while (c.moveToNext()) {
-            val routeAndTerminal = c.getString(routeAndTerminalIndex)
+            val route = c.getString(routeIndex)
+            val terminal = c.getString(terminalIndex)
             val doShow = c.getInt(doShowIndex) != 0
-            doShowRoutes[routeAndTerminal] = doShow
+            doShowRoutes[Pair(route, terminal)] = doShow
         }
         c.close()
         return doShowRoutes
@@ -405,7 +421,6 @@ class DbAdapter {
         private val KEY_VEHICLE_HEADING = "vehicle_heading"
         private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
         private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
-        private val KEY_ROUTE_AND_TERMINAL = "route_and_terminal"
         private val KEY_DO_SHOW = "do_show"
 
         private val KEY_POSITION = "position"
@@ -419,7 +434,7 @@ class DbAdapter {
         private val INDEX_NEXTRIPS = "index_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 5
+        private val DATABASE_VERSION = 6
 
         private val DATABASE_CREATE_FAV_STOPS = """
 	        CREATE TABLE $TABLE_FAV_STOPS (
@@ -432,10 +447,11 @@ class DbAdapter {
         private val DATABASE_CREATE_FILTERS = """
 	        CREATE TABLE $TABLE_FILTERS (
                 $KEY_STOP_ID INTEGER NOT NULL,
-                $KEY_ROUTE_AND_TERMINAL TEXT NOT NULL,
+                $KEY_ROUTE TEXT,
+                $KEY_TERMINAL TEXT,
                 $KEY_DO_SHOW BOOLEAN NOT NULL,
                 FOREIGN KEY($KEY_STOP_ID) REFERENCES $TABLE_FAV_STOPS($KEY_STOP_ID),
-                PRIMARY KEY($KEY_STOP_ID, $KEY_ROUTE_AND_TERMINAL)
+                PRIMARY KEY($KEY_STOP_ID, $KEY_ROUTE, $KEY_TERMINAL)
             )
             """
 

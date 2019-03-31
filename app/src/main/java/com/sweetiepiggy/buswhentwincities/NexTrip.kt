@@ -133,7 +133,9 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val isActual: Boolean = nexTrip.isActual
     val blockNumber: Int? = nexTrip.blockNumber
     val description: String? = nexTrip.description
-    val routeAndTerminal: String? = nexTrip.route?.let { it + (nexTrip.terminal ?: "") }
+    val route: String? = nexTrip.route
+    val terminal: String? = nexTrip.terminal
+    val routeAndTerminal: String? = route?.let { it + (terminal ?: "") }
     val routeDirection: NexTrip.Direction? = nexTrip.routeDirection
     val routeDirectionStr: String? = translateDirection(nexTrip.routeDirection, context.resources)
     val position: LatLng? = nexTrip.position

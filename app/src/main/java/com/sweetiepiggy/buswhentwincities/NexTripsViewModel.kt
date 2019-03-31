@@ -39,8 +39,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         MutableLiveData<List<NexTrip>>().also { loadNexTrips() }
     }
 
-    private val mDoShowRoutes: MutableLiveData<Map<String?, Boolean>> by lazy {
-        MutableLiveData<Map<String?, Boolean>>()
+    private val mDoShowRoutes: MutableLiveData<Map<Pair<String?, String?>, Boolean>> by lazy {
+        MutableLiveData<Map<Pair<String?, String?>, Boolean>>()
     }
 
     private val unixTime: Long
@@ -48,8 +48,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
     fun getNexTrips(): LiveData<List<NexTrip>> = mNexTrips
 
-    fun getDoShowRoutes(): LiveData<Map<String?, Boolean>> = mDoShowRoutes
-    fun setDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+    fun getDoShowRoutes(): LiveData<Map<Pair<String?, String?>, Boolean>> = mDoShowRoutes
+    fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes.value = doShowRoutes
     }
 

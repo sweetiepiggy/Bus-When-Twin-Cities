@@ -53,7 +53,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
     private var mNexTrips: List<NexTrip> = listOf()
-    private var mDoShowRoutes: MutableMap<String?, Boolean> = mutableMapOf()
+    private var mDoShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
     private var mFilteredButWasntFavorite = false
 
     private val unixTime: Long
@@ -166,25 +166,33 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         AlertDialog.Builder(this).apply {
             setTitle(R.string.select_routes)
 
-            val routes = mDoShowRoutes.keys.filter { it != null}.map { it!! }.toSortedSet().toTypedArray()
-            val routesDoShow = routes.map { mDoShowRoutes[it]!! }.toBooleanArray()
-            setMultiChoiceItems(routes, routesDoShow,
+            val routeAndTerminalPairs = mDoShowRoutes.keys.filter {
+                it.first != null
+            }.toSortedSet(object : Comparator<Pair<String?, String?>>{
+                override fun compare(p1: Pair<String?, String?>, p2: Pair<String?, String?>): Int =
+                    (p1.first!! + (p1.second ?: "")).compareTo(p2.first!! + (p2.second ?: ""))
+            }).toTypedArray()
+            val routeAndTerminals = routeAndTerminalPairs.map { routeAndTerminal ->
+                routeAndTerminal.first!! + (routeAndTerminal.second ?: "")
+            }.toTypedArray()
+            val routeAndTerminalsDoShow = routeAndTerminalPairs.map { mDoShowRoutes[it]!! }.toBooleanArray()
+            setMultiChoiceItems(routeAndTerminals, routeAndTerminalsDoShow,
             	DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
-                    routesDoShow[which] = isChecked
+                    routeAndTerminalsDoShow[which] = isChecked
                 })
             setPositiveButton(android.R.string.ok) { _, _ ->
-                val changedRoutes = mutableSetOf<String>()
-                for ((idx, doShow) in routesDoShow.iterator().withIndex()) {
-                    val route = routes[idx]
+                val changedRoutes = mutableSetOf<Pair<String?, String?>>()
+                for ((idx, doShow) in routeAndTerminalsDoShow.iterator().withIndex()) {
+                    val routeAndTerminalPair = routeAndTerminalPairs[idx]
                     if (doShow) {
-                        if (!(mDoShowRoutes.get(route) ?: false)) {
-                            changedRoutes.add(route)
-                            mDoShowRoutes[route] = true
+                        if (!(mDoShowRoutes.get(routeAndTerminalPair) ?: false)) {
+                            changedRoutes.add(routeAndTerminalPair)
+                            mDoShowRoutes[routeAndTerminalPair] = true
                         }
                     } else {
-                        if (mDoShowRoutes.get(route) ?: true){
-                            changedRoutes.add(route)
-                            mDoShowRoutes[route] = false
+                        if (mDoShowRoutes.get(routeAndTerminalPair) ?: true){
+                            changedRoutes.add(routeAndTerminalPair)
+                            mDoShowRoutes[routeAndTerminalPair] = false
                         }
                     }
                 }
@@ -302,9 +310,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
     }
 
-    private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<String?, Boolean>>() {
-        override fun doInBackground(vararg params: Void): Map<String?, Boolean> {
-            var doShowRoutes: Map<String?, Boolean> = mapOf()
+    private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<Pair<String?, String?>, Boolean>>() {
+        override fun doInBackground(vararg params: Void): Map<Pair<String?, String?>, Boolean> {
+            var doShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
         	mStopId?.let { stopId ->
                 DbAdapter().run {
                     open(applicationContext)
@@ -315,14 +323,14 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             return doShowRoutes
         }
 
-        override fun onPostExecute(result: Map<String?, Boolean>) {
+        override fun onPostExecute(result: Map<Pair<String?, String?>, Boolean>) {
             mDoShowRoutes = result.toMutableMap()
             mNexTripsModel.setDoShowRoutes(result)
             updateRoutes(mNexTrips)
         }
     }
 
-    private inner class StoreDoShowRoutesInDbTask(private val doShowRoutes: Map<String?, Boolean>): AsyncTask<Void, Void, Void?>() {
+    private inner class StoreDoShowRoutesInDbTask(private val doShowRoutes: Map<Pair<String?, String?>, Boolean>): AsyncTask<Void, Void, Void?>() {
         override fun doInBackground(vararg params: Void): Void? {
         	mStopId?.let { stopId ->
                 DbAdapter().run {
@@ -339,11 +347,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     fun updateRoutes(nexTrips: List<NexTrip>) {
         mNexTrips = nexTrips
-        val changedRoutes: MutableSet<String> = mutableSetOf()
+        val changedRoutes: MutableSet<Pair<String?, String?>> = mutableSetOf()
         for (nexTrip in nexTrips.filter { it.routeAndTerminal != null} ) {
-            if (!mDoShowRoutes.contains(nexTrip.routeAndTerminal)) {
-                mDoShowRoutes[nexTrip.routeAndTerminal] = guessDoShow(nexTrip.routeAndTerminal)
-                changedRoutes.add(nexTrip.routeAndTerminal!!)
+            if (!mDoShowRoutes.contains(Pair(nexTrip.route, nexTrip.terminal))) {
+                mDoShowRoutes[Pair(nexTrip.route, nexTrip.terminal)] = guessDoShow(nexTrip.route, nexTrip.terminal)
+                changedRoutes.add(Pair(nexTrip.route, nexTrip.terminal))
             }
         }
         if (!changedRoutes.isEmpty()) {
@@ -353,7 +361,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
     }
 
-    private fun guessDoShow(routeAndTerminal: String?) = true
+    private fun guessDoShow(route: String?, terminal: String?) = true
 
     companion object {
         val KEY_STOP_ID = "stopId"

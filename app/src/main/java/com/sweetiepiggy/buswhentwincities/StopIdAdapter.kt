@@ -32,7 +32,7 @@ import java.util.*
 class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
     private var mClickMapListener: OnClickMapListener? = null
     private var mNexTrips: List<PresentableNexTrip> = listOf()
-    private var mDoShowRoutes: Map<String?, Boolean> = mapOf()
+    private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
 
     interface OnClickMapListener {
         fun onClickMap(vehicleBlockNumber: Int?)
@@ -80,7 +80,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         holder.minimalDescriptionTextView.text = nexTrip.description
         holder.minimalDepartureTextTextView.text = nexTrip.departureText
 
-        if (mDoShowRoutes.get(nexTrip.routeAndTerminal) ?: true) {
+        if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) {
             holder.minimalView.visibility = View.GONE
             holder.fullView.visibility = View.VISIBLE
         } else {
@@ -97,7 +97,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         mNexTrips = nexTrips
     }
 
-    fun setDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+    fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes = doShowRoutes
     }
 

@@ -39,7 +39,7 @@ class NexTripsFragment : Fragment() {
     private lateinit var mResultsRecyclerView: RecyclerView
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
     private var mNexTrips: List<PresentableNexTrip> = listOf()
-    private var mDoShowRoutes: Map<String?, Boolean> = mapOf()
+    private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -72,7 +72,7 @@ class NexTripsFragment : Fragment() {
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
         mSwipeRefreshLayout.setOnRefreshListener { model.loadNexTrips() }
-        model.getDoShowRoutes().observe(this, Observer<Map<String?, Boolean>>{ updateDoShowRoutes(it) })
+        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{ updateDoShowRoutes(it) })
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
@@ -98,7 +98,7 @@ class NexTripsFragment : Fragment() {
         }
     }
 
-    fun updateDoShowRoutes(doShowRoutes: Map<String?, Boolean>) {
+    fun updateDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes = doShowRoutes
         mAdapter.setDoShowRoutes(doShowRoutes)
     }
@@ -109,10 +109,10 @@ class NexTripsFragment : Fragment() {
         )
     }
 
-    fun onChangeHiddenRoutes(changedRoutes: Set<String>) {
+    fun onChangeHiddenRoutes(changedRoutes: Set<Pair<String?, String?>>) {
         val itemChanges = mutableListOf<NexTripChange.ItemChanged>()
         for ((idx, nexTrip) in mNexTrips.listIterator().withIndex()) {
-            if (changedRoutes.contains(nexTrip.routeAndTerminal)) {
+            if (changedRoutes.contains(Pair(nexTrip.route, nexTrip.terminal))) {
                 itemChanges.add(NexTripChange.ItemChanged(idx))
             }
         }
