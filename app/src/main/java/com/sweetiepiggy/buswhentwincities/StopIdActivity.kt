@@ -55,6 +55,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mNexTrips: List<NexTrip> = listOf()
     private var mDoShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
     private var mFilteredButWasntFavorite = false
+    private var mDoShowRoutesInitDone = false
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -79,6 +80,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
         mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
+        mNexTripsModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+            if (!mDoShowRoutesInitDone) {
+                initDoShowRoutes(it)
+                mDoShowRoutesInitDone = true
+            }
+        })
 
         if (mDualPane) {
             mNexTripsFragment = NexTripsFragment.newInstance()
@@ -106,7 +113,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mNexTripsModel.loadNexTrips()
         }
         LoadIsFavorite().execute()
-        LoadDoShowRoutesTask().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -310,26 +316,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
     }
 
-    private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<Pair<String?, String?>, Boolean>>() {
-        override fun doInBackground(vararg params: Void): Map<Pair<String?, String?>, Boolean> {
-            var doShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
-        	mStopId?.let { stopId ->
-                DbAdapter().run {
-                    open(applicationContext)
-                    doShowRoutes = getDoShowRoutes(stopId)
-                    close()
-                }
-            }
-            return doShowRoutes
-        }
-
-        override fun onPostExecute(result: Map<Pair<String?, String?>, Boolean>) {
-            mDoShowRoutes = result.toMutableMap()
-            mNexTripsModel.setDoShowRoutes(result)
-            updateRoutes(mNexTrips)
-        }
-    }
-
     private inner class StoreDoShowRoutesInDbTask(private val doShowRoutes: Map<Pair<String?, String?>, Boolean>): AsyncTask<Void, Void, Void?>() {
         override fun doInBackground(vararg params: Void): Void? {
         	mStopId?.let { stopId ->
@@ -345,17 +331,62 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         override fun onPostExecute(result: Void?) { }
     }
 
-    fun updateRoutes(nexTrips: List<NexTrip>) {
+    private fun updateRoutes(nexTrips: List<NexTrip>) {
         mNexTrips = nexTrips
+
+        if (!mDoShowRoutesInitDone) {
+            return
+        }
+
         val changedRoutes: MutableSet<Pair<String?, String?>> = mutableSetOf()
-        for (nexTrip in nexTrips.filter { it.routeAndTerminal != null} ) {
-            if (!mDoShowRoutes.contains(Pair(nexTrip.route, nexTrip.terminal))) {
-                mDoShowRoutes[Pair(nexTrip.route, nexTrip.terminal)] = guessDoShow(nexTrip.route, nexTrip.terminal)
-                changedRoutes.add(Pair(nexTrip.route, nexTrip.terminal))
+        val routeAndTerminalPairs = nexTrips.filter {
+            it.routeAndTerminal != null
+        }.map {
+            Pair(it.route, it.terminal)
+        }.toSet()
+        for (routeAndTerminal in routeAndTerminalPairs) {
+            if (!mDoShowRoutes.contains(routeAndTerminal)) {
+                mDoShowRoutes[routeAndTerminal] = guessDoShow(routeAndTerminal.first, routeAndTerminal.second)
+                changedRoutes.add(routeAndTerminal)
             }
         }
         if (!changedRoutes.isEmpty()) {
             mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
+            mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
+            mMapFragment?.onChangeHiddenRoutes(changedRoutes)
+        }
+    }
+
+    private fun initDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
+        mDoShowRoutes = doShowRoutes.toMutableMap()
+
+        val changedRoutes: MutableSet<Pair<String?, String?>> = mutableSetOf()
+        var addedRoutes = false
+
+        val routeAndTerminalPairs = mNexTrips.filter {
+            it.routeAndTerminal != null
+        }.map {
+            Pair(it.route, it.terminal)
+        }.toSet()
+
+        for (routeAndTerminal in routeAndTerminalPairs) {
+            if (!mDoShowRoutes.contains(routeAndTerminal)) {
+                mDoShowRoutes[routeAndTerminal] = guessDoShow(routeAndTerminal.first, routeAndTerminal.second)
+                addedRoutes = true
+            }
+
+            // routes are shown by default, so the changed routes here are the
+            // ones that should be hidden
+            if (!mDoShowRoutes[routeAndTerminal]!!){
+                changedRoutes.add(routeAndTerminal)
+            }
+        }
+
+        if (addedRoutes) {
+            mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
+        }
+
+        if (!changedRoutes.isEmpty()) {
             mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
             mMapFragment?.onChangeHiddenRoutes(changedRoutes)
         }

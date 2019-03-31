@@ -40,7 +40,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     }
 
     private val mDoShowRoutes: MutableLiveData<Map<Pair<String?, String?>, Boolean>> by lazy {
-        MutableLiveData<Map<Pair<String?, String?>, Boolean>>()
+        MutableLiveData<Map<Pair<String?, String?>, Boolean>>().also {
+            LoadDoShowRoutesTask().execute()
+        }
     }
 
     private val unixTime: Long
@@ -167,6 +169,24 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         }
 
         override fun onPostExecute(result: Void?) { }
+    }
+
+    private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<Pair<String?, String?>, Boolean>>() {
+        override fun doInBackground(vararg params: Void): Map<Pair<String?, String?>, Boolean> {
+            var doShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
+        	mStopId?.let { stopId ->
+                DbAdapter().run {
+                    open(mContext)
+                    doShowRoutes = getDoShowRoutes(stopId)
+                    close()
+                }
+            }
+            return doShowRoutes
+        }
+
+        override fun onPostExecute(result: Map<Pair<String?, String?>, Boolean>) {
+            mDoShowRoutes.value = result
+        }
     }
 
     companion object {

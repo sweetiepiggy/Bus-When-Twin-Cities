@@ -102,7 +102,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
-        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{ updateDoShowRoutes(it) })
+        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+            updateDoShowRoutes(it)
+        })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?

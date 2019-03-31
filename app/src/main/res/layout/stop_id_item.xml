@@ -18,10 +18,11 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -193,4 +194,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+</LinearLayout>

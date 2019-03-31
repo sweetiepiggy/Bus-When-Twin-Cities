@@ -72,7 +72,9 @@ class NexTripsFragment : Fragment() {
         mResultsRecyclerView.adapter = mAdapter
         mAdapter.setOnClickMapListener(mClickMapListener)
         mSwipeRefreshLayout.setOnRefreshListener { model.loadNexTrips() }
-        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{ updateDoShowRoutes(it) })
+        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+            updateDoShowRoutes(it)
+        })
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
