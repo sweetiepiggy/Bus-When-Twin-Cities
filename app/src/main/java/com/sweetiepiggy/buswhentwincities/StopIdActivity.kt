@@ -49,7 +49,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mMapFragment: MyMapFragment? = null
     private var mNexTripsFragment: NexTripsFragment? = null
     private var mMenu: Menu? = null
-    private var mIsFavorite = false
+    private var mIsFavorite: Boolean? = null
     private var mDualPane = false
     private lateinit var mNexTripsModel: NexTripsViewModel
     private var mNexTrips: List<NexTrip> = listOf()
@@ -106,23 +106,32 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             }
         }
 
-        title = resources.getString(R.string.stop_number) + (mStopId?.toString() ?: "")
+        title = makeTitle(mStopId, mStopDesc)
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
             mNexTripsFragment?.setRefreshing(true)
             mNexTripsModel.loadNexTrips()
         }
-        LoadIsFavorite().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         mStopId?.let { savedInstanceState.putInt(KEY_STOP_ID, it) }
+        mIsFavorite?.let { savedInstanceState.putBoolean(KEY_IS_FAVORITE, it) }
+        mStopDesc?.let { savedInstanceState.putString(KEY_STOP_DESC, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_STOP_ID)) {
             mStopId = b.getInt(KEY_STOP_ID)
+        }
+        if (b.containsKey(KEY_STOP_DESC)) {
+            mStopDesc = b.getString(KEY_STOP_DESC)
+        }
+        if (b.containsKey(KEY_IS_FAVORITE)) {
+            mIsFavorite = b.getBoolean(KEY_IS_FAVORITE)
+        } else {
+            LoadIsFavorite().execute()
         }
     }
 
@@ -130,7 +139,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         mMenu = menu
         menuInflater.inflate(R.menu.menu_stop_id, menu)
         menu.findItem(R.id.action_favorite).icon =
-            getDrawable(this, if (mIsFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
+            getDrawable(this, if (mIsFavorite ?: false) IS_FAV_ICON else IS_NOT_FAV_ICON)
         return true
     }
 
@@ -206,7 +215,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
                     mMapFragment?.onChangeHiddenRoutes(changedRoutes)
                     mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
-                    if (mIsFavorite) {
+                    if (mIsFavorite ?: false) {
                         StoreDoShowRoutesInDbTask(mDoShowRoutes).execute()
                     }
                     mFilteredButWasntFavorite = true
@@ -217,7 +226,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     private fun onClickFavorite(item: MenuItem) {
-        if (mIsFavorite) {
+        if (mIsFavorite ?: false) {
             mIsFavorite = false
             item.icon = getDrawable(this, IS_NOT_FAV_ICON)
             title = resources.getString(R.string.stop_number) + mStopId
@@ -309,8 +318,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mIsFavorite = isFavorite
             mStopDesc = stopDesc
 
-            title = resources.getString(R.string.stop_number) + mStopId +
-            	(if (!stopDesc.isNullOrEmpty()) " ($stopDesc)" else "")
+            title = makeTitle(mStopId, stopDesc)
             mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
         		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         }
@@ -394,8 +402,16 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     private fun guessDoShow(route: String?, terminal: String?) = true
 
+    private fun makeTitle(stopId: Int?, stopDesc: String?): String =
+        if (stopDesc.isNullOrEmpty())
+        	resources.getString(R.string.stop_number) + (stopId?.toString() ?: "")
+        else
+        	stopDesc + stopId?.let { " (#" + it.toString() + ")" }
+
     companion object {
         val KEY_STOP_ID = "stopId"
+        val KEY_IS_FAVORITE = "isFavorite"
+        val KEY_STOP_DESC = "stopDesc"
 
         private val IS_FAV_ICON = R.drawable.ic_baseline_favorite_24px
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px

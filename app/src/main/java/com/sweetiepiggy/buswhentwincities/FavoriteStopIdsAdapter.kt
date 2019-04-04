@@ -36,7 +36,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
     val mItemTouchHelper = ItemTouchHelper(FavoriteStopIdsItemTouchHelperCallback())
 
     interface OnClickFavoriteListener {
-        fun onClickFavorite(stopId: Int)
+        fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStopId)
         fun onMoveFavorite(fromPosition: Int, toPosition: Int)
         fun onDeleteFavorite(position: Int)
     }
@@ -55,7 +55,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
         init {
             v.setOnClickListener {
-                mFavoriteListener.onClickFavorite(mFavStops[adapterPosition].stopId)
+                mFavoriteListener.onClickFavorite(mFavStops[adapterPosition])
             }
         }
     }

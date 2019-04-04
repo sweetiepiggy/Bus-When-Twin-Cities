@@ -112,8 +112,13 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             else -> false
         }
 
-    override fun onClickFavorite(stopId: Int) {
-        startStopIdActivity(stopId)
+    override fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStopId) {
+        val b = Bundle().apply {
+            putInt(StopIdActivity.KEY_STOP_ID, favStop.stopId)
+            putBoolean(StopIdActivity.KEY_IS_FAVORITE, true)
+            putString(StopIdActivity.KEY_STOP_DESC, favStop.stopDesc)
+        }
+        startStopIdActivity(b)
     }
 
     override fun onMoveFavorite(fromPosition: Int, toPosition: Int) {
@@ -147,13 +152,13 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     override fun onSearchStopId(stopId: Int) {
-        startStopIdActivity(stopId)
-    }
-
-    private fun startStopIdActivity(stopId: Int) {
         val b = Bundle().apply {
             putInt(StopIdActivity.KEY_STOP_ID, stopId)
         }
+        startStopIdActivity(b)
+    }
+
+    private fun startStopIdActivity(b: Bundle) {
         val intent = Intent(this, StopIdActivity::class.java).apply {
             putExtras(b)
         }
@@ -182,17 +187,13 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_FAV)
     }
 
-    private fun hasAnyFavorites(): Boolean {
-        val dbHelper = DbAdapter()
-        dbHelper.open(applicationContext)
-        val ret = dbHelper.hasAnyFavorites()
-        dbHelper.close()
-        return ret
-    }
-
     private inner class SelectDefaultBnv(): AsyncTask<Void, Void, Int>() {
         override fun doInBackground(vararg params: Void): Int {
-            return if (hasAnyFavorites()) BNV_FAV else BNV_SEARCH
+            val dbHelper = DbAdapter()
+            dbHelper.open(applicationContext)
+            val hasAnyFavorites = dbHelper.hasAnyFavorites()
+            dbHelper.close()
+            return if (hasAnyFavorites) BNV_FAV else BNV_SEARCH
         }
 
         override fun onPostExecute(result: Int) {
