@@ -280,7 +280,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         .icon(getBusIcon(nexTrip.routeDirection))
                         .position(nexTrip.position!!)
                     	.flat(true)
-                    ).apply { if (mVehicleBlockNumber != null) alpha = UNSELECTED_MARKER_ALPHA }
+                    ).apply {
+                        val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
+                        if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
+                            alpha = UNSELECTED_MARKER_ALPHA
+                        }
+                    }
                 }.apply {
                     tag = nexTrip
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
@@ -299,8 +304,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         if (mVehicleBlockNumber == null) {
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
-                if (changedRoutes.contains(Pair(nexTrip.route, nexTrip.terminal))) {
-                    marker.alpha = if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true)
+                val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
+                if (changedRoutes.contains(routeAndTerminal)) {
+                    marker.alpha = if (mDoShowRoutes.get(routeAndTerminal) ?: true)
             	    	1f
                     else
         	        	UNSELECTED_MARKER_ALPHA

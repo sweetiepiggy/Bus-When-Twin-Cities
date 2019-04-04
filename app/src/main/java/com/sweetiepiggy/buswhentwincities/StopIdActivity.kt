@@ -212,9 +212,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     }
                 }
                 if (!changedRoutes.isEmpty()) {
+                    mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
                     mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
                     mMapFragment?.onChangeHiddenRoutes(changedRoutes)
-                    mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
                     if (mIsFavorite ?: false) {
                         StoreDoShowRoutesInDbTask(mDoShowRoutes).execute()
                     }
