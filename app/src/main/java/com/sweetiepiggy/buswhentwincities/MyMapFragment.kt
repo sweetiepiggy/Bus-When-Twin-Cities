@@ -113,7 +113,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
             // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
-        )
+        	)
         })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -201,8 +201,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     .position(LatLng(it.stopLat, it.stopLon))
         	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
-            // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
-        )
+                    // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
+        	)// ?.apply {
+            //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
+        	// }
         }
         if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
@@ -273,11 +275,13 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        val nexTripsWithActualPosition = nexTrips.filter { it.isActual && it.position != null }
+        val timeInMillis = Calendar.getInstance().timeInMillis
+        val nexTripsWithActualPosition = nexTrips.filter {
+            it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < 30 } ?: false))
+        }
         val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
         if (mNexTrips == null) mNexTrips = mutableMapOf()
         mNexTrips!!.clear()
-        val timeInMillis = Calendar.getInstance().timeInMillis
         nexTripsWithActualPosition.forEach {
             mNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
         }

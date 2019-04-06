@@ -64,6 +64,9 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
         }
     }
 
+    fun minutesUntilDeparture(timeInMillis: Long): Long? =
+    	departureTimeInMillis?.let { (it - timeInMillis) / 1000 / 60 }
+
     companion object {
         fun from(rawNexTrip: RawNexTrip, timeInMillis: Long): NexTrip {
             // if we're not given departureTime then try to compute it from departureText
@@ -140,20 +143,16 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val routeDirectionStr: String? = translateDirection(nexTrip.routeDirection, context.resources)
     val position: LatLng? = nexTrip.position
     val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
+    val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(timeInMillis)
 
     val departureText: String?
 	val departureTime: String?
 
     init {
-        val millisUntilDeparture by lazy {
-            nexTrip.departureTimeInMillis!! - timeInMillis
-        }
-        val minutesUntilDeparture by lazy { millisUntilDeparture / 1000 / 60 }
-
         if (nexTrip.departureTimeInMillis == null) {
             departureText = null
             departureTime = null
-        } else if (nexTrip.departureTimeInMillis < 0 || minutesUntilDeparture < 0) {
+        } else if (nexTrip.departureTimeInMillis < 0 || minutesUntilDeparture!! < 0) {
             departureText = context.resources.getString(R.string.past_due)
             departureTime = null
         } else if (minutesUntilDeparture < 60) {
