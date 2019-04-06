@@ -46,6 +46,7 @@ import java.util.*
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
     private var mStopId: Int? = null
     private var mStopDesc: String? = null
+    private var mStop: Stop? = null
     private var mMapFragment: MyMapFragment? = null
     private var mNexTripsFragment: NexTripsFragment? = null
     private var mMenu: Menu? = null
@@ -75,6 +76,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
         mDualPane = findViewById<ViewPager>(R.id.pager) == null
 
+        title = makeTitle(mStopId, mStopDesc)
+
         mNexTripsModel = ViewModelProviders.of(this,
         	NexTripsViewModel.NexTripsViewModelFactory(mStopId, applicationContext)
         ).get(NexTripsViewModel::class.java)
@@ -84,6 +87,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             if (!mDoShowRoutesInitDone) {
                 initDoShowRoutes(it)
                 mDoShowRoutesInitDone = true
+            }
+        })
+        mNexTripsModel.getStop().observe(this, Observer<Stop>{
+            mStop = it
+            if (mStopDesc == null) {
+                title = makeTitle(mStopId, it.stopName)
             }
         })
 
@@ -105,8 +114,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 getTabAt(ITEM_IDX_MAP)?.setIcon(R.drawable.ic_baseline_map_24px)
             }
         }
-
-        title = makeTitle(mStopId, mStopDesc)
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
             mNexTripsFragment?.setRefreshing(true)
@@ -229,7 +236,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         if (mIsFavorite ?: false) {
             mIsFavorite = false
             item.icon = getDrawable(this, IS_NOT_FAV_ICON)
-            title = resources.getString(R.string.stop_number) + mStopId
+            title = makeTitle(mStopId, mStop?.stopName)
             mStopId?.let { stopId ->
                 object : AsyncTask<Void, Void, Void>() {
                     override fun doInBackground(vararg params: Void): Void? {
@@ -240,7 +247,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                         }
                         return null
                     }
-                    override fun onPostExecute(result: Void?) {}
+                    override fun onPostExecute(result: Void?) {
+                        mFilteredButWasntFavorite = true
+                    }
                 }.execute()
             }
         } else {
@@ -248,12 +257,14 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
                 setTitle(R.string.enter_stop_name_dialog_title)
                 setView(favStopIdDialog)
+                mStop?.let { stop ->
+                    favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.setText(stop.stopName)
+                }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     mIsFavorite = true
                     item.icon = getDrawable(context, IS_FAV_ICON)
                     val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
-                    title = resources.getString(R.string.stop_number) + mStopId +
-                    	(if (!stopName.isNullOrEmpty()) " ($stopName)" else "")
+                    title = makeTitle(mStopId, stopName)
                     mStopId?.let { stopId ->
                         object : AsyncTask<Void, Void, Void>() {
                             override fun doInBackground(vararg params: Void): Void? {

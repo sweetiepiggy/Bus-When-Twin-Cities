@@ -52,6 +52,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
+    private var mStop: Stop? = null
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
@@ -104,6 +105,15 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
         model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
             updateDoShowRoutes(it)
+        })
+        model.getStop().observe(this, Observer<Stop>{
+            mStop = it
+            mMap?.addMarker(MarkerOptions()
+                    .position(LatLng(it.stopLat, it.stopLon))
+        	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
+                    .snippet(it.stopName)
+            // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
+        )
         })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -163,7 +173,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 if (blockNumber == nexTrip.blockNumber) {
                     marker.alpha = 1f
                     marker.showInfoWindow()
-                    zoomToVehicle(nexTrip)
+                    zoomToPosition(nexTrip.position!!)
                 } else {
                     marker.alpha = UNSELECTED_MARKER_ALPHA
                 }
@@ -186,43 +196,60 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private fun initCamera() {
         mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
+        mStop?.let {
+            mMap?.addMarker(MarkerOptions()
+                    .position(LatLng(it.stopLat, it.stopLon))
+        	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
+                    .snippet(it.stopName)
+            // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
+        )
+        }
         if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
+        }
+        if (!mNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
         }
     }
 
     private fun zoomToAllVehicles() {
-	    if (mMarkers.size == 1) {
-            zoomToVehicle(mMarkers.values.elementAt(0).tag as PresentableNexTrip)
+        val stop = mStop
+	    if (mMarkers.size == 1 && stop == null) {
+            zoomToPosition((mMarkers.values.elementAt(0).tag as PresentableNexTrip).position!!)
+            return
+        } else if (mMarkers.isEmpty() && stop != null) {
+            zoomToPosition(LatLng(stop.stopLat, stop.stopLon))
             return
         }
 
     	val latLngs = mMarkers.values.map { (it.tag as PresentableNexTrip).position!! }
+        val latLngsWithStop = if (stop == null)
+        		latLngs
+        	else latLngs + LatLng(stop.stopLat, stop.stopLon)
 
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
                 if (!latLngs.isEmpty()) {
                     val latLngsWithMyLoc = if (myLocation != null)
-                    	latLngs + LatLng(myLocation.latitude, myLocation.longitude)
-                    else latLngs
+                    	latLngsWithStop + LatLng(myLocation.latitude, myLocation.longitude)
+                    else latLngsWithStop
                     zoomTo(latLngsWithMyLoc, 5.236f)
                 }
             }
             .addOnFailureListener { zoomTo(latLngs, 5.236f) }
     }
 
-    private fun zoomToVehicle(nexTrip: PresentableNexTrip) {
+    private fun zoomToPosition(pos: LatLng) {
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
                 if (myLocation != null) {
-                    zoomTo(listOf(nexTrip.position!!, LatLng(myLocation.latitude, myLocation.longitude)), 3f)
+                    zoomTo(listOf(pos, LatLng(myLocation.latitude, myLocation.longitude)), 3f)
                 } else {
-                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(nexTrip.position!!, 15f))
+                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f))
                 }
             }
             .addOnFailureListener {
-                mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(nexTrip.position!!, 15f))
+                mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f))
             }
         }
 
@@ -281,6 +308,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         .icon(getBusIcon(nexTrip.routeDirection))
                         .position(nexTrip.position!!)
                     	.flat(true)
+                    	.anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
                     ).apply {
                         val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
                         if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
@@ -324,4 +352,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             NexTrip.Direction.NORTH -> mBusNorthIcon
             else -> mBusIcon
         }
+
+    private fun getBusIconAnchorVertical(direction: NexTrip.Direction?): Float =
+        // anchor at bottom of bus, not bottom of arrow
+    	if (direction == NexTrip.Direction.SOUTH) 0.8f else 1f
 }

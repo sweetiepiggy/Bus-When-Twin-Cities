@@ -39,6 +39,7 @@ class DbAdapter {
             db.execSQL(DATABASE_CREATE_FILTERS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS)
             db.execSQL(DATABASE_CREATE_NEXTRIPS_INDEX)
+            db.execSQL(DATABASE_CREATE_STOPS)
             db.execSQL(DATABASE_CREATE_LAST_UPDATE)
         }
 
@@ -137,6 +138,20 @@ class DbAdapter {
                         do_show BOOLEAN NOT NULL,
                         FOREIGN KEY(stop_id) REFERENCES fav_stops(stop_id),
                         PRIMARY KEY(stop_id, route, terminal)
+                    )
+                """)
+            }
+            // create stops table, versionCode 37
+            if (oldVer < 7) {
+                db.execSQL("""
+	            	CREATE TABLE stops (
+                        stop_id INTEGER PRIMARY KEY,
+                        stop_name TEXT NOT NULL,
+                        stop_desc TEXT,
+                        stop_lat DOUBLE NOT NULL,
+                        stop_lon DOUBLE NOT NULL,
+                        wheelchair_boarding INTEGER,
+                        last_update DATETIME
                     )
                 """)
             }
@@ -406,6 +421,35 @@ class DbAdapter {
         return doShowRoutes
     }
 
+    fun updateStop(stop: Stop) {
+        val cv = ContentValues().apply {
+            put(KEY_STOP_ID, stop.stopId)
+            put(KEY_STOP_NAME, stop.stopName)
+            put(KEY_STOP_DESC, stop.stopDesc)
+            put(KEY_STOP_LAT, stop.stopLat)
+            put(KEY_STOP_LON, stop.stopLon)
+            put(KEY_WHEELCHAIR_BOARDING, stop.wheelchairBoarding)
+        }
+        mDbHelper!!.mDb!!.insert(TABLE_STOPS, null, cv)
+    }
+
+    fun getStop(stopId: Int): Stop? {
+        var stop: Stop? = null
+        val c = mDbHelper!!.mDb!!.query(TABLE_STOPS,
+        	arrayOf(KEY_STOP_NAME, KEY_STOP_DESC, KEY_STOP_LAT, KEY_STOP_LON, KEY_WHEELCHAIR_BOARDING),
+	        "$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
+        if (c.moveToNext()) {
+            val stopName = c.getString(c.getColumnIndex(KEY_STOP_NAME))
+            val stopDesc = c.getString(c.getColumnIndex(KEY_STOP_DESC))
+            val stopLat = c.getDouble(c.getColumnIndex(KEY_STOP_LAT))
+            val stopLon = c.getDouble(c.getColumnIndex(KEY_STOP_LON))
+            val wheelchairBoarding = c.getInt(c.getColumnIndex(KEY_WHEELCHAIR_BOARDING))
+            stop = Stop(stopId, stopName, stopDesc, stopLat, stopLon, wheelchairBoarding)
+        }
+        c.close()
+        return stop
+    }
+
     companion object {
         val KEY_STOP_ID = "stop_id"
         val KEY_STOP_DESCRIPTION = "stop_description"
@@ -422,6 +466,11 @@ class DbAdapter {
         private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
         private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
         private val KEY_DO_SHOW = "do_show"
+        private val KEY_STOP_NAME = "stop_name"
+        private val KEY_STOP_DESC = "stop_desc"
+        private val KEY_STOP_LAT = "stop_lat"
+        private val KEY_STOP_LON = "stop_lon"
+        private val KEY_WHEELCHAIR_BOARDING = "wheelchair_boarding"
 
         private val KEY_POSITION = "position"
         private val KEY_LAST_UPDATE = "last_update"
@@ -429,12 +478,13 @@ class DbAdapter {
         private val TABLE_FAV_STOPS = "fav_stops"
         private val TABLE_NEXTRIPS = "nextrips"
         private val TABLE_FILTERS = "filters"
+        private val TABLE_STOPS = "stops"
         private val TABLE_LAST_UPDATE = "last_update"
 
         private val INDEX_NEXTRIPS = "index_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 6
+        private val DATABASE_VERSION = 7
 
         private val DATABASE_CREATE_FAV_STOPS = """
 	        CREATE TABLE $TABLE_FAV_STOPS (
@@ -474,6 +524,18 @@ class DbAdapter {
 
         private val DATABASE_CREATE_NEXTRIPS_INDEX = """
 	        CREATE INDEX $INDEX_NEXTRIPS ON $TABLE_NEXTRIPS ($KEY_STOP_ID)
+            """
+
+        private val DATABASE_CREATE_STOPS = """
+	        CREATE TABLE $TABLE_STOPS (
+                $KEY_STOP_ID INTEGER PRIMARY KEY,
+                $KEY_STOP_NAME TEXT NOT NULL,
+                $KEY_STOP_DESC TEXT,
+                $KEY_STOP_LAT DOUBLE NOT NULL,
+                $KEY_STOP_LON DOUBLE NOT NULL,
+                $KEY_WHEELCHAIR_BOARDING INTEGER,
+                $KEY_LAST_UPDATE DATETIME
+            )
             """
 
         private val DATABASE_CREATE_LAST_UPDATE = """

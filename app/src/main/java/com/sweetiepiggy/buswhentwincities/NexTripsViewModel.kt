@@ -27,8 +27,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.*
 
-class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedListener {
+class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedListener, DownloadStopTask.OnDownloadedListener {
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
+    private var mDownloadStopTask: DownloadStopTask? = null
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
     private var mLastUpdate: Long = 0
     private var mDbLastUpdate: Long = 0
@@ -45,6 +46,10 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         }
     }
 
+    private val mStop: MutableLiveData<Stop> by lazy {
+        MutableLiveData<Stop>().also { LoadStopTask().execute() }
+    }
+
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
 
@@ -54,6 +59,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes.value = doShowRoutes
     }
+
+    fun getStop(): LiveData<Stop> = mStop
 
     interface OnLoadNexTripsErrorListener {
         fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError)
@@ -109,6 +116,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
     override fun onCleared() {
         mDownloadNexTripsTask?.cancel(true)
+        mDownloadStopTask?.cancel(true)
         super.onCleared()
     }
 
@@ -187,6 +195,49 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         override fun onPostExecute(result: Map<Pair<String?, String?>, Boolean>) {
             mDoShowRoutes.value = result
         }
+    }
+
+    private inner class LoadStopTask(): AsyncTask<Void, Void, Stop?>() {
+        override fun doInBackground(vararg params: Void): Stop? {
+            var stop: Stop? = null
+            mStopId?.let { stopId ->
+                DbAdapter().apply {
+                    open(mContext)
+                    stop = getStop(stopId)
+                    close()
+                }
+            }
+            return stop
+        }
+
+        override fun onPostExecute(result: Stop?) {
+            if (result == null) {
+                mStopId?.let { stopId ->
+                    mDownloadStopTask = DownloadStopTask(this@NexTripsViewModel, stopId)
+                    mDownloadStopTask!!.execute()
+                }
+            } else {
+                mStop.value = result
+            }
+        }
+    }
+
+    override fun onDownloaded(stop: Stop) {
+        mStop.value = stop
+        StoreStopInDbTask(stop).execute()
+    }
+
+    private inner class StoreStopInDbTask(private val stop: Stop): AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg params: Void): Void? {
+            DbAdapter().run {
+                openReadWrite(mContext)
+                updateStop(stop)
+                close()
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) { }
     }
 
     companion object {
