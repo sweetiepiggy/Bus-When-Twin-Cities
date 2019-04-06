@@ -243,7 +243,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        val nexTripsWithActualPosition = nexTrips.filter { it.isActual && it.position != null }
+        // val nexTripsWithActualPosition = nexTrips.filter { it.isActual && it.position != null }
+        val nexTripsWithActualPosition = nexTrips.filter { it.position != null }
         val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
         if (mNexTrips == null) mNexTrips = mutableMapOf()
         mNexTrips!!.clear()
