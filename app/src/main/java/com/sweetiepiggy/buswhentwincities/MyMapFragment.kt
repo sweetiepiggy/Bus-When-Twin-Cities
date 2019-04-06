@@ -146,7 +146,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(marker: Marker): Boolean {
                 if (mVehicleBlockNumber != null &&
-            			mVehicleBlockNumber != (marker.tag as PresentableNexTrip).blockNumber) {
+            			mVehicleBlockNumber != (marker.tag as PresentableNexTrip?)?.blockNumber) {
                     deselectVehicle()
                 }
                 return false
@@ -218,7 +218,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             zoomToPosition((mMarkers.values.elementAt(0).tag as PresentableNexTrip).position!!)
             return
         } else if (mMarkers.isEmpty() && stop != null) {
-            zoomToPosition(LatLng(stop.stopLat, stop.stopLon))
+            mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(stop.stopLat, stop.stopLon), 15f))
             return
         }
 
@@ -242,8 +242,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private fun zoomToPosition(pos: LatLng) {
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
-                if (myLocation != null) {
-                    zoomTo(listOf(pos, LatLng(myLocation.latitude, myLocation.longitude)), 3f)
+                if (myLocation != null || mStop != null) {
+                    val locs = mutableListOf(pos)
+                    myLocation?.let { locs.add(LatLng(it.latitude, it.longitude)) }
+                    mStop?.let { locs.add(LatLng(it.stopLat, it.stopLon)) }
+                    zoomTo(locs, 3f)
                 } else {
                     mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f))
                 }
