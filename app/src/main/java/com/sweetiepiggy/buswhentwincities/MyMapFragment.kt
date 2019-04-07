@@ -112,7 +112,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     .position(LatLng(it.stopLat, it.stopLon))
         	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
-            // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
+                    .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
         	)
         })
 
@@ -201,7 +201,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     .position(LatLng(it.stopLat, it.stopLon))
         	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
-                    // .icon(drawableToBitmap(context!!, R.drawable.ic_place_black_24dp))
+                    .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
         	)// ?.apply {
             //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
         	// }
