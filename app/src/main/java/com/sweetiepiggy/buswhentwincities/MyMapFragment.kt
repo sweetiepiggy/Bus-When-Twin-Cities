@@ -282,7 +282,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
-            it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < 30 } ?: false))
+            it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
         }
         val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
         if (mNexTrips == null) mNexTrips = mutableMapOf()
