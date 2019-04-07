@@ -69,6 +69,21 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private val mBusNorthIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_north_30px)
     }
+    private val mTrainIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_train_24px)
+    }
+    private val mTrainSouthIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_train_south_30px)
+    }
+    private val mTrainEastIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_train_east_36px)
+    }
+    private val mTrainWestIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_train_west_36px)
+    }
+    private val mTrainNorthIcon: BitmapDescriptor by lazy {
+        drawableToBitmap(context!!, R.drawable.ic_baseline_train_north_30px)
+    }
 
     companion object {
         fun newInstance() = MyMapFragment()
@@ -316,7 +331,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     }
                 } else {
                     addMarker(MarkerOptions()
-                        .icon(getBusIcon(nexTrip.routeDirection))
+                        .icon(getIcon(nexTrip.isTrain(), nexTrip.routeDirection))
                         .position(nexTrip.position!!)
                     	.flat(true)
                     	.anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
@@ -354,6 +369,18 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             }
         }
     }
+
+    private fun getIcon(isTrain: Boolean, direction: NexTrip.Direction?): BitmapDescriptor =
+    	if (isTrain) getTrainIcon(direction) else getBusIcon(direction)
+
+    private fun getTrainIcon(direction: NexTrip.Direction?): BitmapDescriptor =
+    	when (direction) {
+            NexTrip.Direction.SOUTH -> mTrainSouthIcon
+            NexTrip.Direction.EAST  -> mTrainEastIcon
+            NexTrip.Direction.WEST  -> mTrainWestIcon
+            NexTrip.Direction.NORTH -> mTrainNorthIcon
+            else -> mTrainIcon
+        }
 
     private fun getBusIcon(direction: NexTrip.Direction?): BitmapDescriptor =
     	when (direction) {

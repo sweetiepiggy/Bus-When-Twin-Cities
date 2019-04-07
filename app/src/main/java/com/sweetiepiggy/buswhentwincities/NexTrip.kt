@@ -169,6 +169,9 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
          }
     }
 
+    fun isTrain(): Boolean =
+    	route == "Blue" || route == "Grn"
+
     companion object {
         private fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =
         	when (dir) {
