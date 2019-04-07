@@ -215,16 +215,21 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun zoomToAllVehicles() {
+        val shownMarkers = mMarkers.values.filter {
+            val nexTrip = it.tag as PresentableNexTrip
+            val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
+            mDoShowRoutes.get(routeAndTerminal) ?: true
+        }
         val stop = mStop
-	    if (mMarkers.size == 1 && stop == null) {
-            zoomToPosition((mMarkers.values.elementAt(0).tag as PresentableNexTrip).position!!)
+	    if (shownMarkers.size == 1 && stop == null) {
+            zoomToPosition((shownMarkers.elementAt(0).tag as PresentableNexTrip).position!!)
             return
-        } else if (mMarkers.isEmpty() && stop != null) {
+        } else if (shownMarkers.isEmpty() && stop != null) {
             mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(stop.stopLat, stop.stopLon), 15f))
             return
         }
 
-    	val latLngs = mMarkers.values.map { (it.tag as PresentableNexTrip).position!! }
+    	val latLngs = shownMarkers.map { (it.tag as PresentableNexTrip).position!! }
         val latLngsWithStop = if (stop == null)
         		latLngs
         	else latLngs + LatLng(stop.stopLat, stop.stopLon)
