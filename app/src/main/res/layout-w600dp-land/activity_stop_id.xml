@@ -42,33 +42,36 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
+  	  app:layout_behavior="@string/appbar_scrolling_view_behavior"
           android:layout_width="match_parent"
           android:layout_height="match_parent" >
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:layout_marginTop="?attr/actionBarSize"
-          android:orientation="horizontal">
-      
-          <FrameLayout
-              android:id="@+id/nextrips_container"
-              android:layout_width="0dp"
-              android:layout_height="match_parent"
-              android:layout_weight="1" />
-      
-          <FrameLayout
-              android:id="@+id/map_container"
-              android:layout_width="0dp"
-              android:layout_weight="1.618"
-              android:layout_height="match_parent" />
-      </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/nextrips_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:id="@+id/map_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.618" />
+        </LinearLayout>
   
       <ProgressBar
           android:id="@+id/progressBar"
-          style="?android:attr/progressBarStyle"
-          android:layout_width="wrap_content"
+          style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_gravity="center"
+          android:layout_gravity="top"
+          android:layout_marginTop="-6dp"
           android:indeterminate="true"
           android:visibility="visible" />
     </FrameLayout>

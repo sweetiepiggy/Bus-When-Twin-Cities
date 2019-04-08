@@ -31,5 +31,6 @@
 	android:layout_marginLeft="@dimen/text_margin"
 	android:layout_marginRight="@dimen/text_margin"
         android:layout_marginBottom="4dp"
+	android:selectAllOnFocus="true"
         android:hint="@string/enter_stop_name_dialog_message" />
 </LinearLayout>
