@@ -70,7 +70,7 @@ sealed class NexTripChange {
                         }
                         // origNexTrip is still in list, make note if it changed
                         if (!nexTripsAppearSame(origNexTrip, newNexTrip,
-                        		doShowRoutes.get(Pair(origNexTrip.route, origNexTrip.terminal)) ?: false)) {
+                        		!(doShowRoutes.get(Pair(origNexTrip.route, origNexTrip.terminal)) ?: true))) {
                             changes.add(NexTripChange.ItemChanged(newIdx))
                         }
                         if (newItr.hasNext()) {
@@ -235,8 +235,8 @@ sealed class NexTripChange {
         		abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 10 * 60 * 1000)
 
         fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip,
-    			isHidden: Boolean): Boolean =
-            nexTrip1.departureText == nexTrip2.departureText &&
+    			isHidden: Boolean): Boolean {
+            val ret = nexTrip1.departureText == nexTrip2.departureText &&
         	nexTrip1.description == nexTrip2.description &&
         	(isHidden ||
         	    (nexTrip1.departureTime == nexTrip2.departureTime &&
@@ -244,6 +244,9 @@ sealed class NexTripChange {
                 nexTrip1.routeDirection == nexTrip2.routeDirection &&
 	            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
     		    (nexTrip1.position == null) == (nexTrip2.position == null)))
+            android.util.Log.d("abc", "got here: nexTripsAppearSame $ret, $isHidden: ${nexTrip1.departureText} ${nexTrip1.isActual} ${nexTrip1.position} ${nexTrip2.departureText} ${nexTrip2.isActual} ${nexTrip2.position}")
+            return ret
+}
         }
 }
 

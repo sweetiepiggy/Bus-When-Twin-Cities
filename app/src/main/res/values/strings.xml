@@ -22,9 +22,9 @@
     <string name="app_name">Bus When? (Twin Cities)</string>
 
     <string name="stop_number">Stop #</string>
-    <string name="stop_id">Stop ID?</string>
+    <string name="stop_id">Stop number?</string>
     <string name="stop_id_hint">for example: 17922</string>
-    <string name="enter_stop_id">Enter Stop ID</string>
+    <string name="enter_stop_id">Enter stop number</string>
     <string name="must_be_number">Must be a number</string>
     <string name="real_time">real-time</string>
     <string name="scheduled">scheduled</string>
@@ -56,10 +56,10 @@
     <string name="no_nextrips_found">No upcoming trips</string>
     <string name="no_favorites_found">No favorites here yet</string>
 
-    <string name="main_search_icon_content_description">search for stop ID</string>
-    <string name="favorite_stop_ids_content_description">favorite stop IDs</string>
+    <string name="main_search_icon_content_description">search for stop number</string>
+    <string name="favorite_stop_ids_content_description">favorite stops</string>
     <string name="about_email_icon_content_description">email the app developer</string>
-    <string name="reorder_favorites_content_description">reorder favorite stop IDs</string>
+    <string name="reorder_favorites_content_description">reorder favorite stops</string>
 
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">Simple, useful, free and open-source apps for Minnesotans</string>

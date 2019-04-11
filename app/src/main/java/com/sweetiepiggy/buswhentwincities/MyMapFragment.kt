@@ -279,12 +279,13 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
 
     private fun zoomTo(latLngs: List<LatLng>, paddingRatio: Float) {
-        if (!latLngs.isEmpty()) mMap?.run {
+        val a = activity
+        if (!latLngs.isEmpty() && a != null) mMap?.run {
             val bounds = LatLngBounds.Builder().apply {
                 latLngs.forEach { include(it) }
             }.build()
             val tv = TypedValue()
-            activity!!.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
+            a.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
             val actionBarHeight = complexToDimensionPixelSize(tv.data, resources.displayMetrics)
             val width = (resources.displayMetrics.widthPixels)
             val height = resources.displayMetrics.heightPixels - actionBarHeight
