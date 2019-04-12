@@ -244,7 +244,6 @@ sealed class NexTripChange {
                 nexTrip1.routeDirection == nexTrip2.routeDirection &&
 	            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
     		    (nexTrip1.position == null) == (nexTrip2.position == null)))
-            android.util.Log.d("abc", "got here: nexTripsAppearSame $ret, $isHidden: ${nexTrip1.departureText} ${nexTrip1.isActual} ${nexTrip1.position} ${nexTrip2.departureText} ${nexTrip2.isActual} ${nexTrip2.position}")
             return ret
 }
         }

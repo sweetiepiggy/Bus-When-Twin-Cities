@@ -36,6 +36,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
@@ -43,7 +44,7 @@ import com.google.android.material.tabs.TabLayout
 import java.security.InvalidParameterException
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
+class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener, NexTripsViewModel.OnChangeRefreshingListener {
     private var mStopId: Int? = null
     private var mStopDesc: String? = null
     private var mStop: Stop? = null
@@ -82,6 +83,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         	NexTripsViewModel.NexTripsViewModelFactory(mStopId, applicationContext)
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
+        mNexTripsModel.setChangeRefreshingListener(this)
         mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
         mNexTripsModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
             if (!mDoShowRoutesInitDone) {
@@ -116,7 +118,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
-            mNexTripsFragment?.setRefreshing(true)
             mNexTripsModel.loadNexTrips()
         }
     }
@@ -182,6 +183,15 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                     override fun onClick(v: View) {}
         		}).show()
         }
+    }
+
+    override fun setRefreshing(refreshing: Boolean) {
+        if (!refreshing) {
+            findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setRefreshing(false)
+        }
+        findViewById<View>(R.id.progressBar)?.setVisibility(
+            if (refreshing) View.VISIBLE else View.INVISIBLE
+        )
     }
 
     private fun onClickFilter() {
