@@ -84,7 +84,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
             			downloadNextTripsTask.status == AsyncTask.Status.FINISHED) &&
 		    			unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
                 // refresh displayed times now in case internet connection is slow
-                mNexTrips.value?.let { mNexTrips.value = filterOldNexTrips(it, unixTime, mLastUpdate) }
+                mNexTrips.value?.let { mNexTrips.value = it }
 
                 // start a new download task if there is no currently running task and
                 // it's been as at least MIN_SECONDS_BETWEEN_REFRESH since the last download
@@ -110,18 +110,18 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     }
 
     override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
-        // if (mLastUpdate == 0L) {
-        //     val dbNexTrips = mDbNexTrips
-        //     // fall back to nexTrips from database if they exist
-        //     if (dbNexTrips != null) {
-        //         mLastUpdate = mDbLastUpdate
-        // 	    mNexTrips.value = filterOldNexTrips(dbNexTrips, unixTime, mLastUpdate)
-        //     } else {
-        //         mNexTrips.value = listOf()
-        //     }
-        // } else mNexTrips.value?.let { nexTrips ->
-        // 	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
-        // }
+        if (mLastUpdate == 0L) {
+            val dbNexTrips = mDbNexTrips
+            // fall back to nexTrips from database if they exist
+            if (dbNexTrips != null) {
+                mLastUpdate = mDbLastUpdate
+        	    mNexTrips.value = filterOldNexTrips(dbNexTrips, unixTime, mLastUpdate)
+            } else {
+                mNexTrips.value = listOf()
+            }
+        } else mNexTrips.value?.let { nexTrips ->
+        	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
+        }
         mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
         mLoadingNexTrips = false
         mRefreshingListener?.setRefreshing(false)
@@ -170,7 +170,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
             // display the database results now in case internet connection is slow
             if (!mDbNexTrips.isNullOrEmpty()) {
-                mNexTrips.value = mDbNexTrips
+                mNexTrips.setValue(mDbNexTrips)
                 mLastUpdate = mDbLastUpdate
             }
 
