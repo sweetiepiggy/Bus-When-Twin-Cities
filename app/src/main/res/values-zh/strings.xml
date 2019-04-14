@@ -23,7 +23,7 @@
 
     <string name="stop_number">公交站＃</string>
     <string name="stop_id">公交站号码？</string>
-    <string name="stop_id_hint">例如：17922</string>
+    <string name="stop_id_hint">例如：17980</string>
     <string name="enter_stop_id">输入公交站号码</string>
     <string name="must_be_number">必须是一个号码数字</string>
     <string name="real_time">即时</string>

@@ -23,7 +23,7 @@
 
     <string name="stop_number">Parada #</string>
     <string name="stop_id">¿Número de parada?</string>
-    <string name="stop_id_hint">por ejemplo: 17922</string>
+    <string name="stop_id_hint">por ejemplo: 17980</string>
     <string name="enter_stop_id">Introduzca número de parada</string>
     <string name="must_be_number">Tiene que ser un número</string>
     <string name="real_time">tiempo real</string>

@@ -23,7 +23,7 @@
 
     <string name="stop_number">Stop #</string>
     <string name="stop_id">Stop number?</string>
-    <string name="stop_id_hint">for example: 17922</string>
+    <string name="stop_id_hint">for example: 17980</string>
     <string name="enter_stop_id">Enter stop number</string>
     <string name="must_be_number">Must be a number</string>
     <string name="real_time">real-time</string>

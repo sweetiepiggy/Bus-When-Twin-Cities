@@ -73,7 +73,7 @@
           android:layout_gravity="top"
           android:layout_marginTop="-6dp"
           android:indeterminate="true"
-          android:visibility="visible" />
+          android:visibility="invisible" />
     </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
