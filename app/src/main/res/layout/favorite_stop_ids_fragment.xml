@@ -27,7 +27,7 @@
 
   <TextView
       android:id="@+id/no_results_textview"
-      style="@android:style/TextAppearance.Large"
+      style="?attr/textAppearanceHeadline5"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:gravity="center"

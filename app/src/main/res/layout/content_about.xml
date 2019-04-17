@@ -32,17 +32,17 @@
       android:layout_height="match_parent"
       android:orientation="vertical">
 
-    <TextView
-      style="@style/TextAppearance.AppCompat.Title"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="@dimen/text_margin"
-      android:text="@string/simple_useful" />
+      <TextView
+          style="?attr/textAppearanceHeadline5"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_margin="@dimen/text_margin"
+          android:text="@string/simple_useful" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Medium"
+        style="?attr/textAppearanceBody1"
 	android:autoLink="web|email"
         android:layout_margin="@dimen/text_margin"
         android:text="@string/about_us" />
@@ -50,14 +50,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.AppCompat.Title"
+        style="?attr/textAppearanceHeadline5"
         android:layout_margin="@dimen/text_margin"
         android:text="@string/license_title" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Medium"
+        style="?attr/textAppearanceBody1"
 	android:autoLink="web|email"
         android:layout_margin="@dimen/text_margin"
         android:text="@string/license" />
