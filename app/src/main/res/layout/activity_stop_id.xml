@@ -44,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:tabGravity="fill"
+            app:tabIndicatorColor="@color/common_google_signin_btn_text_dark_default"
             app:tabMaxWidth="0dp"
             app:tabMode="fixed" />
 
