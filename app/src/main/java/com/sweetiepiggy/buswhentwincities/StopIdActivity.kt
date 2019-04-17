@@ -58,6 +58,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mDoShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
     private var mFilteredButWasntFavorite = false
     private var mDoShowRoutesInitDone = false
+    // use this to prevent progressBar and swipeRefresh from showing at the same time
+    private var mAllowProgressBarVisible = true
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -118,6 +120,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
+            mAllowProgressBarVisible = true
             mNexTripsModel.loadNexTrips()
         }
     }
@@ -186,12 +189,15 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     }
 
     override fun setRefreshing(refreshing: Boolean) {
-        if (!refreshing) {
+        if (refreshing) {
+            if (mAllowProgressBarVisible) {
+                findViewById<View>(R.id.progressBar)?.setVisibility(View.VISIBLE)
+            }
+        } else {
             findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setRefreshing(false)
+            findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
+            mAllowProgressBarVisible = false
         }
-        findViewById<View>(R.id.progressBar)?.setVisibility(
-            if (refreshing) View.VISIBLE else View.INVISIBLE
-        )
     }
 
     private fun onClickFilter() {
