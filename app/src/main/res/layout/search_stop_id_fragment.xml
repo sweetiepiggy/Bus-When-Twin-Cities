@@ -47,6 +47,7 @@
 				android:id="@+id/stopIdEntry"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:imeOptions="actionSearch"
 				android:inputType="number" />
 		</com.google.android.material.textfield.TextInputLayout>
 	</androidx.cardview.widget.CardView>

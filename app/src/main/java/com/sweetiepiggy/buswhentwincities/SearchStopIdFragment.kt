@@ -24,9 +24,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
 
@@ -54,19 +55,16 @@ class SearchStopIdFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        // getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
-        //         ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-        //             override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
-        //                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-        //                     startStopIdActivity()
-        //                     return true
-        //                 } else {
-        //                     return false
-        //                 }
-        //             }
-        //         })
-
-        activity?.findViewById<EditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
+        activity?.findViewById<TextInputEditText>(R.id.stopIdEntry)?.setOnEditorActionListener { _, actionId, _ ->
+            return@setOnEditorActionListener when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> {
+                    startStopIdActivity()
+                    true
+                }
+                else -> false
+            }
+        }
+        activity?.findViewById<TextInputEditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
             stopIdEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
                 override fun onFocusChange(v: View, hasFocus: Boolean) =
             	stopIdEntry.setHint(if (hasFocus) resources.getString(R.string.stop_id_hint) else "")
