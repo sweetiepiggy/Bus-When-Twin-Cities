@@ -18,39 +18,35 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:gravity="center_vertical"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".SearchStopIdFragment">
 
-  <TextView
-      android:id="@+id/stopIdLabel"
-      style="?attr/textAppearanceHeadline5"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:paddingLeft="@dimen/text_margin"
-      android:paddingRight="@dimen/text_margin"
-      android:text="@string/stop_id" />
+	<androidx.cardview.widget.CardView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="6dp"
+		android:layout_marginRight="6dp"
+		android:gravity="center"
+		app:cardElevation="1dp">
 
-  <EditText
-      android:id="@+id/stopIdEntry"
-      android:paddingLeft="@dimen/text_margin"
-      android:paddingRight="@dimen/text_margin"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:layout_marginStart="@dimen/text_margin"
-      android:layout_marginEnd="@dimen/text_margin"
-      android:ems="30"
-      android:hint="@string/stop_id_hint"
-      android:inputType="number"
-      android:minHeight="@android:dimen/app_icon_size"
-      android:textColorHint="@color/colorHint" />
-</LinearLayout>
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/stopIdTextInput"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_margin="@dimen/text_margin"
+			android:hint="@string/stop_id">
+
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/stopIdEntry"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:inputType="number" />
+		</com.google.android.material.textfield.TextInputLayout>
+	</androidx.cardview.widget.CardView>
+</FrameLayout>
