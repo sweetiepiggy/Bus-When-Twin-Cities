@@ -28,27 +28,45 @@
     tools:context=".SearchStopIdFragment">
 
 	<androidx.cardview.widget.CardView
-		android:layout_width="match_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginLeft="6dp"
 		android:layout_marginRight="6dp"
+		android:layout_gravity="center_horizontal"
 		android:gravity="center"
 		app:cardElevation="1dp">
 
+	  <androidx.constraintlayout.widget.ConstraintLayout
+	      android:layout_width="match_parent"
+	      android:layout_height="wrap_content"
+	      android:orientation="horizontal"
+	      android:padding="@dimen/text_margin">
 		<com.google.android.material.textfield.TextInputLayout
 			android:id="@+id/stopIdTextInput"
 			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_margin="@dimen/text_margin"
 			android:hint="@string/stop_id">
 
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/stopIdEntry"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:imeOptions="actionSearch"
-				android:inputType="number" />
+		  <TextView
+		      android:layout_width="wrap_content"
+		      android:layout_height="wrap_content"
+		      android:ems="40"
+		      android:visibility="invisible"
+		      android:gravity="center"
+		      app:layout_constraintBottom_toBottomOf="parent"
+		      app:layout_constraintStart_toStartOf="parent"
+		      app:layout_constraintTop_toTopOf="parent" />
+		  <com.google.android.material.textfield.TextInputEditText
+		      android:id="@+id/stopIdEntry"
+		      android:layout_width="match_parent"
+		      android:layout_height="wrap_content"
+		      app:layout_constraintBottom_toBottomOf="parent"
+		      app:layout_constraintStart_toStartOf="parent"
+		      app:layout_constraintTop_toTopOf="parent"
+		      android:imeOptions="actionSearch"
+		      android:inputType="number" />
 		</com.google.android.material.textfield.TextInputLayout>
+	  </androidx.constraintlayout.widget.ConstraintLayout>
 	</androidx.cardview.widget.CardView>
 </FrameLayout>
