@@ -54,6 +54,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
     private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
+    // note that Marker.position is the current position on the map which will
+    // not match the NexTrip.position if the Marker is undergoing animation,
+    // we keep track of the NexTrip.positions here so we can avoid jumpy
+    // animation behavior that occurs if animation is started a second time
+    // before the first animation is finished
+    private val mMarkerPositions: MutableMap<Int?, LatLng> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
     }
@@ -125,10 +131,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             mStop = it
             mMap?.addMarker(MarkerOptions()
                     .position(LatLng(it.stopLat, it.stopLon))
-        	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
+                    .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
                     .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
-        	)
+            )
         })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -161,7 +167,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(marker: Marker): Boolean {
                 if (mVehicleBlockNumber != null &&
-            			mVehicleBlockNumber != (marker.tag as PresentableNexTrip?)?.blockNumber) {
+                        mVehicleBlockNumber != (marker.tag as PresentableNexTrip?)?.blockNumber) {
                     deselectVehicle()
                 }
                 return false
@@ -202,9 +208,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for (marker in mMarkers.values) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 marker.alpha = if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true)
-                	1f
+                    1f
                 else
-                	UNSELECTED_MARKER_ALPHA
+                    UNSELECTED_MARKER_ALPHA
             }
         }
     }
@@ -214,12 +220,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mStop?.let {
             mMap?.addMarker(MarkerOptions()
                     .position(LatLng(it.stopLat, it.stopLon))
-        	        .title(resources.getString(R.string.stop_number) + it.stopId.toString())
+                    .title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     .snippet(it.stopName)
                     .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
-        	)// ?.apply {
+            )// ?.apply {
             //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
-        	// }
+            // }
         }
         if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
@@ -236,7 +242,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             mDoShowRoutes.get(routeAndTerminal) ?: true
         }
         val stop = mStop
-	    if (shownMarkers.size == 1 && stop == null) {
+        if (shownMarkers.size == 1 && stop == null) {
             zoomToPosition((shownMarkers.elementAt(0).tag as PresentableNexTrip).position!!)
             return
         } else if (shownMarkers.isEmpty() && stop != null) {
@@ -244,16 +250,16 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             return
         }
 
-    	val latLngs = shownMarkers.map { (it.tag as PresentableNexTrip).position!! }
+        val latLngs = shownMarkers.map { (it.tag as PresentableNexTrip).position!! }
         val latLngsWithStop = if (stop == null)
-        		latLngs
-        	else latLngs + LatLng(stop.stopLat, stop.stopLon)
+                latLngs
+            else latLngs + LatLng(stop.stopLat, stop.stopLon)
 
         mFusedLocationClient.lastLocation
             .addOnSuccessListener { myLocation: Location? ->
                 if (!latLngs.isEmpty()) {
                     val latLngsWithMyLoc = if (myLocation != null)
-                    	latLngsWithStop + LatLng(myLocation.latitude, myLocation.longitude)
+                        latLngsWithStop + LatLng(myLocation.latitude, myLocation.longitude)
                     else latLngsWithStop
                     zoomTo(latLngsWithMyLoc, 5.236f)
                 }
@@ -322,20 +328,25 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 blockNumbersToRemove.add(blockNumber)
             }
         }
-        blockNumbersToRemove.forEach { mMarkers.remove(it) }
+        blockNumbersToRemove.forEach {
+            mMarkers.remove(it)
+            mMarkerPositions.remove(it)
+        }
 
         mMap?.run {
             for (nexTrip in mNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.apply {
-                        AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
+                        if (!NexTrip.distanceBetweenIsSmall(mMarkerPositions[nexTrip.blockNumber], nexTrip.position)) {
+                            AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
+                        }
                     }
                 } else {
                     addMarker(MarkerOptions()
                         .icon(getIcon(nexTrip.isTrain(), nexTrip.routeDirection))
                         .position(nexTrip.position!!)
-                    	.flat(true)
-                    	.anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
+                        .flat(true)
+                        .anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
                     ).apply {
                         val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
                         if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
@@ -352,6 +363,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     }
                 }
                 mMarkers[nexTrip.blockNumber] = marker
+                mMarkerPositions[nexTrip.blockNumber] = nexTrip.position!!
             }
         }
     }
@@ -363,19 +375,19 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
                 if (changedRoutes.contains(routeAndTerminal)) {
                     marker.alpha = if (mDoShowRoutes.get(routeAndTerminal) ?: true)
-            	    	1f
+                        1f
                     else
-        	        	UNSELECTED_MARKER_ALPHA
+                        UNSELECTED_MARKER_ALPHA
                 }
             }
         }
     }
 
     private fun getIcon(isTrain: Boolean, direction: NexTrip.Direction?): BitmapDescriptor =
-    	if (isTrain) getTrainIcon(direction) else getBusIcon(direction)
+        if (isTrain) getTrainIcon(direction) else getBusIcon(direction)
 
     private fun getTrainIcon(direction: NexTrip.Direction?): BitmapDescriptor =
-    	when (direction) {
+        when (direction) {
             NexTrip.Direction.SOUTH -> mTrainSouthIcon
             NexTrip.Direction.EAST  -> mTrainEastIcon
             NexTrip.Direction.WEST  -> mTrainWestIcon
@@ -384,7 +396,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
 
     private fun getBusIcon(direction: NexTrip.Direction?): BitmapDescriptor =
-    	when (direction) {
+        when (direction) {
             NexTrip.Direction.SOUTH -> mBusSouthIcon
             NexTrip.Direction.EAST  -> mBusEastIcon
             NexTrip.Direction.WEST  -> mBusWestIcon
@@ -394,5 +406,5 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private fun getBusIconAnchorVertical(direction: NexTrip.Direction?): Float =
         // anchor at bottom of bus, not bottom of arrow
-    	if (direction == NexTrip.Direction.SOUTH) 0.8f else 1f
+        if (direction == NexTrip.Direction.SOUTH) 0.8f else 1f
 }
