@@ -305,14 +305,21 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         val nexTripsWithActualPosition = nexTrips.filter {
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
         }
-        val doInitCamera = mNexTrips == null && !nexTripsWithActualPosition.isEmpty()
-        if (mNexTrips == null) mNexTrips = mutableMapOf()
-        mNexTrips!!.clear()
+
+        val doInitCamera = mNexTrips == null && (!nexTripsWithActualPosition.isEmpty() || mStop != null)
+        if (mNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
+            mNexTrips = mutableMapOf()
+        }
+        mNexTrips?.clear()
         nexTripsWithActualPosition.forEach {
             mNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
         }
-        updateMarkers()
-        if (doInitCamera) initCamera()
+        if (mNexTrips != null) {
+            updateMarkers()
+        }
+        if (doInitCamera) {
+            initCamera()
+        }
     }
 
     fun updateDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
