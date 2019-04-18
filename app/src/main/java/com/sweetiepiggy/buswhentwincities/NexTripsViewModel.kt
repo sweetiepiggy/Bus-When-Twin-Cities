@@ -170,7 +170,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
             // display the database results now in case internet connection is slow
             if (!mDbNexTrips.isNullOrEmpty()) {
-                mNexTrips.setValue(mDbNexTrips)
+                mNexTrips.value = mDbNexTrips
                 mLastUpdate = mDbLastUpdate
             }
 
@@ -183,6 +183,13 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
             // show results from database if they exist and are fresh
             } else {
                 // mNexTrips.value = filterOldNexTrips(result, unixTime, mLastUpdate)
+
+                // actually, we already showed database results above if they
+                // existed, so only show them here if they are empty
+                if (mDbNexTrips.isNullOrEmpty()) {
+                    mNexTrips.value = mDbNexTrips
+                    mLastUpdate = mDbLastUpdate
+                }
                 mLoadingNexTrips = false
                 mRefreshingListener?.setRefreshing(false)
             }
