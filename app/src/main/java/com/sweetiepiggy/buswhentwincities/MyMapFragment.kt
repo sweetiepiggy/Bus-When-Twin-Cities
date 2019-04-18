@@ -53,13 +53,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
-    private val mMarkers: MutableMap<Int?, Marker> = mutableMapOf()
     // note that Marker.position is the current position on the map which will
     // not match the NexTrip.position if the Marker is undergoing animation,
     // we keep track of the NexTrip.positions here so we can avoid jumpy
     // animation behavior that occurs if animation is started a second time
     // before the first animation is finished
-    private val mMarkerPositions: MutableMap<Int?, LatLng> = mutableMapOf()
+    private val mMarkers: MutableMap<Int?, Pair<Marker, LatLng>> = mutableMapOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
     }
@@ -189,7 +188,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     fun selectVehicle(blockNumber: Int) {
         mVehicleBlockNumber = blockNumber
         mMap?.run {
-            for (marker in mMarkers.values) {
+            for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 if (blockNumber == nexTrip.blockNumber) {
                     marker.alpha = 1f
@@ -205,7 +204,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private fun deselectVehicle() {
         mVehicleBlockNumber = null
         mMap?.run {
-            for (marker in mMarkers.values) {
+            for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 marker.alpha = if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true)
                     1f
@@ -236,7 +235,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun zoomToAllVehicles() {
-        val shownMarkers = mMarkers.values.filter {
+        val shownMarkers = mMarkers.values.map { it.first }.filter {
             val nexTrip = it.tag as PresentableNexTrip
             val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
             mDoShowRoutes.get(routeAndTerminal) ?: true
@@ -322,22 +321,19 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private fun updateMarkers() {
         val blockNumbersToRemove = mutableListOf<Int?>()
-        for ((blockNumber, marker) in mMarkers) {
+        for ((blockNumber, markerAndPosition) in mMarkers) {
             if (!mNexTrips!!.containsKey(blockNumber)) {
-                marker.remove()
+                markerAndPosition.first.remove()
                 blockNumbersToRemove.add(blockNumber)
             }
         }
-        blockNumbersToRemove.forEach {
-            mMarkers.remove(it)
-            mMarkerPositions.remove(it)
-        }
+        blockNumbersToRemove.forEach { mMarkers.remove(it) }
 
         mMap?.run {
             for (nexTrip in mNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
-                    mMarkers[nexTrip.blockNumber]!!.apply {
-                        if (!NexTrip.distanceBetweenIsSmall(mMarkerPositions[nexTrip.blockNumber], nexTrip.position)) {
+                    mMarkers[nexTrip.blockNumber]!!.first.apply {
+                        if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second, nexTrip.position)) {
                             AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
                         }
                     }
@@ -362,15 +358,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         showInfoWindow()
                     }
                 }
-                mMarkers[nexTrip.blockNumber] = marker
-                mMarkerPositions[nexTrip.blockNumber] = nexTrip.position!!
+                mMarkers[nexTrip.blockNumber] = Pair(marker, nexTrip.position!!)
             }
         }
     }
 
     fun onChangeHiddenRoutes(changedRoutes: Set<Pair<String?, String?>>) {
         if (mVehicleBlockNumber == null) {
-            for (marker in mMarkers.values) {
+            for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
                 if (changedRoutes.contains(routeAndTerminal)) {
