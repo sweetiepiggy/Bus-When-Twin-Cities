@@ -33,7 +33,7 @@
       android:layout_height="match_parent"
       android:gravity="center"
       android:text="@string/no_nextrips_found"
-      android:visibility="invisible" />
+      android:visibility="gone" />
 
   <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
       android:id="@+id/swiperefresh"

@@ -32,7 +32,7 @@
       android:layout_height="match_parent"
       android:gravity="center"
       android:text="@string/no_favorites_found"
-      android:visibility="invisible" />
+      android:visibility="gone" />
 
   <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/favoritesRecyclerView"
