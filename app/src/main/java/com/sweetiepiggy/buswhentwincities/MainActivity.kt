@@ -178,12 +178,10 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
     private fun selectBnvSearch() {
         findViewById<View>(R.id.progressBar).setVisibility(View.INVISIBLE)
-        findViewById<View>(R.id.fab).setVisibility(View.VISIBLE)
         findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_SEARCH)
     }
 
     private fun selectBnvFav() {
-        findViewById<View>(R.id.fab).setVisibility(View.GONE)
         findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_FAV)
     }
 

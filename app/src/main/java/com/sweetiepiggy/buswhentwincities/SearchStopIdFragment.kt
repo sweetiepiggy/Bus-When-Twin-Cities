@@ -25,9 +25,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -76,8 +76,9 @@ class SearchStopIdFragment : Fragment() {
             })
         }
 
-        val fab = activity?.findViewById<FloatingActionButton>(R.id.fab)
-        fab?.setOnClickListener { startStopIdActivity() }
+        activity?.findViewById<Button>(R.id.searchStopIdButton)?.setOnClickListener {
+            startStopIdActivity()
+        }
     }
 
     private fun startStopIdActivity() {
