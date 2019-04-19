@@ -40,7 +40,8 @@
     <string name="nav_search">搜索</string>
     <string name="action_refresh">刷新</string>
     <string name="action_favorite">喜爱</string>
-    <string name="action_search">搜索</string>
+    <!-- <string name="action_search">搜索</string> -->
+    <string name="search_stop_id">按公交站号码搜索</string>
     <string name="action_filter">过滤</string>
 
     <string name="enter_stop_name_dialog_title">保存为收藏夹</string>

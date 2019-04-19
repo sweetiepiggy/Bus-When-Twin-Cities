@@ -40,7 +40,8 @@
     <string name="nav_search">Buscar</string>
     <string name="action_refresh">Refrescar</string>
     <string name="action_favorite">Favorita</string>
-    <string name="action_search">Buscar</string>
+    <!-- <string name="action_search">Buscar</string> -->
+    <string name="search_stop_id">Buscar por número de parada</string>
     <string name="action_filter">Filtrar</string>
 
     <string name="enter_stop_name_dialog_title">Guardar en favoritos</string>

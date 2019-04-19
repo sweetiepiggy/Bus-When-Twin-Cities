@@ -40,7 +40,8 @@
     <string name="nav_search">Search</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
-    <string name="action_search">Search</string>
+    <!-- <string name="action_search">Search</string> -->
+    <string name="search_stop_id">Search for stop number</string>
     <string name="action_filter">Filter</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
