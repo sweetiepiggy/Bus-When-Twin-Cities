@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
@@ -65,6 +66,10 @@ class SearchStopIdFragment : Fragment() {
             }
         }
         activity?.findViewById<TextInputEditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
+            context?.let {
+                stopIdEntry.setCompoundDrawablesWithIntrinsicBounds(getDrawable(it, R.drawable.ic_stop),
+                    null, null, null)
+            }
             stopIdEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
                 override fun onFocusChange(v: View, hasFocus: Boolean) =
             	stopIdEntry.setHint(if (hasFocus) resources.getString(R.string.stop_id_hint) else "")

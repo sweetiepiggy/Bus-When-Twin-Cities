@@ -65,9 +65,9 @@
 				android:id="@+id/stopIdEntry"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:drawableStart="@drawable/ic_stop"
 				android:drawablePadding="@dimen/fab_margin"
 				android:imeOptions="actionSearch"
+				android:textColorHint="@color/colorHint"
 				android:inputType="number" />
 		</com.google.android.material.textfield.TextInputLayout>
 	  </androidx.constraintlayout.widget.ConstraintLayout>
