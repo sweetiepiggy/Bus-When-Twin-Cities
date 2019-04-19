@@ -26,7 +26,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
@@ -41,6 +40,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.textfield.TextInputEditText
 import java.security.InvalidParameterException
 import java.util.*
 
@@ -274,12 +274,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 setTitle(R.string.enter_stop_name_dialog_title)
                 setView(favStopIdDialog)
                 mStop?.let { stop ->
-                    favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.setText(stop.stopName)
+                    favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.setText(stop.stopName)
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     mIsFavorite = true
                     item.icon = getDrawable(context, IS_FAV_ICON)
-                    val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
+                    val stopName = favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.text.toString()
                     title = makeTitle(mStopId, stopName)
                     mStopId?.let { stopId ->
                         object : AsyncTask<Void, Void, Void>() {
