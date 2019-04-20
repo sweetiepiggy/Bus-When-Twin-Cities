@@ -41,7 +41,8 @@
     <string name="action_refresh">Refrescar</string>
     <string name="action_favorite">Favorita</string>
     <!-- <string name="action_search">Buscar</string> -->
-    <string name="search_stop_id">Buscar por número de parada</string>
+    <!-- <string name="search_stop_id">Buscar por número de parada</string> -->
+    <string name="search_stop_id">Buscar</string>
     <string name="action_filter">Filtrar</string>
 
     <string name="enter_stop_name_dialog_title">Guardar en favoritos</string>
@@ -65,6 +66,11 @@
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">Aplicaciones simples, útiles, libres y de código abierto para los Minnesotanos</string>
     <string name="about_us">"Apóyanos en Patreon https://patreon.com/sweetiepiggyapps\n\nEl código fuente de esta aplicación está disponible en https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    <string name="patreon">Apóyanos en Patreon</string>
+    <string name="facebook">Búscanos en Facebook</string>
+    <string name="twitter">Síganos en Twitter</string>
+    <string name="github">Descargar código fuente en GitHub</string>
+
     <string name="license_title">Licensia</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"

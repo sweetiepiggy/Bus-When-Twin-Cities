@@ -41,7 +41,8 @@
     <string name="action_refresh">刷新</string>
     <string name="action_favorite">喜爱</string>
     <!-- <string name="action_search">搜索</string> -->
-    <string name="search_stop_id">按公交站号码搜索</string>
+    <!-- <string name="search_stop_id">按公交站号码搜索</string> -->
+    <string name="search_stop_id">搜索</string>
     <string name="action_filter">过滤</string>
 
     <string name="enter_stop_name_dialog_title">保存为收藏夹</string>
@@ -68,6 +69,10 @@
 如果此应用程序对您有帮助并希望给予支持，您可以通过此处 https://patreon.com/sweetiepiggyapps 给予赞助。
 
 \n\n这是一个免费的开源应用程序。源代码可通过 https://github.com/sweetiepiggy/Bus-When-Twin-Cities 获得。</string>
+    <string name="patreon">在 Patreon 赞助我们</string>
+    <string name="facebook">在 Facebook 赞我们</string>
+    <string name="twitter">在推特上关注我们</string>
+    <string name="github">在 GitHub 上获取源代码</string>
 
     <string name="license_title">执照</string>
     <string name="license">

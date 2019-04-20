@@ -41,7 +41,8 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
     <!-- <string name="action_search">Search</string> -->
-    <string name="search_stop_id">Search for stop number</string>
+    <!-- <string name="search_stop_id">Search for stop number</string> -->
+    <string name="search_stop_id">Search</string>
     <string name="action_filter">Filter</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
@@ -67,10 +68,12 @@
     <string name="about_us">
     "We develop simple Android apps with the goal of modestly improving the"
     "daily lives of the people in our community.\n\nIf you find this app"
-    "useful and would like to support our work, you can find more"
-    "information at https://patreon.com/sweetiepiggyapps\n\nFor those of you"
-    "familiar with computer programming, the source code"
-    "for this app is available at https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    "useful, please consider supporting us at the links below."</string>
+    <string name="patreon">Support us on Patreon</string>
+    <string name="facebook">Like us on Facebook</string>
+    <string name="twitter">Follow us on Twitter</string>
+    <string name="github">Get the source code on GitHub</string>
+
     <string name="license_title">License</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus When? (Twin Cities) is free software; you can redistribute it and/or modify"

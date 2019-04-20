@@ -68,6 +68,7 @@
             android:text="@string/simple_useful" />
 
 	<TextView
+	    android:id="@+id/about_us"
 	    style="?attr/textAppearanceBody1"
 	    android:layout_width="0dp"
 	    android:layout_height="wrap_content"
@@ -78,6 +79,7 @@
 	    app:layout_constraintEnd_toEndOf="parent"
 	    app:layout_constraintStart_toStartOf="parent"
 	    app:layout_constraintTop_toBottomOf="@id/simple_useful" />
+
       </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -89,6 +91,115 @@
 	android:gravity="center"
 	app:cardElevation="3dp">
       <androidx.constraintlayout.widget.ConstraintLayout
+	  android:layout_width="wrap_content"
+	  android:layout_height="wrap_content"
+	  android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="40"
+            android:focusableInTouchMode="false"
+            android:gravity="center"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+	<ImageView
+	    android:id="@+id/patreon_icon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/text_margin"
+	    app:srcCompat="@drawable/ic_patreon_mark_coral"
+	    app:layout_constraintStart_toStartOf="parent"
+	    app:layout_constraintTop_toTopOf="parent" />
+	<TextView
+	    style="?attr/textAppearanceBody1"
+	    android:layout_width="0dp"
+	    android:layout_height="0dp"
+	    android:gravity="center_vertical"
+	    android:padding="@dimen/text_margin"
+	    android:singleLine="false"
+	    android:text="@string/patreon"
+	    android:autoLink="web"
+	    app:layout_constraintEnd_toEndOf="parent"
+	    app:layout_constraintStart_toEndOf="@id/patreon_icon"
+	    app:layout_constraintTop_toTopOf="@id/patreon_icon"
+	    app:layout_constraintBottom_toBottomOf="@id/patreon_icon" />
+
+	<ImageView
+	    android:id="@+id/fb_icon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/text_margin"
+	    app:srcCompat="@drawable/ic_f_ogo_rgb_hex_58"
+	    app:layout_constraintStart_toStartOf="parent"
+	    app:layout_constraintTop_toBottomOf="@id/patreon_icon" />
+	<TextView
+	    style="?attr/textAppearanceBody1"
+	    android:layout_width="0dp"
+	    android:layout_height="0dp"
+	    android:gravity="center_vertical"
+	    android:padding="@dimen/text_margin"
+	    android:singleLine="false"
+	    android:text="@string/facebook"
+	    app:layout_constraintEnd_toEndOf="parent"
+	    app:layout_constraintStart_toEndOf="@id/fb_icon"
+	    app:layout_constraintTop_toTopOf="@id/fb_icon"
+	    app:layout_constraintBottom_toBottomOf="@id/fb_icon" />
+
+	<ImageView
+	    android:id="@+id/twitter_icon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/text_margin"
+	    app:srcCompat="@drawable/ic_twitter_social_icon_circle_color"
+	    app:layout_constraintStart_toStartOf="parent"
+	    app:layout_constraintTop_toBottomOf="@id/fb_icon" />
+	<TextView
+	    style="?attr/textAppearanceBody1"
+	    android:layout_width="0dp"
+	    android:layout_height="0dp"
+	    android:gravity="center_vertical"
+	    android:padding="@dimen/text_margin"
+	    android:singleLine="false"
+	    android:text="@string/twitter"
+	    app:layout_constraintEnd_toEndOf="parent"
+	    app:layout_constraintStart_toEndOf="@id/twitter_icon"
+	    app:layout_constraintTop_toTopOf="@id/twitter_icon"
+	    app:layout_constraintBottom_toBottomOf="@id/twitter_icon" />
+
+	<ImageView
+	    android:id="@+id/github_icon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:padding="@dimen/text_margin"
+	    app:srcCompat="@drawable/ic_octocat"
+	    app:layout_constraintStart_toStartOf="parent"
+	    app:layout_constraintTop_toBottomOf="@id/twitter_icon" />
+	<TextView
+	    style="?attr/textAppearanceBody1"
+	    android:layout_width="0dp"
+	    android:layout_height="0dp"
+	    android:gravity="center_vertical"
+	    android:padding="@dimen/text_margin"
+	    android:singleLine="false"
+	    android:text="@string/github"
+	    app:layout_constraintEnd_toEndOf="parent"
+	    app:layout_constraintStart_toEndOf="@id/github_icon"
+	    app:layout_constraintTop_toTopOf="@id/github_icon"
+	    app:layout_constraintBottom_toBottomOf="@id/github_icon" />
+      </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_margin="6dp"
+	android:layout_gravity="center_horizontal"
+	android:gravity="center"
+	app:cardElevation="3dp">
+
+		<androidx.constraintlayout.widget.ConstraintLayout
 	  android:layout_width="wrap_content"
 	  android:layout_height="wrap_content"
 	  android:orientation="vertical">
