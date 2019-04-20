@@ -38,6 +38,5 @@
       android:id="@+id/favoritesRecyclerView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:contentDescription="@string/favorite_stop_ids_content_description"
-      android:scrollbars="vertical" />
+      android:contentDescription="@string/favorite_stop_ids_content_description" />
 </FrameLayout>

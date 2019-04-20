@@ -46,7 +46,6 @@
 	android:clipToPadding="false"
 	android:contentDescription="@null"
 	android:paddingTop="3dp"
-	android:paddingBottom="80dp"
-	android:scrollbars="vertical" />
+	android:paddingBottom="80dp" />
   </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>
