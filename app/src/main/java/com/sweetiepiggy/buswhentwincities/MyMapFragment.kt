@@ -155,6 +155,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         googleMap.uiSettings.setMapToolbarEnabled(false)
+        googleMap.setIndoorEnabled(false)
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
             initCamera()
