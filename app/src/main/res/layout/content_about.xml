@@ -111,20 +111,21 @@
 	    android:padding="@dimen/text_margin"
 	    app:srcCompat="@drawable/ic_patreon_mark_coral"
 	    app:layout_constraintStart_toStartOf="parent"
-	    app:layout_constraintTop_toTopOf="parent" />
-	<TextView
-	    style="?attr/textAppearanceBody1"
+	    app:layout_constraintTop_toTopOf="@id/patreon_button"
+	    app:layout_constraintBottom_toBottomOf="@id/patreon_button" />
+	<Button
+	    android:id="@+id/patreon_button"
+	    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 	    android:layout_width="0dp"
-	    android:layout_height="0dp"
-	    android:gravity="center_vertical"
-	    android:padding="@dimen/text_margin"
-	    android:singleLine="false"
+	    android:layout_height="wrap_content"
+	    android:minHeight="@android:dimen/notification_large_icon_height"
 	    android:text="@string/patreon"
-	    android:autoLink="web"
+	    android:layout_marginTop="@dimen/text_margin"
+	    android:layout_marginBottom="@dimen/text_margin"
+	    android:layout_marginEnd="@dimen/text_margin"
 	    app:layout_constraintEnd_toEndOf="parent"
 	    app:layout_constraintStart_toEndOf="@id/patreon_icon"
-	    app:layout_constraintTop_toTopOf="@id/patreon_icon"
-	    app:layout_constraintBottom_toBottomOf="@id/patreon_icon" />
+	    app:layout_constraintTop_toTopOf="parent" />
 
 	<ImageView
 	    android:id="@+id/fb_icon"
@@ -133,19 +134,21 @@
 	    android:padding="@dimen/text_margin"
 	    app:srcCompat="@drawable/ic_f_ogo_rgb_hex_58"
 	    app:layout_constraintStart_toStartOf="parent"
-	    app:layout_constraintTop_toBottomOf="@id/patreon_icon" />
-	<TextView
-	    style="?attr/textAppearanceBody1"
+	    app:layout_constraintTop_toTopOf="@id/fb_button"
+	    app:layout_constraintBottom_toBottomOf="@id/fb_button" />
+	<Button
+	    android:id="@+id/fb_button"
+	    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 	    android:layout_width="0dp"
-	    android:layout_height="0dp"
-	    android:gravity="center_vertical"
-	    android:padding="@dimen/text_margin"
-	    android:singleLine="false"
+	    android:layout_height="wrap_content"
+	    android:minHeight="@android:dimen/notification_large_icon_height"
 	    android:text="@string/facebook"
+	    android:layout_marginTop="@dimen/text_margin"
+	    android:layout_marginBottom="@dimen/text_margin"
+	    android:layout_marginEnd="@dimen/text_margin"
 	    app:layout_constraintEnd_toEndOf="parent"
 	    app:layout_constraintStart_toEndOf="@id/fb_icon"
-	    app:layout_constraintTop_toTopOf="@id/fb_icon"
-	    app:layout_constraintBottom_toBottomOf="@id/fb_icon" />
+	    app:layout_constraintTop_toBottomOf="@id/patreon_button" />
 
 	<ImageView
 	    android:id="@+id/twitter_icon"
@@ -154,19 +157,21 @@
 	    android:padding="@dimen/text_margin"
 	    app:srcCompat="@drawable/ic_twitter_social_icon_circle_color"
 	    app:layout_constraintStart_toStartOf="parent"
-	    app:layout_constraintTop_toBottomOf="@id/fb_icon" />
-	<TextView
-	    style="?attr/textAppearanceBody1"
+	    app:layout_constraintTop_toTopOf="@id/twitter_button"
+	    app:layout_constraintBottom_toBottomOf="@id/twitter_button" />
+	<Button
+	    android:id="@+id/twitter_button"
+	    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 	    android:layout_width="0dp"
-	    android:layout_height="0dp"
-	    android:gravity="center_vertical"
-	    android:padding="@dimen/text_margin"
-	    android:singleLine="false"
+	    android:layout_height="wrap_content"
+	    android:minHeight="@android:dimen/notification_large_icon_height"
 	    android:text="@string/twitter"
+	    android:layout_marginTop="@dimen/text_margin"
+	    android:layout_marginBottom="@dimen/text_margin"
+	    android:layout_marginEnd="@dimen/text_margin"
 	    app:layout_constraintEnd_toEndOf="parent"
 	    app:layout_constraintStart_toEndOf="@id/twitter_icon"
-	    app:layout_constraintTop_toTopOf="@id/twitter_icon"
-	    app:layout_constraintBottom_toBottomOf="@id/twitter_icon" />
+	    app:layout_constraintTop_toBottomOf="@id/fb_button" />
 
 	<ImageView
 	    android:id="@+id/github_icon"
@@ -175,19 +180,22 @@
 	    android:padding="@dimen/text_margin"
 	    app:srcCompat="@drawable/ic_octocat"
 	    app:layout_constraintStart_toStartOf="parent"
-	    app:layout_constraintTop_toBottomOf="@id/twitter_icon" />
-	<TextView
-	    style="?attr/textAppearanceBody1"
+	    app:layout_constraintTop_toTopOf="@id/github_button"
+	    app:layout_constraintBottom_toBottomOf="@id/github_button" />
+	<Button
+	    android:id="@+id/github_button"
+	    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
 	    android:layout_width="0dp"
-	    android:layout_height="0dp"
-	    android:gravity="center_vertical"
-	    android:padding="@dimen/text_margin"
-	    android:singleLine="false"
+	    android:layout_height="wrap_content"
+	    android:minHeight="@android:dimen/notification_large_icon_height"
 	    android:text="@string/github"
+	    android:layout_marginTop="@dimen/text_margin"
+	    android:layout_marginBottom="@dimen/text_margin"
+	    android:layout_marginEnd="@dimen/text_margin"
 	    app:layout_constraintEnd_toEndOf="parent"
 	    app:layout_constraintStart_toEndOf="@id/github_icon"
-	    app:layout_constraintTop_toTopOf="@id/github_icon"
-	    app:layout_constraintBottom_toBottomOf="@id/github_icon" />
+	    app:layout_constraintTop_toBottomOf="@id/twitter_button"
+	    app:layout_constraintBottom_toBottomOf="parent" />
       </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -199,7 +207,7 @@
 	android:gravity="center"
 	app:cardElevation="3dp">
 
-		<androidx.constraintlayout.widget.ConstraintLayout
+      <androidx.constraintlayout.widget.ConstraintLayout
 	  android:layout_width="wrap_content"
 	  android:layout_height="wrap_content"
 	  android:orientation="vertical">

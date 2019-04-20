@@ -75,7 +75,7 @@
 			  android:id="@+id/searchStopIdButton"
 			  android:layout_width="0dp"
 			  android:layout_height="wrap_content"
-			  android:height="@android:dimen/notification_large_icon_height"
+			  android:minHeight="@android:dimen/notification_large_icon_height"
 			  android:drawableStart="@drawable/ic_baseline_search_24px"
 			  android:text="@string/search_stop_id"
 			  app:layout_constraintBottom_toBottomOf="parent"
