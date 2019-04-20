@@ -73,6 +73,7 @@
     <string name="rate">Escribir una opinión en Google Play</string>
 
     <string name="license_title">Licensia</string>
+    <string name="read_license">Leer licencia</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"
       "bajo los términos de la Licencia Pública General GNU publicada"
@@ -80,5 +81,5 @@
       "sea la versión 3 de la Licencia, o (a su elección) cualquier versión posterior.\n\nBus Cuándo? (Ciudades Gemelas) se distribuye con la esperanza de que sea útil,"
       "pero SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita"
       "MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO. Consulte los"
-      "detalles de la Licencia Pública General GNU para obtener una información más detallada.\n\nhttps://www.gnu.org/licenses</string>
+      "detalles de la Licencia Pública General GNU para obtener una información más detallada.</string>
 </resources>

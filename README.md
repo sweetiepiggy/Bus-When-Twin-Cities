@@ -34,6 +34,8 @@ The Octocat is a trademark registered by GitHub, Inc. and is available
 under the terms of use described at
 [https://github.com/logos](https://github.com/logos).
 
+The GPL logo is in the public domain and is available at [https://www.gnu.org/graphics/license-logos.html](https://www.gnu.org/graphics/license-logos.html).
+
 ## How to build
 
 See developer.android.com for tutorials on how to build Android apps.

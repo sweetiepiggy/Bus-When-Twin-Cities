@@ -47,6 +47,9 @@ class AboutActivity : AppCompatActivity() {
         findViewById<Button>(R.id.rate_button)?.setOnClickListener {
             openLink(RATE_URL)
         }
+        findViewById<Button>(R.id.license_button)?.setOnClickListener {
+            openLink(LICENSE_URL)
+        }
     }
 
     private fun openLink(url: String) {
@@ -59,5 +62,6 @@ class AboutActivity : AppCompatActivity() {
         private val TWITTER_URL = "https://twitter.com/sweetiepiggyapp"
         private val GITHUB_URL = "https://github.com/sweetiepiggy"
         private val RATE_URL = "https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities"
+        private val LICENSE_URL = "https://www.gnu.org/licenses/gpl.html"
     }
 }

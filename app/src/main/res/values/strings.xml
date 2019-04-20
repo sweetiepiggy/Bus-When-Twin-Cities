@@ -68,7 +68,7 @@
     <string name="about_us">
     "We develop simple Android apps with the goal of modestly improving the"
     "daily lives of the people in our community.\n\nIf you find this app"
-    "useful, please consider supporting us on the sites below."</string>
+    "useful, please consider supporting us on one or more of the sites below."</string>
     <string name="patreon">Support us on Patreon</string>
     <string name="facebook">Like us on Facebook</string>
     <string name="twitter">Follow us on Twitter</string>
@@ -76,6 +76,7 @@
     <string name="rate">Write a review on Google Play</string>
 
     <string name="license_title">License</string>
+    <string name="read_license">Read license</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus When? (Twin Cities) is free software; you can redistribute it and/or modify"
       "it under the terms of the GNU General Public License as published by"
@@ -83,5 +84,5 @@
       "(at your option) any later version.\n\nBus When? (Twin Cities) is distributed in the hope that it will be useful,"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of"
       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-      "GNU General Public License for more details.\n\nhttps://www.gnu.org/licenses"</string>
+      "GNU General Public License for more details.</string>
 </resources>

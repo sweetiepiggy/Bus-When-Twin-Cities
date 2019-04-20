@@ -73,13 +73,12 @@
     <string name="rate">在Google Play我要评价</string>
 
     <string name="license_title">执照</string>
+    <string name="read_license">读取执照</string>
     <string name="license">
 版權所有(C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com
 
 \n\n公交车何时？（双城）爲自由軟體；您可依據自由軟體基金會所發表的GNU通用公共授權條款，對本程式再次發佈或修改；無論您依據的是本授權的第三版，或（您可選的）任一日後發行的版本。
 
 \n\n公交车何时？（双城）是基於使用目的而加以發佈，然而不負任何擔保責任；亦無對適售性或特定目的適用性所爲的默示性擔保。詳情請參照GNU通用公共授權。
-
-\n\nhttps://www.gnu.org/licenses
 	</string>
 </resources>
