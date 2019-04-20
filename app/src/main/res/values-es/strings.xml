@@ -65,11 +65,12 @@
 
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">Aplicaciones simples, útiles, libres y de código abierto para los Minnesotanos</string>
-    <string name="about_us">"Apóyanos en Patreon https://patreon.com/sweetiepiggyapps\n\nEl código fuente de esta aplicación está disponible en https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    <string name="about_us">"Si encuentra útil esta aplicación, considere apoyarnos en los sitios a continuación."</string>
     <string name="patreon">Apóyanos en Patreon</string>
     <string name="facebook">Búscanos en Facebook</string>
     <string name="twitter">Síganos en Twitter</string>
     <string name="github">Descargar código fuente en GitHub</string>
+    <string name="rate">Escribir una opinión en Google Play</string>
 
     <string name="license_title">Licensia</string>
     <string name="license">

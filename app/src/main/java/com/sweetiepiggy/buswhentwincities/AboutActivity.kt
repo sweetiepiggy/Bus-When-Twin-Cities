@@ -44,6 +44,9 @@ class AboutActivity : AppCompatActivity() {
         findViewById<Button>(R.id.github_button)?.setOnClickListener {
             openLink(GITHUB_URL)
         }
+        findViewById<Button>(R.id.rate_button)?.setOnClickListener {
+            openLink(RATE_URL)
+        }
     }
 
     private fun openLink(url: String) {
@@ -55,5 +58,6 @@ class AboutActivity : AppCompatActivity() {
         private val PATREON_URL = "https://patreon.com/sweetiepiggyapps"
         private val TWITTER_URL = "https://twitter.com/sweetiepiggyapp"
         private val GITHUB_URL = "https://github.com/sweetiepiggy"
+        private val RATE_URL = "https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities"
     }
 }
