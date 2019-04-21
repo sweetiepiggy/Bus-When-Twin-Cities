@@ -22,9 +22,9 @@ package com.sweetiepiggy.buswhentwincities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class AboutActivity : AppCompatActivity() {
 
@@ -34,5 +34,38 @@ class AboutActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        findViewById<Button>(R.id.patreon_button)?.setOnClickListener {
+            openLink(PATREON_URL)
+        }
+        findViewById<Button>(R.id.fb_button)?.setOnClickListener {
+            openLink(FACEBOOK_URL)
+        }
+        findViewById<Button>(R.id.twitter_button)?.setOnClickListener {
+            openLink(TWITTER_URL)
+        }
+        findViewById<Button>(R.id.github_button)?.setOnClickListener {
+            openLink(GITHUB_URL)
+        }
+        findViewById<Button>(R.id.rate_button)?.setOnClickListener {
+            openLink(RATE_URL)
+        }
+        findViewById<Button>(R.id.license_button)?.setOnClickListener {
+            openLink(LICENSE_URL)
+        }
+    }
+
+    private fun openLink(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
+    }
+
+    companion object {
+        private val PATREON_URL = "https://patreon.com/sweetiepiggyapps"
+        private val FACEBOOK_URL = "https://www.facebook.com/Bus-When-Twin-Cities-2295035200768909/"
+        private val TWITTER_URL = "https://twitter.com/sweetiepiggyapp"
+        private val GITHUB_URL = "https://github.com/sweetiepiggy"
+        private val RATE_URL = "https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities"
+        private val LICENSE_URL = "https://www.gnu.org/licenses/gpl.html"
     }
 }

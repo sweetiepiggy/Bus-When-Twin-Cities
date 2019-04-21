@@ -23,7 +23,7 @@
 
     <string name="stop_number">公交站＃</string>
     <string name="stop_id">公交站号码？</string>
-    <string name="stop_id_hint">例如：17922</string>
+    <string name="stop_id_hint">例如：17980</string>
     <string name="enter_stop_id">输入公交站号码</string>
     <string name="must_be_number">必须是一个号码数字</string>
     <string name="real_time">即时</string>
@@ -40,7 +40,9 @@
     <string name="nav_search">搜索</string>
     <string name="action_refresh">刷新</string>
     <string name="action_favorite">喜爱</string>
-    <string name="action_search">搜索</string>
+    <!-- <string name="action_search">搜索</string> -->
+    <!-- <string name="search_stop_id">按公交站号码搜索</string> -->
+    <string name="search_stop_id">搜索</string>
     <string name="action_filter">过滤</string>
 
     <string name="enter_stop_name_dialog_title">保存为收藏夹</string>
@@ -63,19 +65,20 @@
 
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">为明尼苏达居民提供简单，实用，免费和开源的应用程序</string>
-    <string name="about_us">
-如果此应用程序对您有帮助并希望给予支持，您可以通过此处 https://patreon.com/sweetiepiggyapps 给予赞助。
-
-\n\n这是一个免费的开源应用程序。源代码可通过 https://github.com/sweetiepiggy/Bus-When-Twin-Cities 获得。</string>
+    <string name="about_us">如果您觉得此应用程序有用，请考虑在以下网站上支持我们。</string>
+    <string name="patreon">在Patreon赞助我们</string>
+    <string name="facebook">在Facebook赞我们</string>
+    <string name="twitter">在推特上关注我们</string>
+    <string name="github">在GitHub上获取源代码</string>
+    <string name="rate">在Google Play评价我们</string>
 
     <string name="license_title">执照</string>
+    <string name="read_license">读取执照</string>
     <string name="license">
 版權所有(C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com
 
 \n\n公交车何时？（双城）爲自由軟體；您可依據自由軟體基金會所發表的GNU通用公共授權條款，對本程式再次發佈或修改；無論您依據的是本授權的第三版，或（您可選的）任一日後發行的版本。
 
 \n\n公交车何时？（双城）是基於使用目的而加以發佈，然而不負任何擔保責任；亦無對適售性或特定目的適用性所爲的默示性擔保。詳情請參照GNU通用公共授權。
-
-\n\nhttps://www.gnu.org/licenses
 	</string>
 </resources>

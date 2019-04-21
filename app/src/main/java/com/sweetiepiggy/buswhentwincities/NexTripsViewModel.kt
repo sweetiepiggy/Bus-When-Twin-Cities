@@ -31,6 +31,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
     private var mDownloadStopTask: DownloadStopTask? = null
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
+    private var mRefreshingListener: OnChangeRefreshingListener? = null
     private var mLastUpdate: Long = 0
     private var mDbLastUpdate: Long = 0
     private var mDbNexTrips: List<NexTrip>? = null
@@ -66,9 +67,14 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError)
     }
 
+    interface OnChangeRefreshingListener {
+        fun setRefreshing(refreshing: Boolean)
+    }
+
     fun loadNexTrips() {
         if (!mLoadingNexTrips) mStopId?.let { stopId ->
             mLoadingNexTrips = true
+            mRefreshingListener?.setRefreshing(true)
             val downloadNextTripsTask = mDownloadNexTripsTask
             if (mLastUpdate == 0L) {
                 // this is the first time we're loading nexTrips,
@@ -77,6 +83,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
             } else if ((downloadNextTripsTask == null ||
             			downloadNextTripsTask.status == AsyncTask.Status.FINISHED) &&
 		    			unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                // refresh displayed times now in case internet connection is slow
+                mNexTrips.value?.let { mNexTrips.value = it }
+
                 // start a new download task if there is no currently running task and
                 // it's been as at least MIN_SECONDS_BETWEEN_REFRESH since the last download
                 mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
@@ -85,8 +94,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
                 // too soon to download again, just refresh the displayed times
                 mNexTrips.value = mNexTrips.value?.let {
                     filterOldNexTrips(it, unixTime, mLastUpdate)
-                } ?: ArrayList<NexTrip>()
+                } ?: listOf()
                 mLoadingNexTrips = false
+                mRefreshingListener?.setRefreshing(false)
             }
         }
     }
@@ -94,24 +104,27 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     override fun onDownloaded(nexTrips: List<NexTrip>) {
         mLastUpdate = unixTime
         mNexTrips.value = nexTrips
+        mRefreshingListener?.setRefreshing(false)
         StoreNexTripsInDbTask(nexTrips).execute()
         mLoadingNexTrips = false
     }
 
     override fun onDownloadError(err: DownloadNexTripsTask.DownloadError) {
         if (mLastUpdate == 0L) {
+            val dbNexTrips = mDbNexTrips
             // fall back to nexTrips from database if they exist
-            if (mDbNexTrips != null) {
+            if (dbNexTrips != null) {
                 mLastUpdate = mDbLastUpdate
-                mNexTrips.value = mDbNexTrips
+        	    mNexTrips.value = filterOldNexTrips(dbNexTrips, unixTime, mLastUpdate)
             } else {
-                mNexTrips.value = ArrayList<NexTrip>()
+                mNexTrips.value = listOf()
             }
         } else mNexTrips.value?.let { nexTrips ->
         	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
         }
         mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
         mLoadingNexTrips = false
+        mRefreshingListener?.setRefreshing(false)
     }
 
     override fun onCleared() {
@@ -122,6 +135,10 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
     fun setLoadNexTripsErrorListener(loadNexTripsErrorListener: OnLoadNexTripsErrorListener) {
         mLoadNexTripsErrorListener = loadNexTripsErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
     }
 
     class NexTripsViewModelFactory(private val stopId: Int?, private val context: Context) : ViewModelProvider.NewInstanceFactory() {
@@ -148,18 +165,33 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         }
 
         override fun onPostExecute(result: List<NexTrip>?) {
-            mDbNexTrips = result
+            val curTime = unixTime
+            mDbNexTrips = result?.let { filterOldNexTrips(it, curTime, mDbLastUpdate) }
+
+            // display the database results now in case internet connection is slow
+            if (!mDbNexTrips.isNullOrEmpty()) {
+                mNexTrips.value = mDbNexTrips
+                mLastUpdate = mDbLastUpdate
+            }
 
             // download nexTrips if no or not-fresh results in database
-            if (result == null || unixTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+            if (result == null || curTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
                 mStopId?.let { stopId ->
                     mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
                     mDownloadNexTripsTask!!.execute()
                 }
             // show results from database if they exist and are fresh
             } else {
-                mNexTrips.value = result
+                // mNexTrips.value = filterOldNexTrips(result, unixTime, mLastUpdate)
+
+                // actually, we already showed database results above if they
+                // existed, so only show them here if they are empty
+                if (mDbNexTrips.isNullOrEmpty()) {
+                    mNexTrips.value = mDbNexTrips
+                    mLastUpdate = mDbLastUpdate
+                }
                 mLoadingNexTrips = false
+                mRefreshingListener?.setRefreshing(false)
             }
         }
     }
@@ -242,7 +274,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
     companion object {
         private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
-        // don't display NexTrips that were due a minute or more before now
+        // don't display NexTrips that were due this long or more before now
         private val SECONDS_BEFORE_NOW_TO_IGNORE = 60
         private val SECONDS_BEFORE_SUPPRESS_LOCATIONS = 30
 

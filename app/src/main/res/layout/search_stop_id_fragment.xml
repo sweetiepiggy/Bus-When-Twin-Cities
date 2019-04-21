@@ -18,39 +18,69 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:gravity="center_vertical"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".SearchStopIdFragment">
 
-  <TextView
-      android:id="@+id/stopIdLabel"
-      style="@android:style/TextAppearance.Large"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:paddingLeft="@dimen/text_margin"
-      android:paddingRight="@dimen/text_margin"
-      android:text="@string/stop_id" />
+	<androidx.cardview.widget.CardView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="6dp"
+		android:layout_gravity="center_horizontal"
+		android:gravity="center"
+		app:cardElevation="3dp">
 
-  <EditText
-      android:id="@+id/stopIdEntry"
-      android:paddingLeft="@dimen/text_margin"
-      android:paddingRight="@dimen/text_margin"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center_horizontal"
-      android:layout_marginStart="@dimen/text_margin"
-      android:layout_marginEnd="@dimen/text_margin"
-      android:ems="30"
-      android:hint="@string/stop_id_hint"
-      android:inputType="number"
-      android:minHeight="@android:dimen/app_icon_size"
-      android:textColorHint="@color/colorHint" />
-</LinearLayout>
+	  <androidx.constraintlayout.widget.ConstraintLayout
+	      android:layout_width="match_parent"
+	      android:layout_height="wrap_content"
+	      android:orientation="horizontal"
+	      android:padding="@dimen/text_margin">
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:ems="40"
+		android:visibility="invisible"
+		android:gravity="center"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/stopIdTextInput"
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:paddingBottom="@dimen/text_margin"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:hint="@string/stop_id">
+
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/stopIdEntry"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:drawablePadding="@dimen/fab_margin"
+				android:imeOptions="actionSearch"
+				android:textColorHint="@color/colorHint"
+				android:inputType="number" />
+		</com.google.android.material.textfield.TextInputLayout>
+
+		<Button
+		    android:id="@+id/searchStopIdButton"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:minHeight="@android:dimen/notification_large_icon_height"
+		    android:text="@string/search_stop_id"
+		    app:layout_constraintBottom_toBottomOf="parent"
+		    app:layout_constraintEnd_toEndOf="parent"
+		    app:layout_constraintStart_toStartOf="parent"
+		    app:layout_constraintTop_toBottomOf="@id/stopIdTextInput" />
+	  </androidx.constraintlayout.widget.ConstraintLayout>
+	</androidx.cardview.widget.CardView>
+</FrameLayout>

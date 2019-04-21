@@ -23,7 +23,7 @@
 
     <string name="stop_number">Parada #</string>
     <string name="stop_id">¿Número de parada?</string>
-    <string name="stop_id_hint">por ejemplo: 17922</string>
+    <string name="stop_id_hint">por ejemplo: 17980</string>
     <string name="enter_stop_id">Introduzca el número de parada</string>
     <string name="must_be_number">Tiene que ser un número</string>
     <string name="real_time">tiempo real</string>
@@ -40,7 +40,9 @@
     <string name="nav_search">Buscar</string>
     <string name="action_refresh">Refrescar</string>
     <string name="action_favorite">Favorita</string>
-    <string name="action_search">Buscar</string>
+    <!-- <string name="action_search">Buscar</string> -->
+    <!-- <string name="search_stop_id">Buscar por número de parada</string> -->
+    <string name="search_stop_id">Buscar</string>
     <string name="action_filter">Filtrar</string>
 
     <string name="enter_stop_name_dialog_title">Guardar en favoritas</string>
@@ -63,14 +65,15 @@
 
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">Aplicaciones simples, útiles, gratis y de código abierto para los Minnesotanos</string>
-    <string name="about_us">
-    "Desarrollamos aplicaciones simples para Android con el objetivo de mejorar modestamente la"
-    "vida diaria de las personas en nuestra comunidad.\n\nSi encuentra esta aplicación"
-    "útil y desea apoyar nuestro trabajo, puede encontrar más"
-    "información en https://patreon.com/sweetiepiggyapps\n\Para aquellos que"
-    "estén familiarizados con la programación de computadoras, el código fuente"
-    "de esta aplicación está disponible en https://github.com/sweetiepiggy/Bus-When-Twin-Cities"
+    <string name="about_us">"Si encuentra útil esta aplicación, considera apoyarnos en los sitios a continuación."</string>
+    <string name="patreon">Apóyanos en Patreon</string>
+    <string name="facebook">Danos me gusta en Facebook</string>
+    <string name="twitter">Síganos en Twitter</string>
+    <string name="github">Descarga el código fuente desde GitHub</string>
+    <string name="rate">Escribe una reseña en Google Play</string>
+
     <string name="license_title">Licencia</string>
+    <string name="read_license">Leer licencia</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus Cuándo? (Ciudades Gemelas) es software libre: usted puede redistribuirlo y/o modificarlo"
       "bajo los términos de la Licencia Pública General GNU publicada"
@@ -78,5 +81,5 @@
       "sea la versión 3 de la Licencia, o (a su elección) cualquier versión posterior.\n\nBus Cuándo? (Ciudades Gemelas) se distribuye con la esperanza de que sea útil,"
       "pero SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita"
       "MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO. Consulte los"
-      "detalles de la Licencia Pública General GNU para obtener una información más detallada.\n\nhttps://www.gnu.org/licenses</string>
+      "detalles de la Licencia Pública General GNU para obtener una información más detallada.</string>
 </resources>

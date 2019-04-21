@@ -29,9 +29,9 @@
 	android:layout_gravity="center"
 	android:layout_marginLeft="6dp"
 	android:layout_marginRight="6dp"
-	android:layout_marginTop="3dp"
-	android:layout_marginBottom="3dp"
-	app:cardCornerRadius="6dp">
+	android:layout_marginTop="1dp"
+	android:layout_marginBottom="1dp"
+	app:cardElevation="1dp">
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
@@ -51,7 +51,7 @@
 
 		<TextView
 			android:id="@+id/stop_id"
-			style="@android:style/TextAppearance.Medium"
+			style="?attr/textAppearanceSubtitle1"
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
 			android:gravity="center"

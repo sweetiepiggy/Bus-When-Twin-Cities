@@ -24,9 +24,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 
 class SearchStopIdFragment : Fragment() {
@@ -53,32 +56,43 @@ class SearchStopIdFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        // getActivity()?.findViewById<EditText>(R.id.stopIdEntry)
-        //         ?.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-        //             override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
-        //                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-        //                     startStopIdActivity()
-        //                     return true
-        //                 } else {
-        //                     return false
-        //                 }
-        //             }
-        //         })
+        activity?.findViewById<TextInputEditText>(R.id.stopIdEntry)?.setOnEditorActionListener { _, actionId, _ ->
+            return@setOnEditorActionListener when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> {
+                    startStopIdActivity()
+                    true
+                }
+                else -> false
+            }
+        }
+        activity?.findViewById<TextInputEditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
+            context?.let {
+                stopIdEntry.setCompoundDrawablesWithIntrinsicBounds(getDrawable(it, R.drawable.ic_stop),
+                    null, null, null)
+            }
+            stopIdEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
+                override fun onFocusChange(v: View, hasFocus: Boolean) =
+            	stopIdEntry.setHint(if (hasFocus) resources.getString(R.string.stop_id_hint) else "")
+            })
+        }
 
-        val fab = getActivity()?.findViewById<FloatingActionButton>(R.id.fab)
-        fab?.setOnClickListener { startStopIdActivity() }
+        activity?.findViewById<Button>(R.id.searchStopIdButton)?.setOnClickListener {
+            startStopIdActivity()
+        }
     }
 
     private fun startStopIdActivity() {
-        getActivity()?.findViewById<EditText>(R.id.stopIdEntry)?.let { stopIdEntry ->
-            val stopIdStr = stopIdEntry.text.toString()
+        getActivity()?.findViewById<TextInputLayout>(R.id.stopIdTextInput)?.let { stopIdTextInput ->
+            val stopIdStr = stopIdTextInput.editText?.text.toString()
             if (stopIdStr.length == 0) {
-                stopIdEntry.error = resources.getString(R.string.enter_stop_id)
+                stopIdTextInput.error = resources.getString(R.string.enter_stop_id)
             } else {
                 try {
-                    mSearchStopIdListener.onSearchStopId(stopIdStr.toInt())
+                    val stopId = stopIdStr.toInt()
+                    stopIdTextInput.error = null
+                    mSearchStopIdListener.onSearchStopId(stopId)
                 } catch (e: NumberFormatException) {
-                    stopIdEntry.error = resources.getString(R.string.must_be_number)
+                    stopIdTextInput.error = resources.getString(R.string.must_be_number)
                 }
             }
         }

@@ -18,19 +18,21 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <EditText
-        android:id="@+id/stop_name"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/text_margin"
-	android:layout_marginLeft="@dimen/text_margin"
-	android:layout_marginRight="@dimen/text_margin"
-        android:layout_marginBottom="4dp"
-	android:selectAllOnFocus="true"
-        android:hint="@string/enter_stop_name_dialog_message" />
-</LinearLayout>
+<com.google.android.material.textfield.TextInputLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/text_margin"
+    android:paddingLeft="@dimen/text_margin"
+    android:paddingRight="@dimen/text_margin"
+    android:paddingBottom="4dp">
+
+  <com.google.android.material.textfield.TextInputEditText
+      android:id="@+id/stop_name"
+      android:hint="@string/enter_stop_name_dialog_message"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+</com.google.android.material.textfield.TextInputLayout>

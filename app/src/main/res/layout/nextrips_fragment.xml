@@ -28,12 +28,12 @@
 
   <TextView
       android:id="@+id/no_results_textview"
-      style="@android:style/TextAppearance.Medium"
+      style="?attr/textAppearanceHeadline5"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:gravity="center"
       android:text="@string/no_nextrips_found"
-      android:visibility="gone" />
+      android:visibility="invisible" />
 
   <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
       android:id="@+id/swiperefresh"
@@ -45,7 +45,7 @@
 	android:layout_height="match_parent"
 	android:clipToPadding="false"
 	android:contentDescription="@null"
-	android:paddingBottom="80dp"
-	android:scrollbars="vertical" />
+	android:paddingTop="3dp"
+	android:paddingBottom="80dp" />
   </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>

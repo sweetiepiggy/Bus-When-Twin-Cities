@@ -22,9 +22,9 @@
     <string name="app_name">Bus When? (Twin Cities)</string>
 
     <string name="stop_number">Stop #</string>
-    <string name="stop_id">Stop ID?</string>
-    <string name="stop_id_hint">for example: 17922</string>
-    <string name="enter_stop_id">Enter Stop ID</string>
+    <string name="stop_id">Stop number?</string>
+    <string name="stop_id_hint">for example: 17980</string>
+    <string name="enter_stop_id">Enter stop number</string>
     <string name="must_be_number">Must be a number</string>
     <string name="real_time">real-time</string>
     <string name="scheduled">scheduled</string>
@@ -40,7 +40,9 @@
     <string name="nav_search">Search</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_favorite">Favorite</string>
-    <string name="action_search">Search</string>
+    <!-- <string name="action_search">Search</string> -->
+    <!-- <string name="search_stop_id">Search for stop number</string> -->
+    <string name="search_stop_id">Search</string>
     <string name="action_filter">Filter</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
@@ -56,21 +58,25 @@
     <string name="no_nextrips_found">No upcoming trips</string>
     <string name="no_favorites_found">No favorites here yet</string>
 
-    <string name="main_search_icon_content_description">search for stop ID</string>
-    <string name="favorite_stop_ids_content_description">favorite stop IDs</string>
+    <string name="main_search_icon_content_description">search for stop number</string>
+    <string name="favorite_stop_ids_content_description">favorite stops</string>
     <string name="about_email_icon_content_description">email the app developer</string>
-    <string name="reorder_favorites_content_description">reorder favorite stop IDs</string>
+    <string name="reorder_favorites_content_description">reorder favorite stops</string>
 
     <string name="sweetiepiggyapps">Sweetie Piggy Apps</string>
     <string name="simple_useful">Simple, useful, free and open-source apps for Minnesotans</string>
     <string name="about_us">
     "We develop simple Android apps with the goal of modestly improving the"
     "daily lives of the people in our community.\n\nIf you find this app"
-    "useful and wish to support our work, you can find more"
-    "information at https://patreon.com/sweetiepiggyapps\n\nFor those of you"
-    "familiar with computer programming, the source code"
-    "for this app is available at https://github.com/sweetiepiggy/Bus-When-Twin-Cities"</string>
+    "useful, please consider supporting us on one or more of the sites below."</string>
+    <string name="patreon">Support us on Patreon</string>
+    <string name="facebook">Like us on Facebook</string>
+    <string name="twitter">Follow us on Twitter</string>
+    <string name="github">Get source code on GitHub</string>
+    <string name="rate">Rate this app on Google Play</string>
+
     <string name="license_title">License</string>
+    <string name="read_license">Read license</string>
     <string name="license">
       "Copyright (C) 2019 Sweetie Piggy Apps sweetiepiggyapps@gmail.com\n\nBus When? (Twin Cities) is free software; you can redistribute it and/or modify"
       "it under the terms of the GNU General Public License as published by"
@@ -78,5 +84,5 @@
       "(at your option) any later version.\n\nBus When? (Twin Cities) is distributed in the hope that it will be useful,"
       "but WITHOUT ANY WARRANTY; without even the implied warranty of"
       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-      "GNU General Public License for more details.\n\nhttps://www.gnu.org/licenses"</string>
+      "GNU General Public License for more details.</string>
 </resources>

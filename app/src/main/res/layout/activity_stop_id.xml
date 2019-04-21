@@ -41,10 +41,10 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
+            style="@style/Widget.MaterialComponents.TabLayout.Colored"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:tabGravity="fill"
-            app:tabIndicatorColor="@color/common_google_signin_btn_text_dark_default"
             app:tabMaxWidth="0dp"
             app:tabMode="fixed" />
 
@@ -67,7 +67,7 @@
             android:layout_gravity="top"
             android:layout_marginTop="-6dp"
             android:indeterminate="true"
-            android:visibility="visible" />
+            android:visibility="invisible" />
 
     </FrameLayout>
 

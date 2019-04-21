@@ -90,10 +90,10 @@ class FavoriteStopIdsFragment : Fragment() {
         val resultsRecyclerView = activity?.findViewById<View>(R.id.favoritesRecyclerView)
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
         if (mFavoriteStopIds.isEmpty()) {
-            resultsRecyclerView?.setVisibility(View.GONE)
+            resultsRecyclerView?.setVisibility(View.INVISIBLE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {
-            noResultsView?.setVisibility(View.GONE)
+            noResultsView?.setVisibility(View.INVISIBLE)
             resultsRecyclerView?.setVisibility(View.VISIBLE)
         }
     }

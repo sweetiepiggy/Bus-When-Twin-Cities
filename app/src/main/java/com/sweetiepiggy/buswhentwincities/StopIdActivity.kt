@@ -26,7 +26,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
@@ -36,14 +35,16 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.textfield.TextInputEditText
 import java.security.InvalidParameterException
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener {
+class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener, NexTripsViewModel.OnChangeRefreshingListener {
     private var mStopId: Int? = null
     private var mStopDesc: String? = null
     private var mStop: Stop? = null
@@ -57,6 +58,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
     private var mDoShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
     private var mFilteredButWasntFavorite = false
     private var mDoShowRoutesInitDone = false
+    // use this to prevent progressBar and swipeRefresh from showing at the same time
+    private var mAllowProgressBarVisible = true
 
     private val unixTime: Long
         get() = Calendar.getInstance().timeInMillis / 1000L
@@ -82,6 +85,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         	NexTripsViewModel.NexTripsViewModelFactory(mStopId, applicationContext)
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
+        mNexTripsModel.setChangeRefreshingListener(this)
         mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
         mNexTripsModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
             if (!mDoShowRoutesInitDone) {
@@ -97,14 +101,21 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         })
 
         if (mDualPane) {
-            mNexTripsFragment = NexTripsFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.nextrips_container, mNexTripsFragment!!)
-                    .commit()
-            mMapFragment = MyMapFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.map_container, mMapFragment!!)
-                    .commit()
+            mNexTripsFragment = supportFragmentManager.findFragmentByTag(NEXTRIPS_TAG) as NexTripsFragment?
+            if (mNexTripsFragment == null) {
+                mNexTripsFragment = NexTripsFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.nextrips_container, mNexTripsFragment!!, NEXTRIPS_TAG)
+                        .commit()
+            }
+
+            mMapFragment = supportFragmentManager.findFragmentByTag(MAP_TAG) as MyMapFragment?
+            if (mMapFragment == null) {
+                mMapFragment = MyMapFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.map_container, mMapFragment!!, MAP_TAG)
+                        .commit()
+            }
         } else {
             val viewPager = findViewById<ViewPager>(R.id.pager)
             viewPager.adapter = StopIdPagerAdapter(supportFragmentManager, this)
@@ -116,7 +127,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         }
 
         findViewById<View>(R.id.fab)?.setOnClickListener {
-            mNexTripsFragment?.setRefreshing(true)
+            mAllowProgressBarVisible = true
             mNexTripsModel.loadNexTrips()
         }
     }
@@ -181,6 +192,18 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
                     override fun onClick(v: View) {}
         		}).show()
+        }
+    }
+
+    override fun setRefreshing(refreshing: Boolean) {
+        if (refreshing) {
+            if (mAllowProgressBarVisible) {
+                findViewById<View>(R.id.progressBar)?.setVisibility(View.VISIBLE)
+            }
+        } else {
+            findViewById<SwipeRefreshLayout>(R.id.swiperefresh)?.setRefreshing(false)
+            findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
+            mAllowProgressBarVisible = false
         }
     }
 
@@ -258,12 +281,12 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 setTitle(R.string.enter_stop_name_dialog_title)
                 setView(favStopIdDialog)
                 mStop?.let { stop ->
-                    favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.setText(stop.stopName)
+                    favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.setText(stop.stopName)
                 }
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     mIsFavorite = true
                     item.icon = getDrawable(context, IS_FAV_ICON)
-                    val stopName = favStopIdDialog.findViewById<EditText>(R.id.stop_name)?.text.toString()
+                    val stopName = favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.text.toString()
                     title = makeTitle(mStopId, stopName)
                     mStopId?.let { stopId ->
                         object : AsyncTask<Void, Void, Void>() {
@@ -428,6 +451,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val ITEM_IDX_NEXTRIPS = 0
         private val ITEM_IDX_MAP = 1
+
+        private val NEXTRIPS_TAG = "nexTrips"
+        private val MAP_TAG = "map"
     }
 }
 
