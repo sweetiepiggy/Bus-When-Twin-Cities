@@ -89,10 +89,10 @@ class NexTripsFragment : Fragment() {
 
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
         if (nexTrips.isEmpty()) {
-            mSwipeRefreshLayout.setVisibility(View.GONE)
+            mSwipeRefreshLayout.setVisibility(View.INVISIBLE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {
-            noResultsView?.setVisibility(View.GONE)
+            noResultsView?.setVisibility(View.INVISIBLE)
             mSwipeRefreshLayout.setVisibility(View.VISIBLE)
         }
     }
