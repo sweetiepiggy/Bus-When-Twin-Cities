@@ -101,14 +101,21 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         })
 
         if (mDualPane) {
-            mNexTripsFragment = NexTripsFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.nextrips_container, mNexTripsFragment!!)
-                    .commit()
-            mMapFragment = MyMapFragment.newInstance()
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.map_container, mMapFragment!!)
-                    .commit()
+            mNexTripsFragment = supportFragmentManager.findFragmentByTag(NEXTRIPS_TAG) as NexTripsFragment?
+            if (mNexTripsFragment == null) {
+                mNexTripsFragment = NexTripsFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.nextrips_container, mNexTripsFragment!!, NEXTRIPS_TAG)
+                        .commit()
+            }
+
+            mMapFragment = supportFragmentManager.findFragmentByTag(MAP_TAG) as MyMapFragment?
+            if (mMapFragment == null) {
+                mMapFragment = MyMapFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+                        .add(R.id.map_container, mMapFragment!!, MAP_TAG)
+                        .commit()
+            }
         } else {
             val viewPager = findViewById<ViewPager>(R.id.pager)
             viewPager.adapter = StopIdPagerAdapter(supportFragmentManager, this)
@@ -444,6 +451,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         private val IS_NOT_FAV_ICON = R.drawable.ic_baseline_favorite_border_24px
         private val ITEM_IDX_NEXTRIPS = 0
         private val ITEM_IDX_MAP = 1
+
+        private val NEXTRIPS_TAG = "nexTrips"
+        private val MAP_TAG = "map"
     }
 }
 
