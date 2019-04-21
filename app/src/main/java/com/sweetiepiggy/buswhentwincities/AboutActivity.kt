@@ -38,7 +38,7 @@ class AboutActivity : AppCompatActivity() {
         findViewById<Button>(R.id.patreon_button)?.setOnClickListener {
             openLink(PATREON_URL)
         }
-        findViewById<Button>(R.id.facebook_button)?.setOnClickListener {
+        findViewById<Button>(R.id.fb_button)?.setOnClickListener {
             openLink(FACEBOOK_URL)
         }
         findViewById<Button>(R.id.twitter_button)?.setOnClickListener {
