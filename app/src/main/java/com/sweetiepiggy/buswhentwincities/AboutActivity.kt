@@ -38,6 +38,9 @@ class AboutActivity : AppCompatActivity() {
         findViewById<Button>(R.id.patreon_button)?.setOnClickListener {
             openLink(PATREON_URL)
         }
+        findViewById<Button>(R.id.facebook_button)?.setOnClickListener {
+            openLink(FACEBOOK_URL)
+        }
         findViewById<Button>(R.id.twitter_button)?.setOnClickListener {
             openLink(TWITTER_URL)
         }
@@ -59,6 +62,7 @@ class AboutActivity : AppCompatActivity() {
 
     companion object {
         private val PATREON_URL = "https://patreon.com/sweetiepiggyapps"
+        private val FACEBOOK_URL = "https://www.facebook.com/Bus-When-Twin-Cities-2295035200768909/"
         private val TWITTER_URL = "https://twitter.com/sweetiepiggyapp"
         private val GITHUB_URL = "https://github.com/sweetiepiggy"
         private val RATE_URL = "https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities"
