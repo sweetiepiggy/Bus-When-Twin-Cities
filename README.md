@@ -16,8 +16,16 @@ https://developer.android.com/training/basics/first
 
 ## License
 
-This is a free and open source app. The source code is available under the
-GPLv3+ license; see [COPYING](COPYING).
+Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [COPYING](COPYING) for more details.
 
 The code to animate markers on the map
 ([AnimationUtil.java](app/src/main/java/com/sweetiepiggy/buswhentwincities/AnimationUtil.java))
