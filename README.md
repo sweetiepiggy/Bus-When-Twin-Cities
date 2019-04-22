@@ -5,6 +5,15 @@ Stop ID shown on your bus-stop sign to see real-time arrival estimates if
 available, or scheduled arrival times if not. This is similar to the NexTrip
 feature on the official Metro Transit website, but we aim to do it better.
 
+<a href='https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img height=90 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
+
+
+## How to build
+
+See developer.android.com for tutorials on how to build Android apps.
+
+https://developer.android.com/training/basics/first
+
 ## License
 
 This is a free and open source app. The source code is available under the
@@ -36,20 +45,4 @@ under the terms of use described at
 
 The GPL logo is in the public domain and is available at [https://www.gnu.org/graphics/license-logos.html](https://www.gnu.org/graphics/license-logos.html).
 
-## How to build
-
-See developer.android.com for tutorials on how to build Android apps.
-
-https://developer.android.com/training/basics/firstapp/
-
-## Links
-
-### Install from Google Play
-
-https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities
-
-### Get Source Code on GitHub
-https://github.com/sweetiepiggy/Bus-When-Twin-Cities
-
-### Support us on Patreon
-https://patreon.com/sweetiepiggyapps
+<img alt='GPLv3' src='https://www.gnu.org/graphics/gplv3-with-text-136x68.png'/>
