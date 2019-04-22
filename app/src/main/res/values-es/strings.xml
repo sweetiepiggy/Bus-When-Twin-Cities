@@ -71,6 +71,12 @@
     <string name="twitter">Síganos en Twitter</string>
     <string name="github">Descarga el código fuente desde GitHub</string>
     <string name="rate">Escribe una reseña en Google Play</string>
+    <string name="patreon_content_description">Patreon</string>
+    <string name="facebook_content_description">Facebook</string>
+    <string name="twitter_content_description">Twitter</string>
+    <string name="github_content_description">GitHub</string>
+    <string name="rate_content_description">Google Play</string>
+    <string name="license_content_description">GPLv3</string>
 
     <string name="license_title">Licencia</string>
     <string name="read_license">Leer licencia</string>
