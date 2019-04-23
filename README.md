@@ -32,6 +32,10 @@ Bus When? (Twin Cities) is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [COPYING](COPYING) for more details.
 
+<img alt='GPLv3' src='https://www.gnu.org/graphics/gplv3-with-text-136x68.png'/>
+
+### Other
+
 The code to animate markers on the map
 ([AnimationUtil.java](app/src/main/java/com/sweetiepiggy/buswhentwincities/AnimationUtil.java))
 is licensed under Apache 2.0 by Google Inc.
@@ -57,5 +61,3 @@ under the terms of use described at
 [https://github.com/logos](https://github.com/logos).
 
 The GPL logo is in the public domain and is available at [https://www.gnu.org/graphics/license-logos.html](https://www.gnu.org/graphics/license-logos.html).
-
-<img alt='GPLv3' src='https://www.gnu.org/graphics/gplv3-with-text-136x68.png'/>
