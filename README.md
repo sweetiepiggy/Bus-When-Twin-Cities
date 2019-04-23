@@ -3,7 +3,7 @@ master:
 next:
 [![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=next)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
 
-# Bus When (Twin Cities)
+# Bus When? (Twin Cities)
 
 Check bus arrival times in the Minneapolis–Saint Paul metro area. Enter the
 Stop ID shown on your bus-stop sign to see real-time arrival estimates if
@@ -52,7 +52,7 @@ under the terms of use described at
 
 The "f" logo is a trademark registered by Facebook, Inc. and is available
 under the terms of use described at
-[https://en.facebookbrand.com/assets/f-logo/](https://en.facebookbrand.com/assets/f-logo/).
+[https://en.facebookbrand.com/assets/f-logo](https://en.facebookbrand.com/assets/f-logo/).
 
 The Twitter logo is a trademark registered by Twitter, Inc. and is available
 under the terms of use described at
