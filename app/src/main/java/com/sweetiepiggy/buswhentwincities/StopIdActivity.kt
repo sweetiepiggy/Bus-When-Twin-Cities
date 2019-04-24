@@ -22,10 +22,7 @@ package com.sweetiepiggy.buswhentwincities
 import android.content.DialogInterface
 import android.os.AsyncTask
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
@@ -117,7 +114,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                         .commit()
             }
         } else {
-            val viewPager = findViewById<ViewPager>(R.id.pager)
+            val viewPager = findViewById<DisabledSwipeViewPager>(R.id.pager)
             viewPager.adapter = StopIdPagerAdapter(supportFragmentManager, this)
             findViewById<TabLayout>(R.id.tab_layout).run {
                 setupWithViewPager(viewPager)

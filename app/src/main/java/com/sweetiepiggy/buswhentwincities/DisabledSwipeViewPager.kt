@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+/*
     Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
@@ -15,14 +14,22 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
--->
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MyMapFragment" />
+    along with Bus When? (Twin Cities); if not, see <http://www.gnu.org/licenses/>.
+*/
 
+package com.sweetiepiggy.buswhentwincities
+
+import android.content.Context
+import android.util.AttributeSet
+import android.view.MotionEvent
+import androidx.viewpager.widget.ViewPager
+
+
+// StackOverflow: Is it possible to disable scrolling on a ViewPager
+// https://stackoverflow.com/questions/7814017/is-it-possible-to-disable-scrolling-on-a-viewpager/42687397#42687397
+
+class DisabledSwipeViewPager(context: Context, attrs: AttributeSet) : ViewPager(context, attrs) {
+    override fun onTouchEvent(event: MotionEvent) = false
+
+    override fun onInterceptTouchEvent(event: MotionEvent) = false
+}

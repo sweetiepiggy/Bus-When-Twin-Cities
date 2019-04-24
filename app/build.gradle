@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 48
-        versionName "0.16"
+        versionName "0.16-osm"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 	vectorDrawables.useSupportLibrary = true
     }
@@ -42,13 +42,11 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha04'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'com.google.android.gms:play-services-maps:16.1.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.viewpager:viewpager:1.0.0'
     implementation "com.android.support:support-vector-drawable:28.0.0"
-    implementation "androidx.core:core-ktx:1.0.1"
     implementation 'androidx.cardview:cardview:1.0.0'
-
+    implementation 'org.osmdroid:osmdroid-android:6.1.0'
 }
 repositories {
     mavenCentral()

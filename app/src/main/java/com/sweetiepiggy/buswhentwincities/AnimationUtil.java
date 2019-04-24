@@ -3,10 +3,30 @@
    Source - https://gist.github.com/broady/6314689
    Video - https://www.youtube.com/watch?v=WKfZsCKSXVQ&feature=youtu.be
    */
+/*
+    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+
+    Modified by Sweetie Piggy Apps to work with OsmDroid
+
+    This file is part of Bus When? (Twin Cities).
+
+    Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Bus When? (Twin Cities) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bus When? (Twin Cities); if not, see <http://www.gnu.org/licenses/>.
+*/
 package com.sweetiepiggy.buswhentwincities;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Marker;
 
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
@@ -31,7 +51,7 @@ public class AnimationUtil {
      * @param marker        marker to animate
      * @param finalPosition the final position of the marker after the animation
      */
-    public static void animateMarkerTo(final Marker marker, final LatLng finalPosition) {
+    public static void animateMarkerTo(final Marker marker, final GeoPoint finalPosition) {
         // Use the appropriate implementation per API Level
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             animateMarkerToICS(marker, finalPosition);
@@ -42,9 +62,9 @@ public class AnimationUtil {
         }
     }
 
-    private static void animateMarkerToGB(final Marker marker, final LatLng finalPosition) {
+    private static void animateMarkerToGB(final Marker marker, final GeoPoint finalPosition) {
         final LatLngInterpolator latLngInterpolator = new LatLngInterpolator.Linear();
-        final LatLng startPosition = marker.getPosition();
+        final GeoPoint startPosition = marker.getPosition();
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
@@ -76,16 +96,16 @@ public class AnimationUtil {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-    private static void animateMarkerToHC(final Marker marker, final LatLng finalPosition) {
+    private static void animateMarkerToHC(final Marker marker, final GeoPoint finalPosition) {
         final LatLngInterpolator latLngInterpolator = new LatLngInterpolator.Linear();
-        final LatLng startPosition = marker.getPosition();
+        final GeoPoint startPosition = marker.getPosition();
 
         ValueAnimator valueAnimator = new ValueAnimator();
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float v = animation.getAnimatedFraction();
-                LatLng newPosition = latLngInterpolator
+                GeoPoint newPosition = latLngInterpolator
                         .interpolate(v, startPosition, finalPosition);
                 marker.setPosition(newPosition);
             }
@@ -96,15 +116,15 @@ public class AnimationUtil {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    private static void animateMarkerToICS(Marker marker, LatLng finalPosition) {
+    private static void animateMarkerToICS(Marker marker, GeoPoint finalPosition) {
         final LatLngInterpolator latLngInterpolator = new LatLngInterpolator.Linear();
-        TypeEvaluator<LatLng> typeEvaluator = new TypeEvaluator<LatLng>() {
+        TypeEvaluator<GeoPoint> typeEvaluator = new TypeEvaluator<GeoPoint>() {
             @Override
-            public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+            public GeoPoint evaluate(float fraction, GeoPoint startValue, GeoPoint endValue) {
                 return latLngInterpolator.interpolate(fraction, startValue, endValue);
             }
         };
-        Property<Marker, LatLng> property = Property.of(Marker.class, LatLng.class, "position");
+        Property<Marker, GeoPoint> property = Property.of(Marker.class, GeoPoint.class, "position");
         ObjectAnimator animator = ObjectAnimator
                 .ofObject(marker, property, typeEvaluator, finalPosition);
         animator.setDuration(3000);
@@ -116,21 +136,21 @@ public class AnimationUtil {
      */
     interface LatLngInterpolator {
 
-        LatLng interpolate(float fraction, LatLng a, LatLng b);
+        GeoPoint interpolate(float fraction, GeoPoint a, GeoPoint b);
 
         class Linear implements LatLngInterpolator {
 
             @Override
-            public LatLng interpolate(float fraction, LatLng a, LatLng b) {
-                double lat = (b.latitude - a.latitude) * fraction + a.latitude;
-                double lngDelta = b.longitude - a.longitude;
+            public GeoPoint interpolate(float fraction, GeoPoint a, GeoPoint b) {
+                double lat = (b.getLatitude() - a.getLatitude()) * fraction + a.getLatitude();
+                double lngDelta = b.getLongitude() - a.getLongitude();
 
                 // Take the shortest path across the 180th meridian.
                 if (Math.abs(lngDelta) > 180) {
                     lngDelta -= Math.signum(lngDelta) * 360;
                 }
-                double lng = lngDelta * fraction + a.longitude;
-                return new LatLng(lat, lng);
+                double lng = lngDelta * fraction + a.getLongitude();
+                return new GeoPoint(lat, lng);
             }
         }
     }

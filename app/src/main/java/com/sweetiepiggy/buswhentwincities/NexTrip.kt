@@ -23,7 +23,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.location.Location
 import android.text.format.DateFormat
-import com.google.android.gms.maps.model.LatLng
+import org.osmdroid.util.GeoPoint
 import java.util.*
 
 // the raw data as it comes
@@ -39,9 +39,9 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
 			val routeDirection: Direction?, val terminal: String?, val vehicleHeading: Double?,
         	vehicleLatitude: Double?, vehicleLongitude: Double?) {
 
-    val position: LatLng? = vehicleLatitude?.let { latitude ->
+    val position: GeoPoint? = vehicleLatitude?.let { latitude ->
         vehicleLongitude?.let { longitude ->
-            LatLng(latitude, longitude).let {
+            GeoPoint(latitude, longitude).let {
                 if (distanceBetweenIsSmall(it, ORIGIN_LAT_LNG)) null else it
             }
         }
@@ -117,18 +117,18 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
                 null
             }
 
-        fun distanceBetweenIsSmall(pos1: LatLng?, pos2: LatLng?): Boolean =
+        fun distanceBetweenIsSmall(pos1: GeoPoint?, pos2: GeoPoint?): Boolean =
             (pos1 == pos2) || (distanceBetween(pos1!!, pos2!!)?.let { it < 1 } ?: false)
 
         /** @return distance in meters between the two positions */
-        private fun distanceBetween(pos1: LatLng, pos2: LatLng): Float? {
+        private fun distanceBetween(pos1: GeoPoint, pos2: GeoPoint): Float? {
             var results: FloatArray = floatArrayOf(0f)
             Location.distanceBetween(pos1.latitude, pos1.longitude,
         		pos2.latitude, pos2.longitude, results)
             return results[0]
         }
 
-        private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
+        private val ORIGIN_LAT_LNG: GeoPoint = GeoPoint(0.0, 0.0)
     }
 }
 
@@ -143,7 +143,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val routeAndTerminal: String? = route?.let { it + (terminal ?: "") }
     val routeDirection: NexTrip.Direction? = nexTrip.routeDirection
     val routeDirectionStr: String? = translateDirection(nexTrip.routeDirection, context.resources)
-    val position: LatLng? = nexTrip.position
+    val position: GeoPoint? = nexTrip.position
     val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
     val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(timeInMillis)
 
