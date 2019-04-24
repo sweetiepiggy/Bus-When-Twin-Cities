@@ -183,7 +183,7 @@
 	    android:layout_height="wrap_content"
 	    android:padding="@dimen/text_margin"
 	    android:contentDescription="@string/twitter_content_description"
-	    app:srcCompat="@drawable/ic_twitter_social_icon_rounded_square_color"
+	    app:srcCompat="@drawable/ic_twitter_social_icon_square_color"
 	    app:layout_constraintStart_toStartOf="parent"
 	    app:layout_constraintTop_toTopOf="@id/twitter_button"
 	    app:layout_constraintBottom_toBottomOf="@id/twitter_button" />
