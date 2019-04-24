@@ -2,6 +2,8 @@ master:
 [![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=master)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
 next:
 [![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=next)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
+feature/osmdroid:
+[![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=feature/osmdroid)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
 
 # Bus When? (Twin Cities)
 
@@ -33,6 +35,15 @@ the Free Software Foundation; either version 3 of the License, or
 Bus When? (Twin Cities) is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [COPYING](COPYING) for more details.
+
+Additional permission under GNU GPL version 3 section 7
+
+If you modify this Program, or any covered work, by linking or combining it
+with Google Play services (or a modified version of that library), containing
+parts covered by the terms of the respective licensing agreement, the licensors
+of this Program grant you additional permission to convey the resulting work.
+{Corresponding Source for a non-source form of such a combination shall
+include the source code for the parts of Google Play services used as well as that of the covered work.}
 
 <img alt='GPLv3' src='https://www.gnu.org/graphics/gplv3-with-text-136x68.png'/>
 
