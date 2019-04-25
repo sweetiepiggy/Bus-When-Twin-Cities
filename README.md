@@ -2,6 +2,8 @@ master:
 [![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=master)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
 next:
 [![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=next)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
+feature/osmdroid:
+[![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=feature/osmdroid)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
 
 # Bus When? (Twin Cities)
 
@@ -34,9 +36,15 @@ Bus When? (Twin Cities) is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See [COPYING](COPYING) for more details.
 
+### No linking exception
+
+Linking Bus When? (Twin Cities) statically or dynamically with other modules is making a combined work based on Bus When? (Twin Cities). Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+
+This means that you are not permitted to distribute a modified version of Bus When? (Twin Cities) (feature/osmdroid branch) that makes use of proprietary libraries such as Google Play services. If you are interested in doing so, you must fork from the `next` branch, which explicitly grants this permission.
+
 <img alt='GPLv3' src='https://www.gnu.org/graphics/gplv3-with-text-136x68.png'/>
 
-### Other
+### Attribution and Trademarks
 
 The code to animate markers on the map
 ([AnimationUtil.java](app/src/main/java/com/sweetiepiggy/buswhentwincities/AnimationUtil.java))
