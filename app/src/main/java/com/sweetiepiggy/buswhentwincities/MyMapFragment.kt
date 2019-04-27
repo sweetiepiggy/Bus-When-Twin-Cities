@@ -374,7 +374,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                                     deselectVehicle()
                                 }
                                 marker.showInfoWindow()
-                                mapView.controller.animateTo(marker.position)
+                                // mapView.controller.animateTo(marker.position)
                                 return true
                             }
                         })
