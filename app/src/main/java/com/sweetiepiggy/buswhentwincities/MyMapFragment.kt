@@ -170,7 +170,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         mVehicleBlockNumber != (marker.tag as PresentableNexTrip?)?.blockNumber) {
                     deselectVehicle()
                 }
-                return false
+                marker.showInfoWindow()
+                return true
             }
         })
     }
