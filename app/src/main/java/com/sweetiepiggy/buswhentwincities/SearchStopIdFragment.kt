@@ -73,7 +73,7 @@ class SearchStopIdFragment : Fragment() {
             stopIdEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
                 override fun onFocusChange(v: View, hasFocus: Boolean) =
             		stopIdEntry.setHint(
-                    	if (hasFocus) activity?.resources.getString(R.string.stop_id_hint) else ""
+                    	if (hasFocus) activity?.resources?.getString(R.string.stop_id_hint) else ""
                     )
             })
         }
