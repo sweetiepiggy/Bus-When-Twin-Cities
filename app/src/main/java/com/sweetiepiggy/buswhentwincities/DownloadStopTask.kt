@@ -124,8 +124,8 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedListener,
     }
 
     companion object {
-        // private val STOP_URL = "buswhentwincities.herokuapp.com/stops/"
-        private val STOP_URL = "buswhentwincities.appspot.com/stops/"
+        private val STOP_URL = "buswhentwincities.herokuapp.com/stops/"
+        // private val STOP_URL = "buswhentwincities.appspot.com/stops/"
         private var mUseHttps = true
     }
 }
