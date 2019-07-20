@@ -47,6 +47,8 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         val scheduledTextView: TextView = v.findViewById<TextView>(R.id.scheduled)
         val mapButton: ImageButton = v.findViewById<ImageButton>(R.id.map_button).apply {
             setOnClickListener {
+                /* FIXME: adapterPosition can be out of mNexTrips array bounds,
+                	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
                 mClickMapListener!!.onClickMap(mNexTrips[adapterPosition].blockNumber)
             }
         }
