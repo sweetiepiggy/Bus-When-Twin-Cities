@@ -70,7 +70,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         fun newInstance() = MyMapFragment()
         private val MY_PERMISSIONS_REQUEST_LOCATION = 0
         private val KEY_BLOCK_NUMBER = "blockNumber"
-        private val UNSELECTED_MARKER_ALPHA = 0.3f
+        private val UNSELECTED_MARKER_ALPHA = 0.4f
         private val TWIN_CITIES_LATLNG = GeoPoint(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11.0
     }
