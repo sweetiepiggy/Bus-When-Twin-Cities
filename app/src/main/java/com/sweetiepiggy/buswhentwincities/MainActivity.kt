@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         override fun onPostExecute(result: Void?) { }
     }
 
-    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getCount(): Int = 2
 
         override fun getItem(p0: Int): Fragment =
