@@ -37,8 +37,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import java.util.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -59,7 +57,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private var mMap: MapView? = null
     private var mVehicleBlockNumber: Int? = null
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
-    private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
     // note that Marker.position is the current position on the map which will
@@ -123,8 +120,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             loadState(savedInstanceState)
         }
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
-
         val model = activity?.run {
             ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
@@ -171,7 +166,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
 
     fun onMapReady() {
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // googleMap.isMyLocationEnabled = true
             mMap?.overlays?.add(MyLocationNewOverlay(GpsMyLocationProvider(context), mMap).apply {
                 enableMyLocation()
             })
@@ -188,7 +182,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         when (requestCode) {
             MY_PERMISSIONS_REQUEST_LOCATION ->
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // mMap?.isMyLocationEnabled = true
                     mMap?.overlays?.add(MyLocationNewOverlay(GpsMyLocationProvider(context), mMap).apply {
                         enableMyLocation()
                     })
@@ -266,33 +259,36 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 latLngs
             else latLngs + GeoPoint(stop.stopLat, stop.stopLon)
 
-        mFusedLocationClient.lastLocation
-            .addOnSuccessListener { myLocation: Location? ->
-                if (!latLngs.isEmpty()) {
-                    val latLngsWithMyLoc = if (myLocation != null)
-                        latLngsWithStop + GeoPoint(myLocation.latitude, myLocation.longitude)
-                    else latLngsWithStop
-                    zoomTo(latLngsWithMyLoc, 5.236f)
-                }
-            }
-            .addOnFailureListener { zoomTo(latLngs, 5.236f) }
+//        mFusedLocationClient.lastLocation
+//            .addOnSuccessListener { myLocation: Location? ->
+//                if (!latLngs.isEmpty()) {
+//                    val latLngsWithMyLoc = if (myLocation != null)
+//                        latLngsWithStop + GeoPoint(myLocation.latitude, myLocation.longitude)
+//                    else latLngsWithStop
+//                    zoomTo(latLngsWithMyLoc, 5.236f)
+//                }
+//            }
+//            .addOnFailureListener { zoomTo(latLngs, 5.236f) }
     }
 
     private fun zoomToPosition(pos: GeoPoint) {
-        mFusedLocationClient.lastLocation
-            .addOnSuccessListener { myLocation: Location? ->
-                if (myLocation != null || mStop != null) {
-                    val locs = mutableListOf(pos)
-                    myLocation?.let { locs.add(GeoPoint(it.latitude, it.longitude)) }
-                    mStop?.let { locs.add(GeoPoint(it.stopLat, it.stopLon)) }
-                    zoomTo(locs, 3f)
-                } else {
-                    mMap?.controller?.animateTo(pos, 15.0, null)
-                }
-            }
-            .addOnFailureListener {
-                mMap?.controller?.animateTo(pos, 15.0, null)
-            }
+//        mFusedLocationClient.lastLocation
+//            .addOnSuccessListener { myLocation: Location? ->
+//                if (myLocation != null || mStop != null) {
+//                    val locs = mutableListOf(pos)
+//                    myLocation?.let { locs.add(GeoPoint(it.latitude, it.longitude)) }
+//                    mStop?.let { locs.add(GeoPoint(it.stopLat, it.stopLon)) }
+//                    zoomTo(locs, 3f)
+//                } else {
+//                    mMap?.controller?.animateTo(pos, 15.0, null)
+//                }
+//            }
+//            .addOnFailureListener {
+//                mMap?.controller?.animateTo(pos, 15.0, null)
+//            }
+            mStop?.let {
+                zoomTo(listOf(pos, GeoPoint(it.stopLat, it.stopLon)), 3f)
+            } ?: mMap?.controller?.animateTo(pos, 15.0, null)
         }
 
     private fun zoomTo(latLngs: List<GeoPoint>, paddingRatio: Float) {
