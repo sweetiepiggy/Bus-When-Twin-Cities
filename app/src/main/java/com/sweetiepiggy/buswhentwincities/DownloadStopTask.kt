@@ -52,8 +52,10 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedListener,
             } catch (e: MalformedURLException) {
             } catch (e: IllegalStateException) {
             } catch (e: UnsupportedEncodingException) {
+            } catch (e: IOException) {
                 // old Android versions seem to have a problem with https and
                 // throw IOException: CertPathValidatorException,
+                // (or javax.net.ssl.SSLException? or javax.net.ssl.SSLHandshakeException?)
                 // try again using http
                 if (mUseHttps) {
                     mUseHttps = false
