@@ -35,7 +35,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -120,7 +120,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
 
         val model = activity?.run {
-            ViewModelProviders.of(this).get(NexTripsViewModel::class.java)
+            ViewModelProvider(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
         model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
         model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
