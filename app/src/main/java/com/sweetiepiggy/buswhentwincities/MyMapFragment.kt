@@ -96,9 +96,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 setEnabled(true)
             })
             // overlays?.add(CompassOverlay(context, InternalCompassOrientationProvider(context), this).apply {
-            overlays?.add(CompassOverlay(context, this).apply {
-                enableCompass()
-            })
+            // overlays?.add(CompassOverlay(context, this).apply {
+            //     enableCompass()
+            // })
 
             overlays?.add(CopyrightOverlay(context))
         }
@@ -349,9 +349,10 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             for (nexTrip in mNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
-                        if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second.position, nexTrip.position)) {
-                            AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
-                        }
+                        position = nexTrip.position
+                        // if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second.position, nexTrip.position)) {
+                        //     AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
+                        // }
                     }
                 } else {
                     Marker(mMap).apply {
