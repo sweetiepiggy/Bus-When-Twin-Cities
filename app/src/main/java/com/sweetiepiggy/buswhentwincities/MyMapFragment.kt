@@ -134,6 +134,13 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                     setTitle(resources.getString(R.string.stop_number) + it.stopId.toString())
                     setSnippet(it.stopName)
                     setIcon(getDrawable(context!!, R.drawable.ic_stop))
+                    setOnMarkerClickListener(object : Marker.OnMarkerClickListener {
+                        override fun onMarkerClick(marker: Marker, mapView: MapView): Boolean {
+                            marker.showInfoWindow()
+                            // mapView.controller.animateTo(marker.position)
+                            return true
+                        }
+                    })
             })
         })
 
@@ -228,6 +235,13 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                     setTitle(resources.getString(R.string.stop_number) + it.stopId.toString())
                     setSnippet(it.stopName)
                     setIcon(getDrawable(context!!, R.drawable.ic_stop))
+                    setOnMarkerClickListener(object : Marker.OnMarkerClickListener {
+                        override fun onMarkerClick(marker: Marker, mapView: MapView): Boolean {
+                            marker.showInfoWindow()
+                            // mapView.controller.animateTo(marker.position)
+                            return true
+                        }
+                    })
             })// ?.apply {
             //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
             // }
