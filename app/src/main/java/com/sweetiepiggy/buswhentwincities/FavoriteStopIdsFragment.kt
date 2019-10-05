@@ -39,6 +39,7 @@ class FavoriteStopIdsFragment : Fragment() {
     private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
     private lateinit var mAdapter: FavoriteStopIdsAdapter
     private lateinit var mModel: FavoriteStopIdsViewModel
+    private var mModelIsInit = false
     private val mFavoriteStopIds: MutableList<FavoriteStopIdsViewModel.FavoriteStopId> = ArrayList<FavoriteStopIdsViewModel.FavoriteStopId>()
 
     companion object {
@@ -69,13 +70,14 @@ class FavoriteStopIdsFragment : Fragment() {
         mModel = activity?.run {
             ViewModelProvider(this).get(FavoriteStopIdsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+        mModelIsInit = true
 
         mModel.getFavoriteStopIds().observe(this,
         	Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ updateFavoriteStopIds(it) })
     }
 
     fun refresh() {
-        mModel.loadFavoriteStopIds()
+        if (mModelIsInit) { mModel.loadFavoriteStopIds() }
     }
 
     private fun updateFavoriteStopIds(favoriteStopIds: List<FavoriteStopIdsViewModel.FavoriteStopId>) {
