@@ -18,14 +18,18 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<FrameLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".SearchStopIdFragment">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:orientation="vertical">
 
 	<androidx.cardview.widget.CardView
 		android:layout_width="wrap_content"
@@ -83,4 +87,73 @@
 		    app:layout_constraintTop_toBottomOf="@id/stopIdTextInput" />
 	  </androidx.constraintlayout.widget.ConstraintLayout>
 	</androidx.cardview.widget.CardView>
-</FrameLayout>
+
+	<androidx.cardview.widget.CardView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_margin="6dp"
+		android:layout_gravity="center_horizontal"
+		android:gravity="center"
+		app:cardElevation="3dp">
+
+	  <androidx.constraintlayout.widget.ConstraintLayout
+	      android:layout_width="match_parent"
+	      android:layout_height="wrap_content"
+	      android:orientation="horizontal"
+	      android:padding="@dimen/text_margin">
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:ems="40"
+		android:visibility="invisible"
+		android:gravity="center"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+		<com.google.android.material.textfield.TextInputLayout
+			android:id="@+id/routeTextInput"
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:paddingBottom="@dimen/text_margin"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:hint="@string/route">
+
+			<com.google.android.material.textfield.TextInputEditText
+				android:id="@+id/routeEntry"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:drawablePadding="@dimen/fab_margin"
+				android:imeOptions="actionSearch"
+				android:textColorHint="@color/colorHint"
+				android:inputType="text" />
+		</com.google.android.material.textfield.TextInputLayout>
+
+		<Button
+		    android:id="@+id/browseRoutesButton"
+		    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:minHeight="@android:dimen/notification_large_icon_height"
+		    android:text="@string/browse_routes"
+		    app:layout_constraintBottom_toBottomOf="parent"
+		    app:layout_constraintStart_toStartOf="parent"
+		    app:layout_constraintTop_toBottomOf="@id/routeTextInput" />
+		<Button
+		    android:id="@+id/searchRouteButton"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:minHeight="@android:dimen/notification_large_icon_height"
+		    android:text="@string/search_route"
+		    android:layout_marginStart="@dimen/text_margin"
+		    app:layout_constraintBottom_toBottomOf="parent"
+		    app:layout_constraintEnd_toEndOf="parent"
+		    app:layout_constraintStart_toEndOf="@id/browseRoutesButton"
+		    app:layout_constraintTop_toBottomOf="@id/routeTextInput" />
+	  </androidx.constraintlayout.widget.ConstraintLayout>
+	</androidx.cardview.widget.CardView>
+</LinearLayout>
+</ScrollView>
