@@ -59,6 +59,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
+    private var mInitCameraDone: Boolean = false
     // note that Marker.position is the current position on the map which will
     // not match the NexTrip.position if the Marker is undergoing animation,
     // we keep track of the NexTrip.positions here so we can avoid jumpy
@@ -142,6 +143,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                         }
                     })
             })
+            if (!mInitCameraDone) {
+                initCamera()
+            }
         })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -178,8 +182,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             })
             initCamera()
         } else {
-            ActivityCompat.requestPermissions(activity!!,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
         }
     }
@@ -329,8 +332,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
         }
 
-        val doInitCamera = mNexTrips == null && (!nexTripsWithActualPosition.isEmpty() || mStop != null)
-        if (doInitCamera) {
+        if (mNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
             mNexTrips = mutableMapOf()
         }
         mNexTrips?.clear()
@@ -340,8 +342,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         if (mNexTrips != null) {
             updateMarkers()
         }
-        if (doInitCamera) {
+        if (!mInitCameraDone && mNexTrips != null) {
             initCamera()
+            mInitCameraDone = true
         }
     }
 
