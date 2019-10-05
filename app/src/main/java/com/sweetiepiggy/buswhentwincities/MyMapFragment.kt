@@ -53,6 +53,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
+    private var mInitCameraDone: Boolean = false
     // note that Marker.position is the current position on the map which will
     // not match the NexTrip.position if the Marker is undergoing animation,
     // we keep track of the NexTrip.positions here so we can avoid jumpy
@@ -134,6 +135,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     .snippet(it.stopName)
                     .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
             )
+            if (!mInitCameraDone) {
+                initCamera()
+            }
         })
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -153,15 +157,15 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        googleMap.uiSettings.setMapToolbarEnabled(false)
-        googleMap.setIndoorEnabled(false)
+        mMap = googleMap.apply {
+            uiSettings.setMapToolbarEnabled(false)
+            setIndoorEnabled(false)
+        }
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
             initCamera()
         } else {
-            ActivityCompat.requestPermissions(activity!!,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
         }
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
@@ -308,7 +312,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
         }
 
-        val doInitCamera = mNexTrips == null && (!nexTripsWithActualPosition.isEmpty() || mStop != null)
         if (mNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
             mNexTrips = mutableMapOf()
         }
@@ -319,8 +322,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         if (mNexTrips != null) {
             updateMarkers()
         }
-        if (doInitCamera) {
+        if (!mInitCameraDone && mNexTrips != null) {
             initCamera()
+            mInitCameraDone = true
         }
     }
 
