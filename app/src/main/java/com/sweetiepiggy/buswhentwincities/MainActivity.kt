@@ -20,26 +20,21 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.content.Intent
-import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
-import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
-import java.security.InvalidParameterException
 
 class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, SearchStopIdFragment.OnSearchStopIdListener, BottomNavigationView.OnNavigationItemSelectedListener {
     private var mBnvIdx = BNV_UNINITIALIZED
     private var mFavStopIdsFragment: FavoriteStopIdsFragment? = null
+    private var mSearchFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +48,22 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
 
-        findViewById<ViewPager>(R.id.pager)!!.adapter = MainPagerAdapter(supportFragmentManager)
+        if (mSearchFragment == null) {
+            mSearchFragment = SearchStopIdFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.container, mSearchFragment!!)
+                    .detach(mSearchFragment!!)
+                    .commit()
+        }
+        if (mFavStopIdsFragment == null) {
+            mFavStopIdsFragment = FavoriteStopIdsFragment.newInstance()
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.container, mFavStopIdsFragment!!)
+                    .detach(mFavStopIdsFragment!!)
+                    .commit()
+        }
 
         val bnv = findViewById<BottomNavigationView>(R.id.bnv)
-        bnv.setOnNavigationItemSelectedListener(this)
 
         when (mBnvIdx) {
             BNV_FAV -> {
@@ -70,16 +77,22 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             else -> SelectDefaultBnv().execute()
         }
 
+        bnv.setOnNavigationItemSelectedListener(this)
+
         DeletePastDueNexTripsTask().execute()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putInt(KEY_BNV_IDX, mBnvIdx)
+        mFavStopIdsFragment?.let { supportFragmentManager.putFragment(savedInstanceState, KEY_BNV_FAV, it)}
+        mSearchFragment?.let { supportFragmentManager.putFragment(savedInstanceState, KEY_BNV_SEARCH, it)}
     }
 
     private fun loadState(b: Bundle) {
         mBnvIdx = b.getInt(KEY_BNV_IDX, BNV_UNINITIALIZED)
+        mFavStopIdsFragment = supportFragmentManager.getFragment(b, KEY_BNV_FAV) as FavoriteStopIdsFragment?
+        mSearchFragment = supportFragmentManager.getFragment(b, KEY_BNV_SEARCH)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -178,11 +191,19 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
     private fun selectBnvSearch() {
         findViewById<View>(R.id.progressBar).setVisibility(View.INVISIBLE)
-        findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_SEARCH)
+        supportFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .detach(mFavStopIdsFragment!!)
+                .attach(mSearchFragment!!)
+                .commit()
     }
 
     private fun selectBnvFav() {
-        findViewById<ViewPager>(R.id.pager).setCurrentItem(ITEM_IDX_FAV)
+        supportFragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .detach(mSearchFragment!!)
+                .attach(mFavStopIdsFragment!!)
+                .commit()
     }
 
     private inner class SelectDefaultBnv(): AsyncTask<Void, Void, Int>() {
@@ -222,42 +243,10 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         override fun onPostExecute(result: Void?) { }
     }
 
-    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        override fun getCount(): Int = 2
-
-        override fun getItem(p0: Int): Fragment =
-            when (p0) {
-                ITEM_IDX_FAV -> FavoriteStopIdsFragment.newInstance()
-                ITEM_IDX_SEARCH -> SearchStopIdFragment.newInstance()
-                else -> throw InvalidParameterException("getItem() parameter out of range")
-            }
-
-        override fun instantiateItem(container: ViewGroup, i: Int): Any {
-            val fragment = super.instantiateItem(container, i)
-            if (i == ITEM_IDX_FAV) mFavStopIdsFragment = fragment as FavoriteStopIdsFragment
-            return fragment
-        }
-
-        override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) {
-            val bnv = findViewById<BottomNavigationView>(R.id.bnv)
-        	when (position) {
-                ITEM_IDX_FAV -> {
-                    mBnvIdx = BNV_FAV
-                    bnv.menu.findItem(R.id.action_favorites)?.isChecked = true
-                    selectBnvFav()
-                }
-                ITEM_IDX_SEARCH -> {
-                    mBnvIdx = BNV_SEARCH
-                    bnv.menu.findItem(R.id.action_search)?.isChecked = true
-                    selectBnvSearch()
-                }
-            }
-            super.setPrimaryItem(container, position, obj)
-        }
-    }
-
     companion object {
         private val KEY_BNV_IDX = "bnvIdx"
+        private val KEY_BNV_FAV = "bnvFav"
+        private val KEY_BNV_SEARCH = "bnvSearch"
 
         private val BNV_UNINITIALIZED = 0
         private val BNV_FAV = 1
