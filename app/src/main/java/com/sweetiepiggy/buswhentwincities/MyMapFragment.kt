@@ -269,7 +269,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     zoomTo(latLngsWithMyLoc, 5.236f)
                 }
             }
-            .addOnFailureListener { zoomTo(latLngs, 5.236f) }
+            .addOnFailureListener { zoomTo(latLngsWithStop, 5.236f) }
     }
 
     private fun zoomToPosition(pos: LatLng) {
@@ -285,7 +285,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 }
             }
             .addOnFailureListener {
-                mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f))
+                val stop = mStop
+                if (stop != null) {
+                    val locs = mutableListOf(pos)
+                    locs.add(LatLng(stop.stopLat, stop.stopLon))
+                    zoomTo(locs, 3f)
+                } else {
+                    mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 15f))
+                }
             }
         }
 
