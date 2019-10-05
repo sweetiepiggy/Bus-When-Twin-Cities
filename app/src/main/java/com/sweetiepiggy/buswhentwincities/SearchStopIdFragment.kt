@@ -41,6 +41,7 @@ class SearchStopIdFragment : Fragment() {
 
     interface OnSearchStopIdListener {
         fun onSearchStopId(stopId: Int)
+        fun onBrowseRoutes()
     }
 
     override fun onAttach(context: Context) {
@@ -78,8 +79,25 @@ class SearchStopIdFragment : Fragment() {
             })
         }
 
+        activity?.findViewById<TextInputEditText>(R.id.routeEntry)?.let { routeEntry ->
+            context?.let {
+                routeEntry.setCompoundDrawablesWithIntrinsicBounds(getDrawable(it, R.drawable.ic_baseline_directions_bus_24px),
+                    null, null, null)
+            }
+            routeEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
+                override fun onFocusChange(v: View, hasFocus: Boolean) =
+            		routeEntry.setHint(
+                    	if (hasFocus) activity?.resources?.getString(R.string.route_hint) else ""
+                    )
+            })
+        }
+
         activity?.findViewById<Button>(R.id.searchStopIdButton)?.setOnClickListener {
             startStopIdActivity()
+        }
+
+        activity?.findViewById<Button>(R.id.browseRoutesButton)?.setOnClickListener {
+            mSearchStopIdListener.onBrowseRoutes()
         }
     }
 

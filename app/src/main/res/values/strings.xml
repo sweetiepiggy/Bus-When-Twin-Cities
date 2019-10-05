@@ -26,6 +26,8 @@
     <string name="stop_id_hint">for example: 17980</string>
     <string name="enter_stop_id">Enter stop number</string>
     <string name="must_be_number">Must be a number</string>
+    <string name="route">Route?</string>
+    <string name="route_hint">for example: 10</string>
     <string name="real_time">real-time</string>
     <string name="scheduled">scheduled</string>
     <string name="north">north</string>
@@ -42,7 +44,9 @@
     <string name="action_favorite">Favorite</string>
     <!-- <string name="action_search">Search</string> -->
     <!-- <string name="search_stop_id">Search for stop number</string> -->
-    <string name="search_stop_id">Search</string>
+    <string name="search_stop_id">Search by stop</string>
+    <string name="search_route">Search by route</string>
+    <string name="browse_routes">Browse routes</string>
     <string name="action_filter">Filter</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>

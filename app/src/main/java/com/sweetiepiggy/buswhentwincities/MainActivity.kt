@@ -171,6 +171,11 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startStopIdActivity(b)
     }
 
+    override fun onBrowseRoutes() {
+//        val intent = Intent(this, BrowseResultsActivity::class.java)
+//        startActivityForResult(intent, ACTIVITY_STOP_ID)
+    }
+
     private fun startStopIdActivity(b: Bundle) {
         val intent = Intent(this, StopIdActivity::class.java).apply {
             putExtras(b)
