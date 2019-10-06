@@ -50,7 +50,7 @@
 			app:layout_constraintTop_toTopOf="parent" />
 
 		<TextView
-			android:id="@+id/route_description"
+			android:id="@+id/description"
 			style="@android:style/TextAppearance.Large"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"

@@ -19,25 +19,26 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
-        private val mRoutes: MutableList<BrowseRoutesViewModel.Route>) :
-            RecyclerView.Adapter<BrowseRoutesAdapter.BrowseRoutesViewHolder>() {
+class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionListener,
+                              private val mCtxt: Context, private val mDirections: MutableList<NexTrip.Direction>) :
+            RecyclerView.Adapter<BrowseDirectionsAdapter.BrowseDirectionsViewHolder>() {
 
-    interface OnClickRouteListener {
-        fun onClickRoute(route: BrowseRoutesViewModel.Route)
+    interface OnClickDirectionListener {
+        fun onClickDirection(direction: NexTrip.Direction)
     }
 
-    inner class BrowseRoutesViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    inner class BrowseDirectionsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
             v.setOnClickListener {
-                mRouteListener.onClickRoute(mRoutes[adapterPosition])
+                mDirectionListener.onClickDirection(mDirections[adapterPosition])
             }
         }
     }
@@ -46,17 +47,18 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
         setHasStableIds(true)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseRoutesAdapter.BrowseRoutesViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseDirectionsAdapter.BrowseDirectionsViewHolder {
         val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.result_item, parent, false)
-        return BrowseRoutesViewHolder(v)
+        return BrowseDirectionsViewHolder(v)
     }
 
-    override fun onBindViewHolder(holder: BrowseRoutesViewHolder, position: Int) {
-        holder.mDescriptionTextView.text = mRoutes[position].description
+    override fun onBindViewHolder(holder: BrowseDirectionsViewHolder, position: Int) {
+        holder.mDescriptionTextView.text = PresentableNexTrip.translateDirection(mDirections[position], mCtxt.resources)
     }
 
-    override fun getItemCount(): Int = mRoutes.size
+    override fun getItemCount(): Int = mDirections.size
 
-    override fun getItemId(position: Int): Long = mRoutes[position].routeId.toLong()
+    override fun getItemId(position: Int): Long =
+    	NexTrip.getDirectionId(mDirections[position]).toLong()
 }

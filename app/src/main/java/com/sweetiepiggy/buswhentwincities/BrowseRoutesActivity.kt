@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 
-class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRouteListener {
+class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRouteListener, BrowseDirectionsAdapter.OnClickDirectionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,5 +41,17 @@ class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRou
     }
 
     override fun onClickRoute(route: BrowseRoutesViewModel.Route) {
+        val fragment = BrowseDirectionsFragment.newInstance().apply {
+            setArguments(Bundle().apply {
+                putInt(BrowseDirectionsFragment.KEY_ROUTE_ID, route.routeId)
+            })
+        }
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment)
+                .addToBackStack(null)
+                .commit()
+    }
+
+    override fun onClickDirection(direction: NexTrip.Direction) {
     }
 }

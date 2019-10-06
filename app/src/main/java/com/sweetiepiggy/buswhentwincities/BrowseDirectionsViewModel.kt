@@ -21,26 +21,31 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.os.AsyncTask
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutesListener {
-    data class Route(val description: String, val providerId: Int, val routeId: Int)
-
-    private val mRoutes: MutableLiveData<List<Route>> by lazy {
-        MutableLiveData<List<Route>>().also { loadRoutes() }
+class BrowseDirectionsViewModel(private val mRouteId: Int?) : ViewModel(), DownloadDirectionsTask.OnDownloadedDirectionsListener {
+    private val mDirections: MutableLiveData<List<NexTrip.Direction>> by lazy {
+        MutableLiveData<List<NexTrip.Direction>>().also { loadDirections() }
     }
 
-    fun getRoutes(): LiveData<List<Route>> = mRoutes
+    fun getDirections(): LiveData<List<NexTrip.Direction>> = mDirections
 
-    private fun loadRoutes() {
-        DownloadRoutesTask(this).execute()
+    private fun loadDirections() {
+        mRouteId?.let { DownloadDirectionsTask(this, it).execute() }
     }
 
-    override fun onDownloadedRoutes(routes: List<Route>) {
-        mRoutes.value = routes
+    override fun onDownloadedDirections(directions: List<NexTrip.Direction>) {
+        mDirections.value = directions
     }
 
-    override fun onDownloadedRoutesError(err: MetroTransitDownloader.DownloadError) {
+    override fun onDownloadedDirectionsError(err: MetroTransitDownloader.DownloadError) {
+    }
+
+    class BrowseDirectionsViewModelFactory(private val routeId: Int?) : ViewModelProvider.NewInstanceFactory() {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            BrowseDirectionsViewModel(routeId) as T
     }
 }
