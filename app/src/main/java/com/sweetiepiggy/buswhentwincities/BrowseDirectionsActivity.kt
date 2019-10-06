@@ -24,29 +24,58 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
-class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRouteListener {
+class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener, BrowseTimestopsAdapter.OnClickTimestopListener {
+
+    private var mRouteId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.browse_routes_activity)
         if (savedInstanceState == null) {
+            intent.extras?.let { loadState(it) }
+            val fragment = BrowseDirectionsFragment.newInstance().apply {
+                setArguments(Bundle().apply {
+                    mRouteId?.let { putInt(BrowseDirectionsFragment.KEY_ROUTE_ID, it) }
+                })
+            }
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, BrowseRoutesFragment.newInstance())
+                    .replace(R.id.container, fragment)
                     .commitNow()
+        } else {
+            loadState(savedInstanceState)
         }
 
         setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        title = resources.getString(R.string.select_route)
+        title = resources.getString(R.string.select_direction)
     }
 
-    override fun onClickRoute(route: BrowseRoutesViewModel.Route) {
-        val intent = Intent(this, BrowseDirectionsActivity::class.java).apply {
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+    }
+
+    private fun loadState(b: Bundle) {
+        if (b.containsKey(KEY_ROUTE_ID)) {
+            mRouteId = b.getInt(KEY_ROUTE_ID)
+        }
+    }
+
+    override fun onClickDirection(routeId: Int?, direction: NexTrip.Direction) {
+        val intent = Intent(this, BrowseTimestopsActivity::class.java).apply {
             putExtras(Bundle().apply {
-                putInt(BrowseDirectionsActivity.KEY_ROUTE_ID, route.routeId)
+                routeId?.let { putInt(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
+                putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, NexTrip.getDirectionId(direction))
             })
         }
         startActivity(intent)
+    }
+
+    override fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop) {
+    }
+
+    companion object {
+        val KEY_ROUTE_ID = "routeId"
     }
 }

@@ -50,6 +50,8 @@
     <string name="browse_routes">Browse routes</string>
     <string name="action_filter">Filter</string>
     <string name="select_route">Select route</string>
+    <string name="select_direction">Select direction</string>
+    <string name="select_stop">Select stop</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>

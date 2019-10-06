@@ -29,6 +29,24 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
 	</activity>
+        <activity
+ 	    android:name=".BrowseDirectionsActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".BrowseRoutesActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sweetiepiggy.buswhentwincities.BrowseRoutesActivity" />
+	</activity>
+        <activity
+ 	    android:name=".BrowseTimestopsActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".BrowseDirectionsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sweetiepiggy.buswhentwincities.BrowseDirectionsActivity" />
+	</activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
