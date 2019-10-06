@@ -19,14 +19,14 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.os.AsyncTask
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.*
+import androidx.recyclerview.widget.ItemTouchHelper.DOWN
+import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 
 class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListener,
@@ -77,9 +77,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
         holder.mStopDescTextView.text = mFavStops[position].stopDesc
     }
 
-    override fun getItemCount(): Int {
-        return mFavStops.size
-    }
+    override fun getItemCount(): Int = mFavStops.size
 
     override fun getItemId(position: Int): Long = mFavStops[position].stopId.toLong()
 

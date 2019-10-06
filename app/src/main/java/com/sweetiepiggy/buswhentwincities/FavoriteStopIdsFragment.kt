@@ -82,8 +82,10 @@ class FavoriteStopIdsFragment : Fragment() {
 
     private fun updateFavoriteStopIds(favoriteStopIds: List<FavoriteStopIdsViewModel.FavoriteStopId>) {
         activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
-        mFavoriteStopIds.clear()
-        mFavoriteStopIds.addAll(favoriteStopIds)
+        mFavoriteStopIds.apply {
+            clear()
+            addAll(favoriteStopIds)
+        }
         mAdapter.notifyDataSetChanged()
         updateFavoriteStopIdsMessage()
     }
