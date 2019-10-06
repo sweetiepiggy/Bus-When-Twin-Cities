@@ -30,19 +30,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class BrowseRoutesFragment : Fragment() {
+class BrowseDirectionsFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = BrowseRoutesFragment()
-    }
-
-    private val mRoutes: MutableList<BrowseRoutesViewModel.Route> = ArrayList<BrowseRoutesViewModel.Route>()
-    private lateinit var mAdapter: BrowseRoutesAdapter
-    private lateinit var mClickRouteListener: BrowseRoutesAdapter.OnClickRouteListener
+    private var mRouteId: Int? = null
+    private val mDirections: MutableList<NexTrip.Direction> = ArrayList<NexTrip.Direction>()
+    private lateinit var mAdapter: BrowseDirectionsAdapter
+    private lateinit var mClickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mClickRouteListener = context as BrowseRoutesAdapter.OnClickRouteListener
+        mClickDirectionListener = context as BrowseDirectionsAdapter.OnClickDirectionListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -53,7 +50,13 @@ class BrowseRoutesFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mAdapter = BrowseRoutesAdapter(mClickRouteListener, mRoutes)
+        if (savedInstanceState == null) {
+            arguments?.let { loadState(it) }
+        } else {
+            loadState(savedInstanceState)
+        }
+
+        mAdapter = BrowseDirectionsAdapter(mClickDirectionListener, context!!, mDirections)
 
         getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
@@ -61,20 +64,32 @@ class BrowseRoutesFragment : Fragment() {
         }
 
         val model = activity?.run {
-            ViewModelProvider(this).get(BrowseRoutesViewModel::class.java)
+            ViewModelProvider(this, BrowseDirectionsViewModel.BrowseDirectionsViewModelFactory(mRouteId)
+        ).get(BrowseDirectionsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        model.getRoutes().observe(this, Observer<List<BrowseRoutesViewModel.Route>>{
-            updateRoutes(it)
+        model.getDirections().observe(this, Observer<List<NexTrip.Direction>>{
+            updateDirections(it)
         })
     }
 
-    private fun updateRoutes(routes: List<BrowseRoutesViewModel.Route>) {
-        mRoutes.apply {
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+    }
+
+    private fun loadState(b: Bundle) {
+        if (b.containsKey(KEY_ROUTE_ID)) {
+            mRouteId = b.getInt(KEY_ROUTE_ID)
+        }
+    }
+
+    private fun updateDirections(directions: List<NexTrip.Direction>) {
+        mDirections.apply {
             clear()
-            addAll(routes)
+            addAll(directions)
         }
         mAdapter.notifyDataSetChanged()
-        updateResultsVisibility(routes.isEmpty())
+        updateResultsVisibility(directions.isEmpty())
     }
 
     private fun updateResultsVisibility(noResults: Boolean) {
@@ -87,5 +102,11 @@ class BrowseRoutesFragment : Fragment() {
             noResultsView?.setVisibility(View.INVISIBLE)
             resultsRecyclerView?.setVisibility(View.VISIBLE)
         }
+    }
+
+    companion object {
+        fun newInstance() = BrowseDirectionsFragment()
+
+        val KEY_ROUTE_ID = "routeId"
     }
 }

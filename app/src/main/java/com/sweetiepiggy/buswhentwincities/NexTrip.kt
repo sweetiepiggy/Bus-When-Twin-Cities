@@ -181,7 +181,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     	route == "Blue" || route == "Grn"
 
     companion object {
-        private fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =
+        fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =
         	when (dir) {
                 NexTrip.Direction.SOUTH -> resources.getString(R.string.south)
                 NexTrip.Direction.EAST  -> resources.getString(R.string.east)
