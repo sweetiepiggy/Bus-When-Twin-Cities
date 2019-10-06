@@ -168,17 +168,16 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             else -> super.onOptionsItemSelected(item)
         }
 
-    override fun onLoadNexTripsError(err: DownloadNexTripsTask.DownloadError) {
+    override fun onLoadNexTripsError(err: MetroTransitDownloader.DownloadError) {
         if (isFinishing()) {
             return
         }
         val message: String? =
             when (err) {
-                is DownloadNexTripsTask.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
-                is DownloadNexTripsTask.DownloadError.FileNotFound -> resources.getString(R.string.file_not_found) + ":\n${err.message}"
-                is DownloadNexTripsTask.DownloadError.TimedOut -> resources.getString(R.string.timed_out) + ":\n${err.message}"
-                is DownloadNexTripsTask.DownloadError.Unauthorized -> resources.getString(R.string.unauthorized)
-                is DownloadNexTripsTask.DownloadError.OtherDownloadError -> err.message
+                is MetroTransitDownloader.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
+                is MetroTransitDownloader.DownloadError.FileNotFound -> resources.getString(R.string.file_not_found) + ":\n${err.message}"
+                is MetroTransitDownloader.DownloadError.TimedOut -> resources.getString(R.string.timed_out) + ":\n${err.message}"
+                is MetroTransitDownloader.DownloadError.OtherDownloadError -> err.message
             }
         if (mNexTrips.isEmpty()) {
             AlertDialog.Builder(this).apply {

@@ -24,7 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class BrowseRoutesViewModel : ViewModel() {
+class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutesListener {
     data class Route(val description: String, val providerId: Int, val route: Int)
 
     private val mRoutes: MutableLiveData<List<Route>> by lazy {
@@ -34,26 +34,13 @@ class BrowseRoutesViewModel : ViewModel() {
     fun getRoutes(): LiveData<List<Route>> = mRoutes
 
     private fun loadRoutes() {
-        LoadRoutesTask().execute()
+        DownloadRoutesTask(this).execute()
     }
 
-    private inner class LoadRoutesTask() : AsyncTask<Void, Void, List<Route>>() {
-        override fun doInBackground(vararg params: Void): List<Route> {
-            return listOf(
-                Route("METRO Blue Line", 8, 901),
-                Route("METRO Green Line", 8, 902),
-                Route("METRO Red Line", 8, 903),
-                Route("METRO A Line", 8, 921),
-                Route("METRO C Line", 8, 923),
-                Route("Northstar Commuter Rail", 8, 888),
-                Route("2 - Franklin Av - Riverside Av - U of M - 8th St SE", 8, 2),
-                Route("3 - U of M - Como Ave - Energy Park Dr - Maryland Av", 8, 3),
-                Route("4 - New Brighton - Johnson St - Bryant Av - Southtown", 8, 4)
-            )
-        }
+    override fun onDownloadedRoutes(routes: List<Route>) {
+        mRoutes.value = routes
+    }
 
-        override fun onPostExecute(result: List<Route>) {
-            mRoutes.value = result
-        }
+    override fun onDownloadedRoutesError(err: MetroTransitDownloader.DownloadError) {
     }
 }

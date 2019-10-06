@@ -129,7 +129,15 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
         }
 
         private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
-    }
+
+        fun getDirectionId(dir: NexTrip.Direction): Int =
+	    	when(dir) {
+        	    NexTrip.Direction.SOUTH -> 1
+        	    NexTrip.Direction.EAST  -> 2
+        	    NexTrip.Direction.WEST  -> 3
+        	    NexTrip.Direction.NORTH -> 4
+            }
+     }
 }
 
 // processed data for presentation

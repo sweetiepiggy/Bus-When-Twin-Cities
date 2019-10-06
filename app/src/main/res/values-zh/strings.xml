@@ -51,7 +51,6 @@
 
     <string name="dismiss">删除</string>
     <string name="unknown_host">无法连接互联网</string>
-    <string name="unauthorized">擅自</string>
     <string name="file_not_found">文件未找到</string>
     <string name="timed_out">时间到</string>
 
