@@ -35,20 +35,20 @@
         <activity
  	    android:name=".BrowseDirectionsActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".BrowseRoutesActivity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.sweetiepiggy.buswhentwincities.BrowseRoutesActivity" />
+                android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
 	</activity>
         <activity
  	    android:name=".BrowseTimestopsActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".BrowseDirectionsActivity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.sweetiepiggy.buswhentwincities.BrowseDirectionsActivity" />
+                android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
 	</activity>
 
         <uses-library

@@ -171,6 +171,15 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startStopIdActivity(b)
     }
 
+    override fun onSearchRouteId(routeId: Int) {
+        val intent = Intent(this, BrowseDirectionsActivity::class.java).apply {
+            putExtras(Bundle().apply {
+                putInt(BrowseDirectionsActivity.KEY_ROUTE_ID, routeId)
+            })
+        }
+        startActivityForResult(intent, ACTIVITY_BROWSE_ROUTES)
+    }
+
     override fun onBrowseRoutes() {
         val intent = Intent(this, BrowseRoutesActivity::class.java)
         startActivityForResult(intent, ACTIVITY_BROWSE_ROUTES)
@@ -182,6 +191,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
         startActivityForResult(intent, ACTIVITY_STOP_ID)
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

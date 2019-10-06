@@ -24,7 +24,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
-class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener, BrowseTimestopsAdapter.OnClickTimestopListener {
+class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener {
 
     private var mRouteId: Int? = null
 
@@ -70,9 +70,6 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
             })
         }
         startActivity(intent)
-    }
-
-    override fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop) {
     }
 
     companion object {

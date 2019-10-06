@@ -19,8 +19,9 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
 class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnClickTimestopListener {
@@ -68,16 +69,14 @@ class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnCl
     }
 
     override fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop) {
-//        val fragment = BrowseTimestopsFragment.newInstance().apply {
-//            setArguments(Bundle().apply {
-//                routeId?.let { putInt(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
-//                putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, NexTrip.getDirectionId(direction))
-//            })
-//        }
-//        supportFragmentManager.beginTransaction()
-//                .replace(R.id.container, fragment)
-//                .addToBackStack(null)
-//                .commit()
+        val intent = Intent(this, StopIdActivity::class.java).apply {
+            putExtras(Bundle().apply {
+//                routeId?.let { putInt(StopIdActivity.KEY_ROUTE_ID, it) }
+                putString(StopIdActivity.KEY_STOP_DESC, timestop.description)
+//                putString(StopIdActivity.KEY_TIMESTOP_ID, timestop.timestopId)
+            })
+        }
+        startActivity(intent)
     }
 
     companion object {
