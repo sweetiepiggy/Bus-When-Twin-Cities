@@ -48,6 +48,7 @@
     <string name="search_route">Search by route</string>
     <string name="browse_routes">Browse routes</string>
     <string name="action_filter">Filter</string>
+    <string name="select_route">Select route</string>
 
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
@@ -61,6 +62,7 @@
 
     <string name="no_nextrips_found">No upcoming trips</string>
     <string name="no_favorites_found">No favorites here yet</string>
+    <string name="no_routes_found">No routes found</string>
 
     <string name="main_search_icon_content_description">search for stop number</string>
     <string name="favorite_stop_ids_content_description">favorite stops</string>

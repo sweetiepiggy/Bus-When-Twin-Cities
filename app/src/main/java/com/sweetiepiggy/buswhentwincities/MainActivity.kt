@@ -172,8 +172,8 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
     }
 
     override fun onBrowseRoutes() {
-//        val intent = Intent(this, BrowseResultsActivity::class.java)
-//        startActivityForResult(intent, ACTIVITY_STOP_ID)
+        val intent = Intent(this, BrowseRoutesActivity::class.java)
+        startActivityForResult(intent, ACTIVITY_BROWSE_ROUTES)
     }
 
     private fun startStopIdActivity(b: Bundle) {
@@ -190,6 +190,9 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 // if (resultCode == RESULT_OK) {
                     mFavStopIdsFragment?.refresh()
                 // }
+            }
+            ACTIVITY_BROWSE_ROUTES -> {
+                mFavStopIdsFragment?.refresh()
             }
         }
     }
@@ -261,6 +264,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         private val ITEM_IDX_SEARCH = 1
 
         private val ACTIVITY_STOP_ID = 0
+        private val ACTIVITY_BROWSE_ROUTES = 1
 
         // delete NexTrips that were due two minutes or more before now
         private val SECONDS_BEFORE_NOW_TO_DELETE = 120

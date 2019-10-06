@@ -23,6 +23,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+ 	    android:name=".BrowseRoutesActivity"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
+	</activity>
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -39,10 +48,10 @@
         </activity>
         <activity
             android:name=".StopIdActivity"
+            android:hardwareAccelerated="false"
             android:launchMode="singleTop"
-	    android:parentActivityName=".MainActivity"
-	    android:hardwareAccelerated="false"
-	    android:theme="@style/AppTheme.NoActionBar">
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />

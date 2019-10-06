@@ -11,7 +11,7 @@ android {
         versionCode 52
         versionName "0.18-osm"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-	vectorDrawables.useSupportLibrary = true
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {

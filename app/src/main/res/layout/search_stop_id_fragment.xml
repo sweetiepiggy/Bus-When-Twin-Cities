@@ -129,7 +129,7 @@
 				android:drawablePadding="@dimen/fab_margin"
 				android:imeOptions="actionSearch"
 				android:textColorHint="@color/colorHint"
-				android:inputType="text" />
+				android:inputType="number" />
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<Button
