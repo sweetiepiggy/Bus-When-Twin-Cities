@@ -30,16 +30,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class BrowseDirectionsFragment : Fragment() {
+class BrowseTimestopsFragment : Fragment() {
 
     private var mRouteId: Int? = null
-    private val mDirections: MutableList<NexTrip.Direction> = ArrayList<NexTrip.Direction>()
-    private lateinit var mAdapter: BrowseDirectionsAdapter
-    private lateinit var mClickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener
+    private var mDirectionId: Int? = null
+    private val mTimestops: MutableList<BrowseTimestopsViewModel.Timestop> = ArrayList<BrowseTimestopsViewModel.Timestop>()
+    private lateinit var mAdapter: BrowseTimestopsAdapter
+    private lateinit var mClickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mClickDirectionListener = context as BrowseDirectionsAdapter.OnClickDirectionListener
+        mClickTimestopListener = context as BrowseTimestopsAdapter.OnClickTimestopListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -56,7 +57,7 @@ class BrowseDirectionsFragment : Fragment() {
             loadState(savedInstanceState)
         }
 
-        mAdapter = BrowseDirectionsAdapter(mClickDirectionListener, context!!, mRouteId, mDirections)
+        mAdapter = BrowseTimestopsAdapter(mClickTimestopListener, mRouteId, mTimestops)
 
         getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
@@ -64,27 +65,31 @@ class BrowseDirectionsFragment : Fragment() {
         }
 
         val model = activity?.run {
-            ViewModelProvider(this, BrowseDirectionsViewModel.BrowseDirectionsViewModelFactory(mRouteId)
-        ).get(BrowseDirectionsViewModel::class.java)
+            ViewModelProvider(this, BrowseTimestopsViewModel.BrowseTimestopsViewModelFactory(mRouteId, mDirectionId)
+        ).get(BrowseTimestopsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        model.getDirections().observe(this, Observer<List<NexTrip.Direction>>{
-            updateDirections(it)
+        model.getTimestops().observe(this, Observer<List<BrowseTimestopsViewModel.Timestop>>{
+            updateTimestops(it)
         })
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+        mDirectionId?.let { savedInstanceState.putInt(KEY_DIRECTION_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_ROUTE_ID)) {
             mRouteId = b.getInt(KEY_ROUTE_ID)
         }
+        if (b.containsKey(KEY_DIRECTION_ID)) {
+            mDirectionId = b.getInt(KEY_DIRECTION_ID)
+        }
     }
 
-    private fun updateDirections(directions: List<NexTrip.Direction>) {
-        mDirections.apply {
+    private fun updateTimestops(directions: List<BrowseTimestopsViewModel.Timestop>) {
+        mTimestops.apply {
             clear()
             addAll(directions)
         }
@@ -105,8 +110,9 @@ class BrowseDirectionsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance() = BrowseDirectionsFragment()
+        fun newInstance() = BrowseTimestopsFragment()
 
         val KEY_ROUTE_ID = "routeId"
+        val KEY_DIRECTION_ID = "directionId"
     }
 }

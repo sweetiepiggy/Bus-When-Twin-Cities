@@ -19,47 +19,39 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionListener,
-                              private val mCtxt: Context, private val mRouteId: Int?,
-                              private val mDirections: MutableList<NexTrip.Direction>) :
-            RecyclerView.Adapter<BrowseDirectionsAdapter.BrowseDirectionsViewHolder>() {
+class BrowseTimestopsAdapter(private val mTimestopListener: OnClickTimestopListener,
+                             private val mRouteId: Int?,
+                             private val mTimestops: MutableList<BrowseTimestopsViewModel.Timestop>) :
+            RecyclerView.Adapter<BrowseTimestopsAdapter.BrowseTimestopsViewHolder>() {
 
-    interface OnClickDirectionListener {
-        fun onClickDirection(routeId: Int?, direction: NexTrip.Direction)
+    interface OnClickTimestopListener {
+        fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop)
     }
 
-    inner class BrowseDirectionsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    inner class BrowseTimestopsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
             v.setOnClickListener {
-                mDirectionListener.onClickDirection(mRouteId, mDirections[adapterPosition])
+                mTimestopListener.onClickTimestop(mRouteId, mTimestops[adapterPosition])
             }
         }
     }
 
-    init {
-        setHasStableIds(true)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseDirectionsAdapter.BrowseDirectionsViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseTimestopsAdapter.BrowseTimestopsViewHolder {
         val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.result_item, parent, false)
-        return BrowseDirectionsViewHolder(v)
+        return BrowseTimestopsViewHolder(v)
     }
 
-    override fun onBindViewHolder(holder: BrowseDirectionsViewHolder, position: Int) {
-        holder.mDescriptionTextView.text = PresentableNexTrip.translateDirection(mDirections[position], mCtxt.resources)
+    override fun onBindViewHolder(holder: BrowseTimestopsViewHolder, position: Int) {
+        holder.mDescriptionTextView.text = mTimestops[position].description
     }
 
-    override fun getItemCount(): Int = mDirections.size
-
-    override fun getItemId(position: Int): Long =
-    	NexTrip.getDirectionId(mDirections[position]).toLong()
+    override fun getItemCount(): Int = mTimestops.size
 }

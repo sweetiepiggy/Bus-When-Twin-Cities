@@ -61,6 +61,14 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
                     "NORTHBOUND" -> NORTH
                     else -> null
                 }
+            fun from(directionId: Int?): Direction? =
+            	when(directionId) {
+                    SOUTH_ID -> SOUTH
+                    EAST_ID  -> EAST
+                    WEST_ID  -> WEST
+                    NORTH_ID -> NORTH
+                    else -> null
+                }
         }
     }
 
@@ -132,11 +140,16 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
 
         fun getDirectionId(dir: NexTrip.Direction): Int =
 	    	when(dir) {
-        	    NexTrip.Direction.SOUTH -> 1
-        	    NexTrip.Direction.EAST  -> 2
-        	    NexTrip.Direction.WEST  -> 3
-        	    NexTrip.Direction.NORTH -> 4
+        	    NexTrip.Direction.SOUTH -> SOUTH_ID
+        	    NexTrip.Direction.EAST  -> EAST_ID
+        	    NexTrip.Direction.WEST  -> WEST_ID
+        	    NexTrip.Direction.NORTH -> NORTH_ID
             }
+
+        private val SOUTH_ID = 1
+        private val EAST_ID = 2
+        private val WEST_ID = 3
+        private val NORTH_ID = 4
      }
 }
 
