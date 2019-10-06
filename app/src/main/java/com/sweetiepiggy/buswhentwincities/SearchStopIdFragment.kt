@@ -79,6 +79,15 @@ class SearchStopIdFragment : Fragment() {
             })
         }
 
+        activity?.findViewById<TextInputEditText>(R.id.routeEntry)?.setOnEditorActionListener { _, actionId, _ ->
+            return@setOnEditorActionListener when (actionId) {
+                EditorInfo.IME_ACTION_SEARCH -> {
+                    startRouteActivity()
+                    true
+                }
+                else -> false
+            }
+        }
         activity?.findViewById<TextInputEditText>(R.id.routeEntry)?.let { routeEntry ->
             context?.let {
                 routeEntry.setCompoundDrawablesWithIntrinsicBounds(getDrawable(it, R.drawable.ic_baseline_directions_bus_24px),
@@ -94,6 +103,10 @@ class SearchStopIdFragment : Fragment() {
 
         activity?.findViewById<Button>(R.id.searchStopIdButton)?.setOnClickListener {
             startStopIdActivity()
+        }
+
+        activity?.findViewById<Button>(R.id.searchRouteButton)?.setOnClickListener {
+            startRouteActivity()
         }
 
         activity?.findViewById<Button>(R.id.browseRoutesButton)?.setOnClickListener {
@@ -113,6 +126,23 @@ class SearchStopIdFragment : Fragment() {
                     mSearchStopIdListener.onSearchStopId(stopId)
                 } catch (e: NumberFormatException) {
                     stopIdTextInput.error = resources.getString(R.string.must_be_number)
+                }
+            }
+        }
+    }
+
+    private fun startRouteActivity() {
+        getActivity()?.findViewById<TextInputLayout>(R.id.routeTextInput)?.let { routeTextInput ->
+            val routeStr = routeTextInput.editText?.text.toString()
+            if (routeStr.length == 0) {
+                routeTextInput.error = resources.getString(R.string.enter_route)
+            } else {
+                try {
+//                    val route = routeStr.toInt()
+                    routeTextInput.error = null
+//                    mSearchStopIdListener.onSearchRoute(route)
+                } catch (e: NumberFormatException) {
+                    routeTextInput.error = resources.getString(R.string.must_be_number)
                 }
             }
         }

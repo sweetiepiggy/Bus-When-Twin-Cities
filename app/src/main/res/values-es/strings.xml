@@ -51,7 +51,6 @@
 
     <string name="dismiss">Descartar</string>
     <string name="unknown_host">Incapaz de conectarse a Internet</string>
-    <string name="unauthorized">No autorizado</string>
     <string name="file_not_found">Archivo no encontrado</string>
     <string name="timed_out">Tiempo de espera caducado</string>
 
