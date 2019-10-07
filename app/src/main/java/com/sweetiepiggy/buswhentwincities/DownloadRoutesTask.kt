@@ -77,18 +77,18 @@ class DownloadRoutesTask(private val mDownloadedRoutesListener: OnDownloadedRout
             reader.beginObject()
             var description: String? = null
             var providerId: Int? = null
-            var route: Int? = null
+            var routeId: String? = null
             while (reader.hasNext()) {
                 when (reader.nextName()) {
                     "Description" -> description = reader.nextString()
                     "ProviderID"  -> providerId = reader.nextInt()
-                    "Route"       -> route = reader.nextInt()
+                    "Route"       -> routeId = reader.nextString()
                     else          -> reader.skipValue()
                 }
             }
             reader.endObject()
-            if (description != null && providerId != null && route != null) {
-                routes.add(BrowseRoutesViewModel.Route(description, providerId, route))
+            if (description != null && providerId != null && routeId != null) {
+                routes.add(BrowseRoutesViewModel.Route(description, providerId, routeId))
             }
         }
         reader.endArray()

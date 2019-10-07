@@ -27,12 +27,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionListener,
-                              private val mCtxt: Context, private val mRouteId: Int?,
+                              private val mCtxt: Context, private val mRouteId: String?,
                               private val mDirections: MutableList<NexTrip.Direction>) :
             RecyclerView.Adapter<BrowseDirectionsAdapter.BrowseDirectionsViewHolder>() {
 
     interface OnClickDirectionListener {
-        fun onClickDirection(routeId: Int?, direction: NexTrip.Direction)
+        fun onClickDirection(routeId: String?, direction: NexTrip.Direction)
     }
 
     inner class BrowseDirectionsViewHolder(v: View) : RecyclerView.ViewHolder(v) {

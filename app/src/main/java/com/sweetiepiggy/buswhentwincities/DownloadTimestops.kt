@@ -28,7 +28,7 @@ import java.net.*
 import java.util.*
 
 class DownloadTimestopsTask(private val mDownloadedTimestopsListener: OnDownloadedTimestopsListener,
-		                     private val mRouteId: Int, private val mDirection: NexTrip.Direction) : AsyncTask<Void, Int, Void>() {
+		                     private val mRouteId: String, private val mDirection: NexTrip.Direction) : AsyncTask<Void, Int, Void>() {
     private var mError: MetroTransitDownloader.DownloadError? = null
     private var mTimestops: List<BrowseTimestopsViewModel.Timestop>? = null
 

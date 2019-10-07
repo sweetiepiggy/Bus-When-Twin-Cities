@@ -26,38 +26,88 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(application) {
-    private val mFavoriteStopIds: MutableLiveData<List<FavoriteStopId>> by lazy {
-        MutableLiveData<List<FavoriteStopId>>().also {
-            loadFavoriteStopIds()
+    private val mFavoriteStops: MutableLiveData<List<FavoriteStop>> by lazy {
+        MutableLiveData<List<FavoriteStop>>().also {
+            loadFavoriteStops()
         }
     }
 
-    fun getFavoriteStopIds(): LiveData<List<FavoriteStopId>> = mFavoriteStopIds
+    fun getFavoriteStops(): LiveData<List<FavoriteStop>> = mFavoriteStops
 
-    fun loadFavoriteStopIds() {
-        LoadFavoriteStopIdsTask().execute()
+    fun loadFavoriteStops() {
+        LoadFavoriteStopsTask().execute()
     }
 
-    data class FavoriteStopId(val stopId: Int, val stopDesc: String)
+    sealed class FavoriteStop {
+        data class FavoriteStopId(val stopId: Int, val stopDesc: String, val position: Int): FavoriteStop()
+        data class FavoriteTimestop(val timestop: Timestop, val stopDesc: String, val position: Int): FavoriteStop()
 
-    private inner class LoadFavoriteStopIdsTask() : AsyncTask<Void, Void, List<FavoriteStopId>>() {
-        override fun doInBackground(vararg params: Void): List<FavoriteStopId> {
+        companion object {
+            fun stopId(f: FavoriteStop): Int? =
+                when (f) {
+                    is FavoriteStopId -> f.stopId
+                    is FavoriteTimestop -> null
+                }
+
+            fun stopDesc(f: FavoriteStop): String =
+                when (f) {
+                    is FavoriteStopId -> f.stopDesc
+                    is FavoriteTimestop -> f.stopDesc
+                }
+
+            fun position(f: FavoriteStop): Int =
+                when (f) {
+                    is FavoriteStopId -> f.position
+                    is FavoriteTimestop -> f.position
+                }
+        }
+    }
+
+    private inner class LoadFavoriteStopsTask() : AsyncTask<Void, Void, List<FavoriteStop>>() {
+        override fun doInBackground(vararg params: Void): List<FavoriteStop> {
             val dbHelper = DbAdapter()
             dbHelper.open(getApplication())
-            val favoriteStopIds = ArrayList<FavoriteStopId>()
+            val favoriteStops = ArrayList<FavoriteStop>()
+
             val c = dbHelper.fetchFavStops()
             val stopIdIndex = c.getColumnIndex(DbAdapter.KEY_STOP_ID)
             val stopDescIndex = c.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
+            val positionIndex = c.getColumnIndex(DbAdapter.KEY_POSITION)
             while (c.moveToNext()) {
-                favoriteStopIds.add(FavoriteStopId(c.getInt(stopIdIndex), c.getString(stopDescIndex)))
+                favoriteStops.add(FavoriteStop.FavoriteStopId(
+                    c.getInt(stopIdIndex),
+                    c.getString(stopDescIndex),
+                    c.getInt(positionIndex)
+                ))
             }
             c.close()
+
+            val c1 = dbHelper.fetchFavTimestops()
+            val timestopIdIndex = c1.getColumnIndex(DbAdapter.KEY_TIMESTOP_ID)
+            val routeIdIndex = c1.getColumnIndex(DbAdapter.KEY_ROUTE)
+            val directionIdIndex = c1.getColumnIndex(DbAdapter.KEY_ROUTE_DIRECTION)
+            val stopDescIndex1 = c1.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
+            val positionIndex1 = c1.getColumnIndex(DbAdapter.KEY_POSITION)
+            while (c1.moveToNext()) {
+                val timestopId = c1.getString(timestopIdIndex)
+                val routeId = c1.getString(routeIdIndex)
+                val direction = NexTrip.Direction.from(c1.getInt(directionIdIndex))
+                val stopDesc = c1.getString(stopDescIndex1)
+                val position = c1.getInt(positionIndex1)
+                if (timestopId != null && routeId != null && direction != null) {
+                    favoriteStops.add(FavoriteStop.FavoriteTimestop(
+                        Timestop(timestopId, routeId, direction), stopDesc, position))
+                }
+            }
+            c1.close()
+
             dbHelper.close()
-            return favoriteStopIds
+            return favoriteStops.sortedWith(compareBy({ -FavoriteStop.position(it) }))
         }
 
-        override fun onPostExecute(result: List<FavoriteStopId>) {
-            mFavoriteStopIds.value = result
+        override fun onPostExecute(result: List<FavoriteStop>) {
+            android.util.Log.d("got here", "got here: LoadFavoriteStopsTask: $result")
+            mFavoriteStops.value = result
         }
     }
 }

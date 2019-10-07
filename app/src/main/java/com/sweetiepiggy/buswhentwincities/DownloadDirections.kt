@@ -28,7 +28,7 @@ import java.net.*
 import java.util.*
 
 class DownloadDirectionsTask(private val mDownloadedDirectionsListener: OnDownloadedDirectionsListener,
-		                     private val mRoute: Int) : AsyncTask<Void, Int, Void>() {
+		                     private val mRouteId: String) : AsyncTask<Void, Int, Void>() {
     private var mError: MetroTransitDownloader.DownloadError? = null
     private var mDirections: List<NexTrip.Direction>? = null
 
@@ -39,7 +39,7 @@ class DownloadDirectionsTask(private val mDownloadedDirectionsListener: OnDownlo
 
     override fun doInBackground(vararg params: Void): Void? {
         try {
-            val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetDirections(mRoute))
+            val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetDirections(mRouteId))
             mDirections = parseDirections(reader)
             reader.close()
         } catch (e: UnknownHostException) { // probably no internet connection

@@ -26,7 +26,7 @@ import androidx.appcompat.widget.Toolbar
 
 class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnClickTimestopListener {
 
-    private var mRouteId: Int? = null
+    private var mRouteId: String? = null
     private var mDirectionId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +36,7 @@ class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnCl
             intent.extras?.let { loadState(it) }
             val fragment = BrowseTimestopsFragment.newInstance().apply {
                 setArguments(Bundle().apply {
-                    mRouteId?.let { putInt(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
+                    mRouteId?.let { putString(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
                     mDirectionId?.let { putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, it) }
                 })
             }
@@ -55,25 +55,26 @@ class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnCl
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+        mRouteId?.let { savedInstanceState.putString(KEY_ROUTE_ID, it) }
         mDirectionId?.let { savedInstanceState.putInt(KEY_DIRECTION_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_ROUTE_ID)) {
-            mRouteId = b.getInt(KEY_ROUTE_ID)
+            mRouteId = b.getString(KEY_ROUTE_ID)
         }
         if (b.containsKey(KEY_DIRECTION_ID)) {
             mDirectionId = b.getInt(KEY_DIRECTION_ID)
         }
     }
 
-    override fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop) {
+    override fun onClickTimestop(routeId: String?, directionId: Int?, timestop: BrowseTimestopsViewModel.Timestop) {
         val intent = Intent(this, StopIdActivity::class.java).apply {
             putExtras(Bundle().apply {
-//                routeId?.let { putInt(StopIdActivity.KEY_ROUTE_ID, it) }
+                routeId?.let { putString(StopIdActivity.KEY_ROUTE_ID, it) }
+                directionId?.let { putInt(StopIdActivity.KEY_DIRECTION_ID, it) }
                 putString(StopIdActivity.KEY_STOP_DESC, timestop.description)
-//                putString(StopIdActivity.KEY_TIMESTOP_ID, timestop.timestopId)
+                putString(StopIdActivity.KEY_TIMESTOP_ID, timestop.timestopId)
             })
         }
         startActivity(intent)

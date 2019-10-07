@@ -25,7 +25,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutesListener {
-    data class Route(val description: String, val providerId: Int, val routeId: Int)
+    data class Route(val description: String, val providerId: Int, val routeId: String)
 
     private val mRoutes: MutableLiveData<List<Route>> by lazy {
         MutableLiveData<List<Route>>().also { loadRoutes() }

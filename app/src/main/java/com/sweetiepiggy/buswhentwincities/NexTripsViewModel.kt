@@ -27,8 +27,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.*
 
-class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedListener {
-    private var mDownloadNexTripsTask: DownloadNexTripsTask? = null
+class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedListener {
+    private var mDownloadNexTripsTask: AsyncTask<Void, Int, Void>? = null
     private var mDownloadStopTask: DownloadStopTask? = null
     private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
     private var mRefreshingListener: OnChangeRefreshingListener? = null
@@ -72,7 +72,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     }
 
     fun loadNexTrips() {
-        if (!mLoadingNexTrips) mStopId?.let { stopId ->
+        val stopId = mStopId
+        val timestop = mTimestop
+        if (!mLoadingNexTrips && (stopId != null || timestop != null)) {
             mLoadingNexTrips = true
             mRefreshingListener?.setRefreshing(true)
             val downloadNextTripsTask = mDownloadNexTripsTask
@@ -88,7 +90,11 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
                 // start a new download task if there is no currently running task and
                 // it's been as at least MIN_SECONDS_BETWEEN_REFRESH since the last download
-                mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
+                if (stopId != null) {
+                    mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
+                } else if (timestop != null) {
+                    mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this, timestop.routeId, timestop.direction, timestop.timestopId)
+                }
                 mDownloadNexTripsTask!!.execute()
             } else {
                 // too soon to download again, just refresh the displayed times
@@ -141,22 +147,33 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
         mRefreshingListener = refreshingListener
     }
 
-    class NexTripsViewModelFactory(private val stopId: Int?, private val context: Context) : ViewModelProvider.NewInstanceFactory() {
+    class NexTripsViewModelFactory(private val stopId: Int?, private val timestop: Timestop?, private val context: Context) : ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            NexTripsViewModel(stopId, context) as T
+            NexTripsViewModel(stopId, timestop, context) as T
     }
 
     private inner class InitLoadNexTripsTask(): AsyncTask<Void, Void, List<NexTrip>?>() {
         override fun doInBackground(vararg params: Void): List<NexTrip>? {
             var nexTrips: List<NexTrip>? = null
-            mStopId?.let { stopId ->
+            val stopId = mStopId
+            val timestop = mTimestop
+            if (stopId != null || timestop != null) {
                 DbAdapter().apply {
                     open(mContext)
-                    getLastUpdate(stopId)?.let { lastUpdate ->
+                    val lastUpdate = if (stopId != null) {
+                        getLastUpdate(stopId)
+                    } else {
+                        getLastTimestopUpdate(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                    }
+                    if (lastUpdate != null) {
                         mDbLastUpdate = lastUpdate
                         val suppressLocations = unixTime - lastUpdate >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
-                        nexTrips = getNexTrips(stopId, SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
+                        nexTrips = if (stopId != null) {
+                            getNexTrips(stopId, SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
+                        } else {
+                            getTimestopNexTrips(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
+                        }
                     }
                     close()
                 }
@@ -176,8 +193,14 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
             // download nexTrips if no or not-fresh results in database
             if (result == null || curTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
-                mStopId?.let { stopId ->
-                    mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
+                val stopId = mStopId
+                val timestop = mTimestop
+                if (stopId != null || timestop != null) {
+                    if (stopId != null) {
+                        mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
+                    } else if (timestop != null) {
+                        mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this@NexTripsViewModel, timestop.routeId, timestop.direction, timestop.timestopId)
+                    }
                     mDownloadNexTripsTask!!.execute()
                 }
             // show results from database if they exist and are fresh
@@ -198,10 +221,16 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
 
     private inner class StoreNexTripsInDbTask(private val nexTrips: List<NexTrip>): AsyncTask<Void, Void, Void>() {
         override fun doInBackground(vararg params: Void): Void? {
-        	mStopId?.let { stopId ->
+            val stopId = mStopId
+            val timestop = mTimestop
+        	if (stopId != null || timestop != null) {
                 DbAdapter().run {
                     openReadWrite(mContext)
-                    updateNexTrips(stopId, nexTrips, mLastUpdate)
+                    if (stopId != null) {
+                        updateNexTrips(stopId, nexTrips, mLastUpdate)
+                    } else {
+                        updateTimestopNexTrips(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), nexTrips, mLastUpdate)
+                    }
                     close()
                 }
             }
@@ -214,10 +243,16 @@ class NexTripsViewModel(private val mStopId: Int?, private val mContext: Context
     private inner class LoadDoShowRoutesTask(): AsyncTask<Void, Void, Map<Pair<String?, String?>, Boolean>>() {
         override fun doInBackground(vararg params: Void): Map<Pair<String?, String?>, Boolean> {
             var doShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
-        	mStopId?.let { stopId ->
+            val stopId = mStopId
+            val timestop = mTimestop
+            if (stopId != null || timestop != null) {
                 DbAdapter().run {
                     open(mContext)
-                    doShowRoutes = getDoShowRoutes(stopId)
+                    doShowRoutes = if (stopId != null) {
+                        getDoShowRoutes(stopId)
+                    } else {
+                        getTimestopDoShowRoutes(timestop!!.timestopId, timestop.routeId)
+                    }
                     close()
                 }
             }

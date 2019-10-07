@@ -26,19 +26,20 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class BrowseTimestopsAdapter(private val mTimestopListener: OnClickTimestopListener,
-                             private val mRouteId: Int?,
+                             private val mRouteId: String?,
+                             private val mDirectionId: Int?,
                              private val mTimestops: MutableList<BrowseTimestopsViewModel.Timestop>) :
             RecyclerView.Adapter<BrowseTimestopsAdapter.BrowseTimestopsViewHolder>() {
 
     interface OnClickTimestopListener {
-        fun onClickTimestop(routeId: Int?, timestop: BrowseTimestopsViewModel.Timestop)
+        fun onClickTimestop(routeId: String?, directionId: Int?, timestop: BrowseTimestopsViewModel.Timestop)
     }
 
     inner class BrowseTimestopsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
             v.setOnClickListener {
-                mTimestopListener.onClickTimestop(mRouteId, mTimestops[adapterPosition])
+                mTimestopListener.onClickTimestop(mRouteId, mDirectionId, mTimestops[adapterPosition])
             }
         }
     }

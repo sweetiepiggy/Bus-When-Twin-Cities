@@ -32,7 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class BrowseDirectionsFragment : Fragment() {
 
-    private var mRouteId: Int? = null
+    private var mRouteId: String? = null
     private val mDirections: MutableList<NexTrip.Direction> = ArrayList<NexTrip.Direction>()
     private lateinit var mAdapter: BrowseDirectionsAdapter
     private lateinit var mClickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener
@@ -74,12 +74,12 @@ class BrowseDirectionsFragment : Fragment() {
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+        mRouteId?.let { savedInstanceState.putString(KEY_ROUTE_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_ROUTE_ID)) {
-            mRouteId = b.getInt(KEY_ROUTE_ID)
+            mRouteId = b.getString(KEY_ROUTE_ID)
         }
     }
 

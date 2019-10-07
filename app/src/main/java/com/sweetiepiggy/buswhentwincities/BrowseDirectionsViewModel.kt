@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class BrowseDirectionsViewModel(private val mRouteId: Int?) : ViewModel(), DownloadDirectionsTask.OnDownloadedDirectionsListener {
+class BrowseDirectionsViewModel(private val mRouteId: String?) : ViewModel(), DownloadDirectionsTask.OnDownloadedDirectionsListener {
     private val mDirections: MutableLiveData<List<NexTrip.Direction>> by lazy {
         MutableLiveData<List<NexTrip.Direction>>().also { loadDirections() }
     }
@@ -43,7 +43,7 @@ class BrowseDirectionsViewModel(private val mRouteId: Int?) : ViewModel(), Downl
     override fun onDownloadedDirectionsError(err: MetroTransitDownloader.DownloadError) {
     }
 
-    class BrowseDirectionsViewModelFactory(private val routeId: Int?) : ViewModelProvider.NewInstanceFactory() {
+    class BrowseDirectionsViewModelFactory(private val routeId: String?) : ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
             BrowseDirectionsViewModel(routeId) as T

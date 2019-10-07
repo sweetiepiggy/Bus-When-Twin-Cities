@@ -44,7 +44,7 @@ class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRou
     override fun onClickRoute(route: BrowseRoutesViewModel.Route) {
         val intent = Intent(this, BrowseDirectionsActivity::class.java).apply {
             putExtras(Bundle().apply {
-                putInt(BrowseDirectionsActivity.KEY_ROUTE_ID, route.routeId)
+                putString(BrowseDirectionsActivity.KEY_ROUTE_ID, route.routeId)
             })
         }
         startActivity(intent)

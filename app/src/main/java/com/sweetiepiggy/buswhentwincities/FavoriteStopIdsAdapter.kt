@@ -30,13 +30,13 @@ import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 
 class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListener,
-		private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStopId>) :
+		private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop>) :
 			RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
 
     val mItemTouchHelper = ItemTouchHelper(FavoriteStopIdsItemTouchHelperCallback())
 
     interface OnClickFavoriteListener {
-        fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStopId)
+        fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStop)
         fun onMoveFavorite(fromPosition: Int, toPosition: Int)
         fun onDeleteFavorite(position: Int)
     }
@@ -73,13 +73,13 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
     }
 
     override fun onBindViewHolder(holder: FavoriteStopIdsViewHolder, position: Int) {
-        holder.mStopIdTextView.text = mFavStops[position].stopId.toString()
-        holder.mStopDescTextView.text = mFavStops[position].stopDesc
+        holder.mStopIdTextView.text = FavoriteStopIdsViewModel.FavoriteStop.stopId(mFavStops[position])?.toString()
+        holder.mStopDescTextView.text = FavoriteStopIdsViewModel.FavoriteStop.stopDesc(mFavStops[position])
     }
 
     override fun getItemCount(): Int = mFavStops.size
 
-    override fun getItemId(position: Int): Long = mFavStops[position].stopId.toLong()
+    override fun getItemId(position: Int): Long = FavoriteStopIdsViewModel.FavoriteStop.position(mFavStops[position]).toLong()
 
     private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
