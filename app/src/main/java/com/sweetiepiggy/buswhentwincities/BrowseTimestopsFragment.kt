@@ -32,7 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class BrowseTimestopsFragment : Fragment() {
 
-    private var mRouteId: Int? = null
+    private var mRouteId: String? = null
     private var mDirectionId: Int? = null
     private val mTimestops: MutableList<BrowseTimestopsViewModel.Timestop> = ArrayList<BrowseTimestopsViewModel.Timestop>()
     private lateinit var mAdapter: BrowseTimestopsAdapter
@@ -57,7 +57,7 @@ class BrowseTimestopsFragment : Fragment() {
             loadState(savedInstanceState)
         }
 
-        mAdapter = BrowseTimestopsAdapter(mClickTimestopListener, mRouteId, mTimestops)
+        mAdapter = BrowseTimestopsAdapter(mClickTimestopListener, mRouteId, mDirectionId, mTimestops)
 
         getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
@@ -75,13 +75,13 @@ class BrowseTimestopsFragment : Fragment() {
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+        mRouteId?.let { savedInstanceState.putString(KEY_ROUTE_ID, it) }
         mDirectionId?.let { savedInstanceState.putInt(KEY_DIRECTION_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_ROUTE_ID)) {
-            mRouteId = b.getInt(KEY_ROUTE_ID)
+            mRouteId = b.getString(KEY_ROUTE_ID)
         }
         if (b.containsKey(KEY_DIRECTION_ID)) {
             mDirectionId = b.getInt(KEY_DIRECTION_ID)

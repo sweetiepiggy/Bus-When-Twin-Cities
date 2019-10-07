@@ -26,7 +26,7 @@ import androidx.appcompat.widget.Toolbar
 
 class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener {
 
-    private var mRouteId: Int? = null
+    private var mRouteId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +35,7 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
             intent.extras?.let { loadState(it) }
             val fragment = BrowseDirectionsFragment.newInstance().apply {
                 setArguments(Bundle().apply {
-                    mRouteId?.let { putInt(BrowseDirectionsFragment.KEY_ROUTE_ID, it) }
+                    mRouteId?.let { putString(BrowseDirectionsFragment.KEY_ROUTE_ID, it) }
                 })
             }
             supportFragmentManager.beginTransaction()
@@ -53,19 +53,19 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        mRouteId?.let { savedInstanceState.putInt(KEY_ROUTE_ID, it) }
+        mRouteId?.let { savedInstanceState.putString(KEY_ROUTE_ID, it) }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_ROUTE_ID)) {
-            mRouteId = b.getInt(KEY_ROUTE_ID)
+            mRouteId = b.getString(KEY_ROUTE_ID)
         }
     }
 
-    override fun onClickDirection(routeId: Int?, direction: NexTrip.Direction) {
+    override fun onClickDirection(routeId: String?, direction: NexTrip.Direction) {
         val intent = Intent(this, BrowseTimestopsActivity::class.java).apply {
             putExtras(Bundle().apply {
-                routeId?.let { putInt(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
+                routeId?.let { putString(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
                 putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, NexTrip.getDirectionId(direction))
             })
         }

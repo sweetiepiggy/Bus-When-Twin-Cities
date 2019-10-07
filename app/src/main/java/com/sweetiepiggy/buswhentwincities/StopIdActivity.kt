@@ -43,6 +43,7 @@ import java.util.*
 
 class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener, NexTripsViewModel.OnChangeRefreshingListener {
     private var mStopId: Int? = null
+    private var mTimestop: Timestop? = null
     private var mStopDesc: String? = null
     private var mStop: Stop? = null
     private var mMapFragment: MyMapFragment? = null
@@ -79,7 +80,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         title = makeTitle(mStopId, mStopDesc)
 
         mNexTripsModel = ViewModelProvider(this,
-        	NexTripsViewModel.NexTripsViewModelFactory(mStopId, applicationContext)
+        	NexTripsViewModel.NexTripsViewModelFactory(mStopId, mTimestop, applicationContext)
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
         mNexTripsModel.setChangeRefreshingListener(this)
@@ -94,6 +95,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             mStop = it
             if (mStopDesc == null) {
                 title = makeTitle(mStopId, it.stopName)
+            } else {
+                mStopDesc = it.stopName
             }
         })
 
@@ -134,11 +137,24 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         mStopId?.let { savedInstanceState.putInt(KEY_STOP_ID, it) }
         mIsFavorite?.let { savedInstanceState.putBoolean(KEY_IS_FAVORITE, it) }
         mStopDesc?.let { savedInstanceState.putString(KEY_STOP_DESC, it) }
+        mTimestop?.let {
+            savedInstanceState.putString(KEY_TIMESTOP_ID, it.timestopId)
+            savedInstanceState.putString(KEY_ROUTE_ID, it.routeId)
+            savedInstanceState.putInt(KEY_DIRECTION_ID, NexTrip.getDirectionId(it.direction))
+        }
     }
 
     private fun loadState(b: Bundle) {
         if (b.containsKey(KEY_STOP_ID)) {
             mStopId = b.getInt(KEY_STOP_ID)
+        }
+        if (b.containsKey(KEY_TIMESTOP_ID) && b.containsKey(KEY_ROUTE_ID) && b.containsKey(KEY_DIRECTION_ID)) {
+            val timestopId = b.getString(KEY_TIMESTOP_ID)
+            val routeId = b.getString(KEY_ROUTE_ID)
+            val direction = NexTrip.Direction.from(b.getInt(KEY_DIRECTION_ID))
+            if (timestopId != null && routeId != null && direction != null) {
+                mTimestop = Timestop(timestopId, routeId, direction)
+            }
         }
         if (b.containsKey(KEY_STOP_DESC)) {
             mStopDesc = b.getString(KEY_STOP_DESC)
@@ -255,13 +271,19 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         if (mIsFavorite ?: false) {
             mIsFavorite = false
             item.icon = getDrawable(this, IS_NOT_FAV_ICON)
-            title = makeTitle(mStopId, mStop?.stopName)
-            mStopId?.let { stopId ->
+            title = makeTitle(mStopId, mStop?.stopName ?: mStopDesc)
+            val stopId = mStopId
+            val timestop = mTimestop
+            if (stopId != null || timestop != null) {
                 object : AsyncTask<Void, Void, Void>() {
                     override fun doInBackground(vararg params: Void): Void? {
                         DbAdapter().apply {
                             openReadWrite(applicationContext)
-                            deleteFavStop(stopId)
+                            if (stopId != null) {
+                            	deleteFavStop(stopId)
+                            } else if (timestop != null) {
+                                deleteFavTimestop(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                            }
                             close()
                         }
                         return null
@@ -276,20 +298,24 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
                 val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
                 setTitle(R.string.enter_stop_name_dialog_title)
                 setView(favStopIdDialog)
-                mStop?.let { stop ->
-                    favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.setText(stop.stopName)
-                }
+                favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.setText(mStop?.stopName ?: mStopDesc)
                 setPositiveButton(android.R.string.ok) { _, _ ->
                     mIsFavorite = true
                     item.icon = getDrawable(context, IS_FAV_ICON)
-                    val stopName = favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.text.toString()
-                    title = makeTitle(mStopId, stopName)
-                    mStopId?.let { stopId ->
+                    mStopDesc = favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.text.toString()
+                    title = makeTitle(mStopId, mStopDesc)
+                    val stopId = mStopId
+                    val timestop = mTimestop
+                    if (stopId != null || timestop != null) {
                         object : AsyncTask<Void, Void, Void>() {
                             override fun doInBackground(vararg params: Void): Void? {
                                 DbAdapter().apply {
                                     openReadWrite(applicationContext)
-                                    createFavStop(stopId, stopName)
+                                    if (stopId != null) {
+                                        createFavStop(stopId, mStopDesc)
+                                    } else if (timestop != null) {
+                                        createFavTimestop(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), mStopDesc)
+                                    }
                                     close()
                                 }
                                 return null
@@ -335,20 +361,34 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     private inner class LoadIsFavorite(): AsyncTask<Void, Void, Pair<Boolean, String?>>() {
         override fun doInBackground(vararg params: Void): Pair<Boolean, String?> {
-            val dbHelper = DbAdapter()
-            dbHelper.open(applicationContext)
-            val isFavorite = mStopId?.let { dbHelper.isFavStop(it) } ?: false
-            val stopDesc = mStopId?.let { dbHelper.getStopDesc(it) }
-            dbHelper.close()
-            return Pair(isFavorite, stopDesc)
+            var ret: Pair<Boolean, String?> = Pair(false, mStopDesc)
+
+            val stopId = mStopId
+            val timestop = mTimestop
+            if (stopId != null || timestop != null) {
+                val dbHelper = DbAdapter()
+                dbHelper.open(applicationContext)
+                ret = if (stopId != null) {
+                    Pair(dbHelper.isFavStop(stopId), dbHelper.getStopDesc(stopId))
+                } else {
+                    Pair(
+                        dbHelper.isFavTimestop(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction)),
+                        dbHelper.getTimestopDesc(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                    )
+                }
+                dbHelper.close()
+            }
+            return ret
         }
 
         override fun onPostExecute(result: Pair<Boolean, String?>) {
             val (isFavorite, stopDesc) = result
             mIsFavorite = isFavorite
-            mStopDesc = stopDesc
+            stopDesc?.let {
+                mStopDesc = it
+                title = makeTitle(mStopId, it)
+            }
 
-            title = makeTitle(mStopId, stopDesc)
             mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
         		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         }
@@ -356,10 +396,16 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
 
     private inner class StoreDoShowRoutesInDbTask(private val doShowRoutes: Map<Pair<String?, String?>, Boolean>): AsyncTask<Void, Void, Void?>() {
         override fun doInBackground(vararg params: Void): Void? {
-        	mStopId?.let { stopId ->
+            val stopId = mStopId
+            val timestop = mTimestop
+            if (stopId != null || timestop != null) {
                 DbAdapter().run {
                     openReadWrite(applicationContext)
-                    updateDoShowRoutes(stopId, doShowRoutes)
+                    if (stopId != null) {
+                        updateDoShowRoutes(stopId, doShowRoutes)
+                    } else if (timestop != null) {
+                        updateTimestopDoShowRoutes(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), doShowRoutes)
+                    }
                     close()
                 }
             }
@@ -436,10 +482,13 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
         if (stopDesc.isNullOrEmpty())
         	resources.getString(R.string.stop_number) + (stopId?.toString() ?: "")
         else
-        	stopDesc + stopId?.let { " (#" + it.toString() + ")" }
+    	    stopDesc + (stopId?.let { " (#" + it.toString() + ")" } ?: "")
 
     companion object {
         val KEY_STOP_ID = "stopId"
+        val KEY_TIMESTOP_ID = "timestopId"
+        val KEY_ROUTE_ID = "routeId"
+        val KEY_DIRECTION_ID = "directionId"
         val KEY_IS_FAVORITE = "isFavorite"
         val KEY_STOP_DESC = "stopDesc"
 

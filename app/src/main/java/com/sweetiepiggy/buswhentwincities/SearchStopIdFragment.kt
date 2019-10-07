@@ -41,7 +41,7 @@ class SearchStopIdFragment : Fragment() {
 
     interface OnSearchStopIdListener {
         fun onSearchStopId(stopId: Int)
-        fun onSearchRouteId(routeId: Int)
+        fun onSearchRouteId(routeId: String)
         fun onBrowseRoutes()
     }
 
@@ -134,12 +134,11 @@ class SearchStopIdFragment : Fragment() {
 
     private fun startRouteActivity() {
         getActivity()?.findViewById<TextInputLayout>(R.id.routeTextInput)?.let { routeTextInput ->
-            val routeStr = routeTextInput.editText?.text.toString()
-            if (routeStr.length == 0) {
+            val routeId = routeTextInput.editText?.text.toString()
+            if (routeId.length == 0) {
                 routeTextInput.error = resources.getString(R.string.enter_route)
             } else {
                 try {
-                    val routeId = routeStr.toInt()
                     routeTextInput.error = null
                     mSearchStopIdListener.onSearchRouteId(routeId)
                 } catch (e: NumberFormatException) {

@@ -125,11 +125,21 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             else -> false
         }
 
-    override fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStopId) {
+    override fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStop) {
         val b = Bundle().apply {
-            putInt(StopIdActivity.KEY_STOP_ID, favStop.stopId)
+            when (favStop) {
+                is FavoriteStopIdsViewModel.FavoriteStop.FavoriteStopId -> {
+                    putInt(StopIdActivity.KEY_STOP_ID, favStop.stopId)
+                    putString(StopIdActivity.KEY_STOP_DESC, favStop.stopDesc)
+                }
+                is FavoriteStopIdsViewModel.FavoriteStop.FavoriteTimestop -> {
+                    putString(StopIdActivity.KEY_ROUTE_ID, favStop.timestop.routeId)
+                    putInt(StopIdActivity.KEY_DIRECTION_ID, NexTrip.getDirectionId(favStop.timestop.direction))
+                    putString(StopIdActivity.KEY_TIMESTOP_ID, favStop.timestop.timestopId)
+                    putString(StopIdActivity.KEY_STOP_DESC, favStop.stopDesc)
+                }
+            }
             putBoolean(StopIdActivity.KEY_IS_FAVORITE, true)
-            putString(StopIdActivity.KEY_STOP_DESC, favStop.stopDesc)
         }
         startStopIdActivity(b)
     }
@@ -171,10 +181,10 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startStopIdActivity(b)
     }
 
-    override fun onSearchRouteId(routeId: Int) {
+    override fun onSearchRouteId(routeId: String) {
         val intent = Intent(this, BrowseDirectionsActivity::class.java).apply {
             putExtras(Bundle().apply {
-                putInt(BrowseDirectionsActivity.KEY_ROUTE_ID, routeId)
+                putString(BrowseDirectionsActivity.KEY_ROUTE_ID, routeId)
             })
         }
         startActivityForResult(intent, ACTIVITY_BROWSE_ROUTES)

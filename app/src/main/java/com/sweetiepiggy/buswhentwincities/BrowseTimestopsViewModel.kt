@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-class BrowseTimestopsViewModel(private val mRouteId: Int?, private val mDirectionId: Int?) : ViewModel(), DownloadTimestopsTask.OnDownloadedTimestopsListener {
+class BrowseTimestopsViewModel(private val mRouteId: String?, private val mDirectionId: Int?) : ViewModel(), DownloadTimestopsTask.OnDownloadedTimestopsListener {
     data class Timestop(val description: String, val timestopId: String)
 
     private val mTimestops: MutableLiveData<List<Timestop>> by lazy {
@@ -49,7 +49,7 @@ class BrowseTimestopsViewModel(private val mRouteId: Int?, private val mDirectio
     override fun onDownloadedTimestopsError(err: MetroTransitDownloader.DownloadError) {
     }
 
-    class BrowseTimestopsViewModelFactory(private val routeId: Int?, private val directionId: Int?) : ViewModelProvider.NewInstanceFactory() {
+    class BrowseTimestopsViewModelFactory(private val routeId: String?, private val directionId: Int?) : ViewModelProvider.NewInstanceFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
             BrowseTimestopsViewModel(routeId, directionId) as T

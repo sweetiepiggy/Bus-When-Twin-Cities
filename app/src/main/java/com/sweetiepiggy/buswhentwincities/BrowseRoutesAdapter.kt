@@ -42,10 +42,6 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
         }
     }
 
-    init {
-        setHasStableIds(true)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseRoutesAdapter.BrowseRoutesViewHolder {
         val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.result_item, parent, false)
@@ -57,6 +53,4 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
     }
 
     override fun getItemCount(): Int = mRoutes.size
-
-    override fun getItemId(position: Int): Long = mRoutes[position].routeId.toLong()
 }

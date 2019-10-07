@@ -27,8 +27,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsAdapter
@@ -40,7 +38,7 @@ class FavoriteStopIdsFragment : Fragment() {
     private lateinit var mAdapter: FavoriteStopIdsAdapter
     private lateinit var mModel: FavoriteStopIdsViewModel
     private var mModelIsInit = false
-    private val mFavoriteStopIds: MutableList<FavoriteStopIdsViewModel.FavoriteStopId> = ArrayList<FavoriteStopIdsViewModel.FavoriteStopId>()
+    private val mFavoriteStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop> = ArrayList<FavoriteStopIdsViewModel.FavoriteStop>()
 
     companion object {
         fun newInstance() = FavoriteStopIdsFragment()
@@ -59,7 +57,7 @@ class FavoriteStopIdsFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mAdapter = FavoriteStopIdsAdapter(mClickFavoriteListener, mFavoriteStopIds)
+        mAdapter = FavoriteStopIdsAdapter(mClickFavoriteListener, mFavoriteStops)
         getActivity()?.findViewById<RecyclerView>(R.id.favoritesRecyclerView)?.apply {
             layoutManager = LinearLayoutManager(context)
             // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
@@ -72,19 +70,19 @@ class FavoriteStopIdsFragment : Fragment() {
         } ?: throw Exception("Invalid Activity")
         mModelIsInit = true
 
-        mModel.getFavoriteStopIds().observe(this,
-        	Observer<List<FavoriteStopIdsViewModel.FavoriteStopId>>{ updateFavoriteStopIds(it) })
+        mModel.getFavoriteStops().observe(this,
+        	Observer<List<FavoriteStopIdsViewModel.FavoriteStop>>{ updateFavoriteStops(it) })
     }
 
     fun refresh() {
-        if (mModelIsInit) { mModel.loadFavoriteStopIds() }
+        if (mModelIsInit) { mModel.loadFavoriteStops() }
     }
 
-    private fun updateFavoriteStopIds(favoriteStopIds: List<FavoriteStopIdsViewModel.FavoriteStopId>) {
+    private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {
         activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
-        mFavoriteStopIds.apply {
+        mFavoriteStops.apply {
             clear()
-            addAll(favoriteStopIds)
+            addAll(favoriteStops)
         }
         mAdapter.notifyDataSetChanged()
         updateFavoriteStopIdsMessage()
@@ -93,7 +91,7 @@ class FavoriteStopIdsFragment : Fragment() {
     fun updateFavoriteStopIdsMessage() {
         val resultsRecyclerView = activity?.findViewById<View>(R.id.favoritesRecyclerView)
         val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
-        if (mFavoriteStopIds.isEmpty()) {
+        if (mFavoriteStops.isEmpty()) {
             resultsRecyclerView?.setVisibility(View.INVISIBLE)
             noResultsView?.setVisibility(View.VISIBLE)
         } else {

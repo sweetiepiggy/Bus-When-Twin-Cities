@@ -74,11 +74,11 @@ class MetroTransitDownloader() {
     sealed class NexTripOperation {
         object GetProviders: NexTripOperation()
         object GetRoutes: NexTripOperation()
-        data class GetDirections(val route: Int): NexTripOperation()
-        data class GetStops(val route: Int, val direction: NexTrip.Direction): NexTripOperation()
+        data class GetDirections(val routeId: String): NexTripOperation()
+        data class GetStops(val routeId: String, val direction: NexTrip.Direction): NexTripOperation()
         data class GetDepartures(val stopId: Int): NexTripOperation()
-        data class GetTimepointDepartures(val route: Int, val direction: NexTrip.Direction,
-        		val stopId: Int): NexTripOperation()
+        data class GetTimepointDepartures(val routeId: String, val direction: NexTrip.Direction,
+        		val timestopId: String): NexTripOperation()
         data class GetVehicleLocations(val route: Int): NexTripOperation()
     }
 
@@ -87,10 +87,10 @@ class MetroTransitDownloader() {
         	when(operation) {
                 is NexTripOperation.GetProviders -> "Providers"
                 is NexTripOperation.GetRoutes -> "Routes"
-                is NexTripOperation.GetDirections -> "Directions/${operation.route}"
-                is NexTripOperation.GetStops -> "Stops/${operation.route}/${NexTrip.getDirectionId(operation.direction)}"
+                is NexTripOperation.GetDirections -> "Directions/${operation.routeId}"
+                is NexTripOperation.GetStops -> "Stops/${operation.routeId}/${NexTrip.getDirectionId(operation.direction)}"
                 is NexTripOperation.GetDepartures -> "${operation.stopId}"
-                is NexTripOperation.GetTimepointDepartures -> "${operation.route}/${NexTrip.getDirectionId(operation.direction)}/${operation.stopId}"
+                is NexTripOperation.GetTimepointDepartures -> "${operation.routeId}/${NexTrip.getDirectionId(operation.direction)}/${operation.timestopId}"
                 is NexTripOperation.GetVehicleLocations -> "VehicleLocations/${operation.route}"
             } + "?format=json"
 		)
