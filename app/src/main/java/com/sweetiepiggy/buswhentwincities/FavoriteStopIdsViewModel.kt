@@ -38,6 +38,10 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
         LoadFavoriteStopsTask().execute()
     }
 
+    fun setFavoriteStops(favoriteStops: List<FavoriteStop>) {
+            mFavoriteStops.value = favoriteStops
+    }
+
     sealed class FavoriteStop {
         data class FavoriteStopId(val stopId: Int, val stopDesc: String, val position: Int): FavoriteStop()
         data class FavoriteTimestop(val timestop: Timestop, val stopDesc: String, val position: Int): FavoriteStop()
@@ -107,7 +111,7 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
 
         override fun onPostExecute(result: List<FavoriteStop>) {
             android.util.Log.d("got here", "got here: LoadFavoriteStopsTask: $result")
-            mFavoriteStops.value = result
+            setFavoriteStops(result)
         }
     }
 }

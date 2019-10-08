@@ -33,11 +33,12 @@ import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsAdapter
 import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsViewModel
 import com.sweetiepiggy.buswhentwincities.R
 
-class FavoriteStopIdsFragment : Fragment() {
+class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavoriteListener {
     private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
     private lateinit var mAdapter: FavoriteStopIdsAdapter
     private lateinit var mModel: FavoriteStopIdsViewModel
     private var mModelIsInit = false
+    private var mInitUpdated = false
     private val mFavoriteStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop> = ArrayList<FavoriteStopIdsViewModel.FavoriteStop>()
 
     companion object {
@@ -78,13 +79,30 @@ class FavoriteStopIdsFragment : Fragment() {
         if (mModelIsInit) { mModel.loadFavoriteStops() }
     }
 
+    override fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStop) {
+        mClickFavoriteListener.onClickFavorite(favStop)
+    }
+
+    override fun onMoveFavorite(fromPosition: Int, toPosition: Int) {
+        mClickFavoriteListener.onMoveFavorite(fromPosition, toPosition)
+        mModel.setFavoriteStops(mFavoriteStops)
+    }
+
+    override fun onDeleteFavorite(position: Int) {
+        mClickFavoriteListener.onDeleteFavorite(position)
+        mModel.setFavoriteStops(mFavoriteStops)
+    }
+
     private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {
-        activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
-        mFavoriteStops.apply {
-            clear()
-            addAll(favoriteStops)
+        if (!mInitUpdated) {
+            activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
+            mFavoriteStops.apply {
+                clear()
+                addAll(favoriteStops)
+            }
+            mAdapter.notifyDataSetChanged()
+            mInitUpdated = true
         }
-        mAdapter.notifyDataSetChanged()
         updateFavoriteStopIdsMessage()
     }
 

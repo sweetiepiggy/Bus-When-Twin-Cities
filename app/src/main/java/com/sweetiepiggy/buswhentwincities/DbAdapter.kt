@@ -189,7 +189,7 @@ class DbAdapter {
                         departure_time DATETIME NOT NULL,
                         description TEXT,
                         gate TEXT,
-                        route TEXT NOT,
+                        route TEXT,
                         route_direction INTEGER,
                         terminal TEXT,
                         vehicle_heading DOUBLE,
