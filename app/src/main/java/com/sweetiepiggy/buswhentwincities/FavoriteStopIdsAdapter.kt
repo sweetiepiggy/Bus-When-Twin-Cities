@@ -25,8 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.DOWN
-import androidx.recyclerview.widget.ItemTouchHelper.UP
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 
 class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListener,
@@ -83,8 +82,8 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
     private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-        	// makeMovementFlags(UP or DOWN, START or END)
-        	makeMovementFlags(UP or DOWN, 0)
+        	makeMovementFlags(UP or DOWN, START or END)
+        	// makeMovementFlags(UP or DOWN, 0)
 
         override fun isLongPressDragEnabled() = false
 

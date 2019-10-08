@@ -35,6 +35,10 @@
     <string name="south">south</string>
     <string name="east">east</string>
     <string name="west">west</string>
+    <string name="northbound">Northbound</string>
+    <string name="southbound">Southbound</string>
+    <string name="eastbound">Eastbound</string>
+    <string name="westbound">Westbound</string>
     <string name="minutes">min</string>
     <string name="due">Due</string>
     <string name="past_due">Past Due</string>
