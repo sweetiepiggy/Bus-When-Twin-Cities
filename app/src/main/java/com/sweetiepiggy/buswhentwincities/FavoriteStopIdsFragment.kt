@@ -38,7 +38,7 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
     private lateinit var mAdapter: FavoriteStopIdsAdapter
     private lateinit var mModel: FavoriteStopIdsViewModel
     private var mModelIsInit = false
-    private var mInitUpdated = false
+    private var mDoUpdateFavoriteStops = true
     private val mFavoriteStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop> = ArrayList<FavoriteStopIdsViewModel.FavoriteStop>()
 
     companion object {
@@ -76,7 +76,10 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
     }
 
     fun refresh() {
-        if (mModelIsInit) { mModel.loadFavoriteStops() }
+        if (mModelIsInit) {
+            mDoUpdateFavoriteStops = true
+            mModel.loadFavoriteStops()
+        }
     }
 
     override fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStop) {
@@ -94,14 +97,14 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
     }
 
     private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {
-        if (!mInitUpdated) {
+        if (mDoUpdateFavoriteStops) {
             activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
             mFavoriteStops.apply {
                 clear()
                 addAll(favoriteStops)
             }
             mAdapter.notifyDataSetChanged()
-            mInitUpdated = true
+            mDoUpdateFavoriteStops = false
         }
         updateFavoriteStopIdsMessage()
     }
