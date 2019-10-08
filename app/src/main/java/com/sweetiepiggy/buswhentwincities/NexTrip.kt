@@ -202,6 +202,15 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
                 NexTrip.Direction.NORTH -> resources.getString(R.string.north)
                 else -> null
             }
+
+        fun translateDirectionBound(dir: NexTrip.Direction?, resources: Resources): String? =
+        	when (dir) {
+                NexTrip.Direction.SOUTH -> resources.getString(R.string.southbound)
+                NexTrip.Direction.EAST  -> resources.getString(R.string.eastbound)
+                NexTrip.Direction.WEST  -> resources.getString(R.string.westbound)
+                NexTrip.Direction.NORTH -> resources.getString(R.string.northbound)
+                else -> null
+            }
     }
 
     override fun toString(): String =

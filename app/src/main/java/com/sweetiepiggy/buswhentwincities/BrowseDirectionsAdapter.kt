@@ -55,7 +55,7 @@ class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionLi
     }
 
     override fun onBindViewHolder(holder: BrowseDirectionsViewHolder, position: Int) {
-        holder.mDescriptionTextView.text = PresentableNexTrip.translateDirection(mDirections[position], mCtxt.resources)
+        holder.mDescriptionTextView.text = PresentableNexTrip.translateDirectionBound(mDirections[position], mCtxt.resources)
     }
 
     override fun getItemCount(): Int = mDirections.size
