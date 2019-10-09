@@ -95,7 +95,7 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
         mClickFavoriteListener.onPromptDeleteFavorite(removedStop, position, recyclerViewPosition)
     }
 
-    fun onDeleteFavorite(recyclerViewPosition: Int) {
+    fun onDeleteFavorite() {
         mModel.setFavoriteStops(mFavoriteStops)
     }
 

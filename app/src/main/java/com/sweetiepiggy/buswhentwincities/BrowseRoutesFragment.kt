@@ -33,17 +33,21 @@ import androidx.recyclerview.widget.RecyclerView
 class BrowseRoutesFragment : Fragment() {
 
     companion object {
-        fun newInstance() = BrowseRoutesFragment()
+        fun newInstance(clickRouteListener: BrowseRoutesAdapter.OnClickRouteListener,
+                        downloadErrorListener: OnDownloadErrorListener,
+                        refreshingListener: OnChangeRefreshingListener) =
+            BrowseRoutesFragment().apply {
+                setClickRouteListener(clickRouteListener)
+                setDownloadErrorListener(downloadErrorListener)
+                setChangeRefreshingListener(refreshingListener)
+            }
     }
 
     private val mRoutes: MutableList<BrowseRoutesViewModel.Route> = ArrayList<BrowseRoutesViewModel.Route>()
     private lateinit var mAdapter: BrowseRoutesAdapter
     private lateinit var mClickRouteListener: BrowseRoutesAdapter.OnClickRouteListener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mClickRouteListener = context as BrowseRoutesAdapter.OnClickRouteListener
-    }
+    private lateinit var mDownloadErrorListener: OnDownloadErrorListener
+    private lateinit var mRefreshingListener: OnChangeRefreshingListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -55,7 +59,7 @@ class BrowseRoutesFragment : Fragment() {
 
         mAdapter = BrowseRoutesAdapter(mClickRouteListener, mRoutes)
 
-        getActivity()?.findViewById<RecyclerView>(R.id.results_recycler_view)?.apply {
+        activity?.findViewById<RecyclerView>(R.id.results_recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = mAdapter
         }
@@ -63,9 +67,25 @@ class BrowseRoutesFragment : Fragment() {
         val model = activity?.run {
             ViewModelProvider(this).get(BrowseRoutesViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+        model.run {
+            setDownloadErrorListener(mDownloadErrorListener)
+            setChangeRefreshingListener(mRefreshingListener)
+        }
         model.getRoutes().observe(this, Observer<List<BrowseRoutesViewModel.Route>>{
             updateRoutes(it)
         })
+    }
+
+    fun setClickRouteListener(clickRouteListener: BrowseRoutesAdapter.OnClickRouteListener) {
+        mClickRouteListener = clickRouteListener
+    }
+
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
     }
 
     private fun updateRoutes(routes: List<BrowseRoutesViewModel.Route>) {

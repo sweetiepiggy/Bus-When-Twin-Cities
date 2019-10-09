@@ -26,6 +26,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class BrowseTimestopsViewModel(private val mRouteId: String?, private val mDirectionId: Int?) : ViewModel(), DownloadTimestopsTask.OnDownloadedTimestopsListener {
+    private var mDownloadErrorListener: OnDownloadErrorListener? = null
+    private var mRefreshingListener: OnChangeRefreshingListener? = null
+
     data class Timestop(val description: String, val timestopId: String)
 
     private val mTimestops: MutableLiveData<List<Timestop>> by lazy {
@@ -34,7 +37,16 @@ class BrowseTimestopsViewModel(private val mRouteId: String?, private val mDirec
 
     fun getTimestops(): LiveData<List<Timestop>> = mTimestops
 
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
+    }
+
     private fun loadTimestops() {
+        mRefreshingListener?.setRefreshing(true)
         mRouteId?.let { routeId ->
             NexTrip.Direction.from(mDirectionId)?.let { direction ->
                 DownloadTimestopsTask(this, routeId, direction).execute()
@@ -44,9 +56,12 @@ class BrowseTimestopsViewModel(private val mRouteId: String?, private val mDirec
 
     override fun onDownloadedTimestops(timestops: List<Timestop>) {
         mTimestops.value = timestops
+        mRefreshingListener?.setRefreshing(false)
     }
 
     override fun onDownloadedTimestopsError(err: MetroTransitDownloader.DownloadError) {
+        mRefreshingListener?.setRefreshing(false)
+        mDownloadErrorListener?.onDownloadError(err)
     }
 
     class BrowseTimestopsViewModelFactory(private val routeId: String?, private val directionId: Int?) : ViewModelProvider.NewInstanceFactory() {

@@ -21,10 +21,12 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 
-class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener {
+class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.OnClickDirectionListener, OnDownloadErrorListener, OnChangeRefreshingListener {
 
     private var mRouteId: String? = null
 
@@ -33,7 +35,7 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
         setContentView(R.layout.browse_routes_activity)
         if (savedInstanceState == null) {
             intent.extras?.let { loadState(it) }
-            val fragment = BrowseDirectionsFragment.newInstance().apply {
+            val fragment = BrowseDirectionsFragment.newInstance(this, this, this).apply {
                 setArguments(Bundle().apply {
                     mRouteId?.let { putString(BrowseDirectionsFragment.KEY_ROUTE_ID, it) }
                 })
@@ -70,6 +72,28 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
             })
         }
         startActivity(intent)
+    }
+
+    override fun onDownloadError(err: MetroTransitDownloader.DownloadError) {
+        if (isFinishing()) {
+            return
+        }
+        val message: String? =
+            when (err) {
+                is MetroTransitDownloader.DownloadError.UnknownHost -> resources.getString(R.string.unknown_host)
+                is MetroTransitDownloader.DownloadError.FileNotFound -> resources.getString(R.string.file_not_found) + ":\n${err.message}"
+                is MetroTransitDownloader.DownloadError.TimedOut -> resources.getString(R.string.timed_out) + ":\n${err.message}"
+                is MetroTransitDownloader.DownloadError.OtherDownloadError -> err.message
+            }
+        AlertDialog.Builder(this).apply {
+            setTitle(resources.getString(android.R.string.dialog_alert_title))
+            message?.let { setMessage(it) }
+            setPositiveButton(resources.getString(R.string.dismiss)) { _, _ -> }
+        }.show()
+    }
+
+    override fun setRefreshing(refreshing: Boolean) {
+        findViewById<View>(R.id.progressBar)?.setVisibility(if (refreshing) View.VISIBLE else View.INVISIBLE)
     }
 
     companion object {

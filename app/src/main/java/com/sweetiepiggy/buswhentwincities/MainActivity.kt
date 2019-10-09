@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                         return null
                     }
                     override fun onPostExecute(result: Void?) {
-                        mFavStopIdsFragment?.onDeleteFavorite(recyclerViewPosition)
+                        mFavStopIdsFragment?.onDeleteFavorite()
 //                        mFavStopIdsFragment?.updateFavoriteStopIdsMessage()
                     }
                 }.execute()

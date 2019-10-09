@@ -110,7 +110,6 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
         }
 
         override fun onPostExecute(result: List<FavoriteStop>) {
-            android.util.Log.d("got here", "got here: LoadFavoriteStopsTask: $result")
             setFavoriteStops(result)
         }
     }

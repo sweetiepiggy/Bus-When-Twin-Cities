@@ -37,11 +37,8 @@ class BrowseTimestopsFragment : Fragment() {
     private val mTimestops: MutableList<BrowseTimestopsViewModel.Timestop> = ArrayList<BrowseTimestopsViewModel.Timestop>()
     private lateinit var mAdapter: BrowseTimestopsAdapter
     private lateinit var mClickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mClickTimestopListener = context as BrowseTimestopsAdapter.OnClickTimestopListener
-    }
+    private lateinit var mDownloadErrorListener: OnDownloadErrorListener
+    private lateinit var mRefreshingListener: OnChangeRefreshingListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -68,6 +65,10 @@ class BrowseTimestopsFragment : Fragment() {
             ViewModelProvider(this, BrowseTimestopsViewModel.BrowseTimestopsViewModelFactory(mRouteId, mDirectionId)
         ).get(BrowseTimestopsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+        model.run {
+            setDownloadErrorListener(mDownloadErrorListener)
+            setChangeRefreshingListener(mRefreshingListener)
+        }
         model.getTimestops().observe(this, Observer<List<BrowseTimestopsViewModel.Timestop>>{
             updateTimestops(it)
         })
@@ -86,6 +87,18 @@ class BrowseTimestopsFragment : Fragment() {
         if (b.containsKey(KEY_DIRECTION_ID)) {
             mDirectionId = b.getInt(KEY_DIRECTION_ID)
         }
+    }
+
+    fun setClickTimestopListener(clickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener) {
+        mClickTimestopListener = clickTimestopListener
+    }
+
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
     }
 
     private fun updateTimestops(directions: List<BrowseTimestopsViewModel.Timestop>) {
@@ -110,7 +123,14 @@ class BrowseTimestopsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance() = BrowseTimestopsFragment()
+        fun newInstance(clickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener,
+                        downloadErrorListener: OnDownloadErrorListener,
+                        refreshingListener: OnChangeRefreshingListener) =
+            BrowseTimestopsFragment().apply {
+                setClickTimestopListener(clickTimestopListener)
+                setDownloadErrorListener(downloadErrorListener)
+                setChangeRefreshingListener(refreshingListener)
+            }
 
         val KEY_ROUTE_ID = "routeId"
         val KEY_DIRECTION_ID = "directionId"
