@@ -25,13 +25,20 @@
     <string name="stop_id">¿Número de parada?</string>
     <string name="stop_id_hint">por ejemplo: 17980</string>
     <string name="enter_stop_id">Introduzca el número de parada</string>
+    <string name="enter_route">Introduzca el número de ruta</string>
     <string name="must_be_number">Tiene que ser un número</string>
+    <string name="route">¿Número de ruta?</string>
+    <string name="route_hint">por ejemplo: 10</string>
     <string name="real_time">tiempo real</string>
     <string name="scheduled">programado</string>
     <string name="north">norte</string>
     <string name="south">sur</string>
     <string name="east">este</string>
     <string name="west">oeste</string>
+    <string name="northbound">Norte</string>
+    <string name="southbound">Sur</string>
+    <string name="eastbound">Este</string>
+    <string name="westbound">Oeste</string>
     <string name="minutes">min</string>
     <string name="due">Esperado</string>
     <string name="past_due">Atrasado</string>
@@ -42,12 +49,20 @@
     <string name="action_favorite">Favorita</string>
     <!-- <string name="action_search">Buscar</string> -->
     <!-- <string name="search_stop_id">Buscar por número de parada</string> -->
-    <string name="search_stop_id">Buscar</string>
+    <string name="search_stop_id">Mostrar parada</string>
+    <string name="search_route">Mostrar ruta</string>
+    <string name="browse_routes">Navegar por rutas</string>
     <string name="action_filter">Filtrar</string>
+    <string name="select_route">Seleccione una ruta</string>
+    <string name="select_direction">Selecciona una dirección</string>
+    <string name="select_stop">Seleccione una parada</string>
 
     <string name="enter_stop_name_dialog_title">Guardar en favoritas</string>
     <string name="enter_stop_name_dialog_message">Ingresa un nombre para esta parada</string>
     <string name="select_routes">Selecciona las rutas para mostrar</string>
+
+    <string name="remove_favorite">¿Eliminar favorito?</string>
+    <string name="remove">eliminar</string>
 
     <string name="dismiss">Descartar</string>
     <string name="unknown_host">Incapaz de conectarse a Internet</string>
