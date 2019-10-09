@@ -82,8 +82,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
     private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-        	// makeMovementFlags(UP or DOWN, START or END)
-        	makeMovementFlags(UP or DOWN, START)
+        	makeMovementFlags(UP or DOWN, START or END)
         	// makeMovementFlags(UP or DOWN, 0)
 
         override fun isLongPressDragEnabled() = false
