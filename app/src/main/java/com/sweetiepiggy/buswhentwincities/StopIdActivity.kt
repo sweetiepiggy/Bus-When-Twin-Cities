@@ -44,7 +44,7 @@ import com.google.android.material.textfield.TextInputEditText
 import java.security.InvalidParameterException
 import java.util.*
 
-class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, NexTripsViewModel.OnLoadNexTripsErrorListener, NexTripsViewModel.OnChangeRefreshingListener {
+class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, OnDownloadErrorListener, OnChangeRefreshingListener {
     private var mStopId: Int? = null
     private var mTimestop: Timestop? = null
     private var mStopDesc: String? = null
@@ -184,7 +184,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, Ne
             else -> super.onOptionsItemSelected(item)
         }
 
-    override fun onLoadNexTripsError(err: MetroTransitDownloader.DownloadError) {
+    override fun onDownloadError(err: MetroTransitDownloader.DownloadError) {
         if (isFinishing()) {
             return
         }

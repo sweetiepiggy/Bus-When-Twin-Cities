@@ -25,6 +25,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutesListener {
+    private var mDownloadErrorListener: OnDownloadErrorListener? = null
+    private var mRefreshingListener: OnChangeRefreshingListener? = null
+
     data class Route(val description: String, val providerId: Int, val routeId: String)
 
     private val mRoutes: MutableLiveData<List<Route>> by lazy {
@@ -33,14 +36,27 @@ class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutes
 
     fun getRoutes(): LiveData<List<Route>> = mRoutes
 
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
+    }
+
     private fun loadRoutes() {
+        mRefreshingListener?.setRefreshing(true)
         DownloadRoutesTask(this).execute()
     }
 
     override fun onDownloadedRoutes(routes: List<Route>) {
         mRoutes.value = routes
+        mRefreshingListener?.setRefreshing(false)
     }
 
     override fun onDownloadedRoutesError(err: MetroTransitDownloader.DownloadError) {
+        mRefreshingListener?.setRefreshing(false)
+        mDownloadErrorListener?.onDownloadError(err)
     }
 }
+

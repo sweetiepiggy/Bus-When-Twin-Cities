@@ -26,21 +26,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 class BrowseDirectionsViewModel(private val mRouteId: String?) : ViewModel(), DownloadDirectionsTask.OnDownloadedDirectionsListener {
+    private var mDownloadErrorListener: OnDownloadErrorListener? = null
+    private var mRefreshingListener: OnChangeRefreshingListener? = null
+
     private val mDirections: MutableLiveData<List<NexTrip.Direction>> by lazy {
         MutableLiveData<List<NexTrip.Direction>>().also { loadDirections() }
     }
 
     fun getDirections(): LiveData<List<NexTrip.Direction>> = mDirections
 
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
+    }
+
     private fun loadDirections() {
+        mRefreshingListener?.setRefreshing(true)
         mRouteId?.let { DownloadDirectionsTask(this, it).execute() }
     }
 
     override fun onDownloadedDirections(directions: List<NexTrip.Direction>) {
         mDirections.value = directions
+        mRefreshingListener?.setRefreshing(false)
     }
 
     override fun onDownloadedDirectionsError(err: MetroTransitDownloader.DownloadError) {
+        mRefreshingListener?.setRefreshing(false)
+        mDownloadErrorListener?.onDownloadError(err)
     }
 
     class BrowseDirectionsViewModelFactory(private val routeId: String?) : ViewModelProvider.NewInstanceFactory() {

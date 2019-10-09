@@ -36,11 +36,8 @@ class BrowseDirectionsFragment : Fragment() {
     private val mDirections: MutableList<NexTrip.Direction> = ArrayList<NexTrip.Direction>()
     private lateinit var mAdapter: BrowseDirectionsAdapter
     private lateinit var mClickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mClickDirectionListener = context as BrowseDirectionsAdapter.OnClickDirectionListener
-    }
+    private lateinit var mDownloadErrorListener: OnDownloadErrorListener
+    private lateinit var mRefreshingListener: OnChangeRefreshingListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -64,9 +61,12 @@ class BrowseDirectionsFragment : Fragment() {
         }
 
         val model = activity?.run {
-            ViewModelProvider(this, BrowseDirectionsViewModel.BrowseDirectionsViewModelFactory(mRouteId)
-        ).get(BrowseDirectionsViewModel::class.java)
+            ViewModelProvider(this, BrowseDirectionsViewModel.BrowseDirectionsViewModelFactory(mRouteId)).get(BrowseDirectionsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+        model.run {
+            setDownloadErrorListener(mDownloadErrorListener)
+            setChangeRefreshingListener(mRefreshingListener)
+        }
         model.getDirections().observe(this, Observer<List<NexTrip.Direction>>{
             updateDirections(it)
         })
@@ -81,6 +81,18 @@ class BrowseDirectionsFragment : Fragment() {
         if (b.containsKey(KEY_ROUTE_ID)) {
             mRouteId = b.getString(KEY_ROUTE_ID)
         }
+    }
+
+    fun setClickDirectionListener(clickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener) {
+        mClickDirectionListener = clickDirectionListener
+    }
+
+    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
+        mDownloadErrorListener = downloadErrorListener
+    }
+
+    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
+        mRefreshingListener = refreshingListener
     }
 
     private fun updateDirections(directions: List<NexTrip.Direction>) {
@@ -105,7 +117,14 @@ class BrowseDirectionsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance() = BrowseDirectionsFragment()
+        fun newInstance(clickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener,
+                        downloadErrorListener: OnDownloadErrorListener,
+                        refreshingListener: OnChangeRefreshingListener) =
+            BrowseDirectionsFragment().apply {
+                setClickDirectionListener(clickDirectionListener)
+                setDownloadErrorListener(downloadErrorListener)
+                setChangeRefreshingListener(refreshingListener)
+            }
 
         val KEY_ROUTE_ID = "routeId"
     }

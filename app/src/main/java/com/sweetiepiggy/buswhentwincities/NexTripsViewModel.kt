@@ -30,7 +30,7 @@ import java.util.*
 class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedListener {
     private var mDownloadNexTripsTask: AsyncTask<Void, Int, Void>? = null
     private var mDownloadStopTask: DownloadStopTask? = null
-    private var mLoadNexTripsErrorListener: OnLoadNexTripsErrorListener? = null
+    private var mLoadNexTripsErrorListener: OnDownloadErrorListener? = null
     private var mRefreshingListener: OnChangeRefreshingListener? = null
     private var mLastUpdate: Long = 0
     private var mDbLastUpdate: Long = 0
@@ -62,14 +62,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     }
 
     fun getStop(): LiveData<Stop> = mStop
-
-    interface OnLoadNexTripsErrorListener {
-        fun onLoadNexTripsError(err: MetroTransitDownloader.DownloadError)
-    }
-
-    interface OnChangeRefreshingListener {
-        fun setRefreshing(refreshing: Boolean)
-    }
 
     fun loadNexTrips() {
         val stopId = mStopId
@@ -128,7 +120,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         } else mNexTrips.value?.let { nexTrips ->
         	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
         }
-        mLoadNexTripsErrorListener?.onLoadNexTripsError(err)
+        mLoadNexTripsErrorListener?.onDownloadError(err)
         mLoadingNexTrips = false
         mRefreshingListener?.setRefreshing(false)
     }
@@ -139,7 +131,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         super.onCleared()
     }
 
-    fun setLoadNexTripsErrorListener(loadNexTripsErrorListener: OnLoadNexTripsErrorListener) {
+    fun setLoadNexTripsErrorListener(loadNexTripsErrorListener: OnDownloadErrorListener) {
         mLoadNexTripsErrorListener = loadNexTripsErrorListener
     }
 
