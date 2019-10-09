@@ -35,7 +35,7 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
         setContentView(R.layout.browse_routes_activity)
         if (savedInstanceState == null) {
             intent.extras?.let { loadState(it) }
-            val fragment = BrowseDirectionsFragment.newInstance(this, this, this).apply {
+            val fragment = BrowseDirectionsFragment.newInstance().apply {
                 setArguments(Bundle().apply {
                     mRouteId?.let { putString(BrowseDirectionsFragment.KEY_ROUTE_ID, it) }
                 })

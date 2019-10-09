@@ -40,6 +40,13 @@ class BrowseTimestopsFragment : Fragment() {
     private lateinit var mDownloadErrorListener: OnDownloadErrorListener
     private lateinit var mRefreshingListener: OnChangeRefreshingListener
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mClickTimestopListener = context as BrowseTimestopsAdapter.OnClickTimestopListener
+        mDownloadErrorListener = context as OnDownloadErrorListener
+        mRefreshingListener = context as OnChangeRefreshingListener
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.results_fragment, container, false)
@@ -89,18 +96,6 @@ class BrowseTimestopsFragment : Fragment() {
         }
     }
 
-    fun setClickTimestopListener(clickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener) {
-        mClickTimestopListener = clickTimestopListener
-    }
-
-    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
-        mDownloadErrorListener = downloadErrorListener
-    }
-
-    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
-        mRefreshingListener = refreshingListener
-    }
-
     private fun updateTimestops(directions: List<BrowseTimestopsViewModel.Timestop>) {
         mTimestops.apply {
             clear()
@@ -110,14 +105,7 @@ class BrowseTimestopsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(clickTimestopListener: BrowseTimestopsAdapter.OnClickTimestopListener,
-                        downloadErrorListener: OnDownloadErrorListener,
-                        refreshingListener: OnChangeRefreshingListener) =
-            BrowseTimestopsFragment().apply {
-                setClickTimestopListener(clickTimestopListener)
-                setDownloadErrorListener(downloadErrorListener)
-                setChangeRefreshingListener(refreshingListener)
-            }
+        fun newInstance() = BrowseTimestopsFragment()
 
         val KEY_ROUTE_ID = "routeId"
         val KEY_DIRECTION_ID = "directionId"

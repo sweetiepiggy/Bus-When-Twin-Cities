@@ -33,7 +33,7 @@ class BrowseRoutesActivity : AppCompatActivity(), BrowseRoutesAdapter.OnClickRou
         setContentView(R.layout.browse_routes_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, BrowseRoutesFragment.newInstance(this, this, this))
+                    .replace(R.id.container, BrowseRoutesFragment.newInstance())
                     .commitNow()
         }
 
