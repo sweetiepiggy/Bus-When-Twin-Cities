@@ -91,9 +91,16 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
         mModel.setFavoriteStops(mFavoriteStops)
     }
 
-    override fun onDeleteFavorite(position: Int) {
-        mClickFavoriteListener.onDeleteFavorite(position)
+    override fun onPromptDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int, recyclerViewPosition: Int) {
+        mClickFavoriteListener.onPromptDeleteFavorite(removedStop, position, recyclerViewPosition)
+    }
+
+    fun onDeleteFavorite(recyclerViewPosition: Int) {
         mModel.setFavoriteStops(mFavoriteStops)
+    }
+
+    fun onCancelDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, recyclerViewPosition: Int) {
+        mAdapter.onCancelDeleteFavorite(removedStop, recyclerViewPosition)
     }
 
     private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {

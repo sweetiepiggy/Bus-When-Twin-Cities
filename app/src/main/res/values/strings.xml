@@ -61,6 +61,9 @@
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
     <string name="select_routes">Select routes to show</string>
 
+    <string name="remove_favorite">Remove favorite?</string>
+    <string name="remove">remove</string>
+
     <string name="dismiss">Dismiss</string>
     <string name="unknown_host">Unable to connect to the internet</string>
     <string name="file_not_found">File not found</string>
