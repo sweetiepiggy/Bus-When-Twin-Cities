@@ -37,7 +37,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
     interface OnClickFavoriteListener {
         fun onClickFavorite(favStop: FavoriteStopIdsViewModel.FavoriteStop)
         fun onMoveFavorite(fromPosition: Int, toPosition: Int)
-        fun onDeleteFavorite(position: Int)
+        fun onPromptDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int, recyclerViewPosition: Int)
     }
 
     inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -106,10 +106,15 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             val position = viewHolder.getAdapterPosition()
-            mFavStops.removeAt(position)
+            val removedStop = mFavStops.removeAt(position)
             notifyItemRemoved(position)
             // note: positions in adapter are reversed from positions in database
-            mFavoriteListener.onDeleteFavorite(mFavStops.size - position)
+            mFavoriteListener.onPromptDeleteFavorite(removedStop, mFavStops.size - position, position)
         }
+    }
+
+    fun onCancelDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int) {
+        mFavStops.add(position, removedStop)
+        notifyItemInserted(position)
     }
 }

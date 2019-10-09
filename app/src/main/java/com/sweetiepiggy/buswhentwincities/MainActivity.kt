@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -158,20 +159,30 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }.execute()
     }
 
-    override fun onDeleteFavorite(position: Int) {
-        object : AsyncTask<Void, Void, Void>() {
-            override fun doInBackground(vararg params: Void): Void? {
-                DbAdapter().apply {
-                    openReadWrite(applicationContext)
-                    deleteFavStopAtPosition(position)
-                    close()
-                }
-                return null
+    override fun onPromptDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int, recyclerViewPosition: Int) {
+        AlertDialog.Builder(this).apply {
+            setMessage(FavoriteStopIdsViewModel.FavoriteStop.stopDesc(removedStop))
+            setTitle(resources.getString(R.string.remove_favorite))
+            setPositiveButton(resources.getString(R.string.remove)) { _, _ ->
+                object : AsyncTask<Void, Void, Void>() {
+                    override fun doInBackground(vararg params: Void): Void? {
+                        DbAdapter().apply {
+                            openReadWrite(applicationContext)
+                            deleteFavStopAtPosition(position)
+                            close()
+                        }
+                        return null
+                    }
+                    override fun onPostExecute(result: Void?) {
+                        mFavStopIdsFragment?.onDeleteFavorite(recyclerViewPosition)
+//                        mFavStopIdsFragment?.updateFavoriteStopIdsMessage()
+                    }
+                }.execute()
             }
-            override fun onPostExecute(result: Void?) {
-                mFavStopIdsFragment?.updateFavoriteStopIdsMessage()
+            setNegativeButton(android.R.string.cancel) { _, _ ->
+                mFavStopIdsFragment?.onCancelDeleteFavorite(removedStop, recyclerViewPosition)
             }
-        }.execute()
+        }.show()
     }
 
     override fun onSearchStopId(stopId: Int) {
