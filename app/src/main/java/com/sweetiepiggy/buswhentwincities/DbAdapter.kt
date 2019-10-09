@@ -211,6 +211,21 @@ class DbAdapter {
                     )
                 """)
             }
+            // add route_direction to timestop_filters table, versionCode 52
+            if (oldVer < 9) {
+                db.execSQL("DROP TABLE timestop_filters")
+                db.execSQL("""
+                    CREATE TABLE timestop_filters (
+                        timestop_id TEXT NOT NULL,
+                        route TEXT NOT NULL,
+                        route_direction INTEGER NOT NULL,
+                        terminal TEXT,
+                        do_show BOOLEAN NOT NULL,
+                        FOREIGN KEY(timestop_id) REFERENCES fav_timestops(timestop_id),
+                        PRIMARY KEY(timestop_id, route, route_direction, terminal)
+                    )
+                """)
+            }
         }
 
         fun open() {
@@ -660,11 +675,11 @@ class DbAdapter {
         return doShowRoutes
     }
 
-    fun getTimestopDoShowRoutes(timestopId: String, routeId: String): Map<Pair<String?, String?>, Boolean> {
+    fun getTimestopDoShowRoutes(timestopId: String, routeId: String, routeDirection: Int): Map<Pair<String?, String?>, Boolean> {
         val doShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_TIMESTOP_FILTERS,
-            arrayOf(KEY_ROUTE, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ?",
-            arrayOf(timestopId, routeId), null, null, null, null)
+            arrayOf(KEY_ROUTE, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
+            arrayOf(timestopId, routeId, routeDirection.toString()), null, null, null, null)
         val routeIndex = c.getColumnIndex(KEY_ROUTE)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val doShowIndex = c.getColumnIndex(KEY_DO_SHOW)
@@ -767,7 +782,7 @@ class DbAdapter {
         private val INDEX_TIMESTOP_NEXTRIPS = "index_timestop_nextrips"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 8
+        private val DATABASE_VERSION = 9
 
         private val DATABASE_CREATE_FAV_STOPS = """
             CREATE TABLE $TABLE_FAV_STOPS (
@@ -802,11 +817,12 @@ class DbAdapter {
         private val DATABASE_CREATE_TIMESTOP_FILTERS = """
             CREATE TABLE $TABLE_TIMESTOP_FILTERS (
                 $KEY_TIMESTOP_ID TEXT NOT NULL,
-                $KEY_ROUTE TEXT,
+                $KEY_ROUTE TEXT NOT NULL,
+                $KEY_ROUTE_DIRECTION INTEGER NOT NULL,
                 $KEY_TERMINAL TEXT,
                 $KEY_DO_SHOW BOOLEAN NOT NULL,
                 FOREIGN KEY($KEY_TIMESTOP_ID) REFERENCES $TABLE_FAV_TIMESTOPS($KEY_TIMESTOP_ID),
-                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_TERMINAL)
+                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_ROUTE_DIRECTION, $KEY_TERMINAL)
             )
             """
 

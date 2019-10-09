@@ -251,7 +251,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     doShowRoutes = if (stopId != null) {
                         getDoShowRoutes(stopId)
                     } else {
-                        getTimestopDoShowRoutes(timestop!!.timestopId, timestop.routeId)
+                        getTimestopDoShowRoutes(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
                     }
                     close()
                 }
