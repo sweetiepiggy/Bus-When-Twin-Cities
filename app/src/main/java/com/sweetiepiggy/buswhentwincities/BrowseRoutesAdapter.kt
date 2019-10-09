@@ -34,6 +34,7 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
     }
 
     inner class BrowseRoutesViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        val mRouteIdTextView: TextView = v.findViewById<TextView>(R.id.route_id)
         val mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
             v.setOnClickListener {
@@ -44,12 +45,16 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrowseRoutesAdapter.BrowseRoutesViewHolder {
         val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.result_item, parent, false)
+                .inflate(R.layout.route_item, parent, false)
         return BrowseRoutesViewHolder(v)
     }
 
     override fun onBindViewHolder(holder: BrowseRoutesViewHolder, position: Int) {
-        holder.mDescriptionTextView.text = mRoutes[position].description
+        val expectedPrefix = "${mRoutes[position].routeId} - "
+        holder.mRouteIdTextView.text = if (mRoutes[position].description.startsWith(expectedPrefix)) {
+            mRoutes[position].routeId
+        } else ""
+        holder.mDescriptionTextView.text = mRoutes[position].description.removePrefix(expectedPrefix)
     }
 
     override fun getItemCount(): Int = mRoutes.size
