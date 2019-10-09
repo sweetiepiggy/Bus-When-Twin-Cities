@@ -25,13 +25,20 @@
     <string name="stop_id">公交站号码？</string>
     <string name="stop_id_hint">例如：17980</string>
     <string name="enter_stop_id">输入公交站号码</string>
+    <string name="enter_route">输入路线号码</string>
     <string name="must_be_number">必须是一个号码数字</string>
+    <string name="route">路线号码？</string>
+    <string name="route_hint">例如：10</string>
     <string name="real_time">即时</string>
     <string name="scheduled">规划时间</string>
     <string name="north">北向</string>
     <string name="south">南向</string>
     <string name="east">东向</string>
     <string name="west">西向</string>
+    <string name="northbound">北行</string>
+    <string name="southbound">南行</string>
+    <string name="eastbound">东行</string>
+    <string name="westbound">西行</string>
     <string name="minutes">分钟</string>
     <string name="due">过时了</string>
     <string name="past_due">逾时</string>
@@ -42,12 +49,20 @@
     <string name="action_favorite">喜爱</string>
     <!-- <string name="action_search">搜索</string> -->
     <!-- <string name="search_stop_id">按公交站号码搜索</string> -->
-    <string name="search_stop_id">搜索</string>
+    <string name="search_stop_id">显示公交站</string>
+    <string name="search_route">显示路线</string>
+    <string name="browse_routes">浏览路线</string>
     <string name="action_filter">过滤</string>
+    <string name="select_route">选择路线</string>
+    <string name="select_direction">选择方向</string>
+    <string name="select_stop">选择公交站</string>
 
     <string name="enter_stop_name_dialog_title">保存为收藏夹</string>
     <string name="enter_stop_name_dialog_message">输入公交站的名称</string>
     <string name="select_routes">选择路线</string>
+
+    <string name="remove_favorite">删除收藏夹？</string>
+    <string name="remove">删除</string>
 
     <string name="dismiss">删除</string>
     <string name="unknown_host">无法连接互联网</string>

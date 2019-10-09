@@ -107,19 +107,6 @@ class BrowseTimestopsFragment : Fragment() {
             addAll(directions)
         }
         mAdapter.notifyDataSetChanged()
-        updateResultsVisibility(directions.isEmpty())
-    }
-
-    private fun updateResultsVisibility(noResults: Boolean) {
-        val resultsRecyclerView = activity?.findViewById<View>(R.id.results_recycler_view)
-        val noResultsView = activity?.findViewById<View>(R.id.no_results_textview)
-        if (noResults) {
-            resultsRecyclerView?.setVisibility(View.INVISIBLE)
-            noResultsView?.setVisibility(View.VISIBLE)
-        } else {
-            noResultsView?.setVisibility(View.INVISIBLE)
-            resultsRecyclerView?.setVisibility(View.VISIBLE)
-        }
     }
 
     companion object {

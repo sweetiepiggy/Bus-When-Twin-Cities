@@ -71,7 +71,6 @@
 
     <string name="no_nextrips_found">No upcoming trips</string>
     <string name="no_favorites_found">No favorites here yet</string>
-    <string name="no_routes_found">No routes found</string>
 
     <string name="main_search_icon_content_description">search for stop number</string>
     <string name="favorite_stop_ids_content_description">favorite stops</string>
