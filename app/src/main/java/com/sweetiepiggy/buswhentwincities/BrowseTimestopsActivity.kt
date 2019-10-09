@@ -36,7 +36,7 @@ class BrowseTimestopsActivity : AppCompatActivity(), BrowseTimestopsAdapter.OnCl
         setContentView(R.layout.browse_routes_activity)
         if (savedInstanceState == null) {
             intent.extras?.let { loadState(it) }
-            val fragment = BrowseTimestopsFragment.newInstance(this, this, this).apply {
+            val fragment = BrowseTimestopsFragment.newInstance().apply {
                 setArguments(Bundle().apply {
                     mRouteId?.let { putString(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
                     mDirectionId?.let { putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, it) }

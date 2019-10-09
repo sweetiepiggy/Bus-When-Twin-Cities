@@ -39,6 +39,13 @@ class BrowseDirectionsFragment : Fragment() {
     private lateinit var mDownloadErrorListener: OnDownloadErrorListener
     private lateinit var mRefreshingListener: OnChangeRefreshingListener
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mClickDirectionListener = context as BrowseDirectionsAdapter.OnClickDirectionListener
+        mDownloadErrorListener = context as OnDownloadErrorListener
+        mRefreshingListener = context as OnChangeRefreshingListener
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.results_fragment, container, false)
@@ -83,18 +90,6 @@ class BrowseDirectionsFragment : Fragment() {
         }
     }
 
-    fun setClickDirectionListener(clickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener) {
-        mClickDirectionListener = clickDirectionListener
-    }
-
-    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
-        mDownloadErrorListener = downloadErrorListener
-    }
-
-    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
-        mRefreshingListener = refreshingListener
-    }
-
     private fun updateDirections(directions: List<NexTrip.Direction>) {
         mDirections.apply {
             clear()
@@ -104,14 +99,7 @@ class BrowseDirectionsFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(clickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener,
-                        downloadErrorListener: OnDownloadErrorListener,
-                        refreshingListener: OnChangeRefreshingListener) =
-            BrowseDirectionsFragment().apply {
-                setClickDirectionListener(clickDirectionListener)
-                setDownloadErrorListener(downloadErrorListener)
-                setChangeRefreshingListener(refreshingListener)
-            }
+        fun newInstance() = BrowseDirectionsFragment()
 
         val KEY_ROUTE_ID = "routeId"
     }

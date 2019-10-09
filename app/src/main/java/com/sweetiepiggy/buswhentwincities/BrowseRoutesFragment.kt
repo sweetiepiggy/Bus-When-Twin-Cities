@@ -33,14 +33,7 @@ import androidx.recyclerview.widget.RecyclerView
 class BrowseRoutesFragment : Fragment() {
 
     companion object {
-        fun newInstance(clickRouteListener: BrowseRoutesAdapter.OnClickRouteListener,
-                        downloadErrorListener: OnDownloadErrorListener,
-                        refreshingListener: OnChangeRefreshingListener) =
-            BrowseRoutesFragment().apply {
-                setClickRouteListener(clickRouteListener)
-                setDownloadErrorListener(downloadErrorListener)
-                setChangeRefreshingListener(refreshingListener)
-            }
+        fun newInstance() = BrowseRoutesFragment()
     }
 
     private val mRoutes: MutableList<BrowseRoutesViewModel.Route> = ArrayList<BrowseRoutesViewModel.Route>()
@@ -48,6 +41,13 @@ class BrowseRoutesFragment : Fragment() {
     private lateinit var mClickRouteListener: BrowseRoutesAdapter.OnClickRouteListener
     private lateinit var mDownloadErrorListener: OnDownloadErrorListener
     private lateinit var mRefreshingListener: OnChangeRefreshingListener
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mClickRouteListener = context as BrowseRoutesAdapter.OnClickRouteListener
+        mDownloadErrorListener = context as OnDownloadErrorListener
+        mRefreshingListener = context as OnChangeRefreshingListener
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -74,18 +74,6 @@ class BrowseRoutesFragment : Fragment() {
         model.getRoutes().observe(this, Observer<List<BrowseRoutesViewModel.Route>>{
             updateRoutes(it)
         })
-    }
-
-    fun setClickRouteListener(clickRouteListener: BrowseRoutesAdapter.OnClickRouteListener) {
-        mClickRouteListener = clickRouteListener
-    }
-
-    fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
-        mDownloadErrorListener = downloadErrorListener
-    }
-
-    fun setChangeRefreshingListener(refreshingListener: OnChangeRefreshingListener) {
-        mRefreshingListener = refreshingListener
     }
 
     private fun updateRoutes(routes: List<BrowseRoutesViewModel.Route>) {
