@@ -182,6 +182,9 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
             setNegativeButton(android.R.string.cancel) { _, _ ->
                 mFavStopIdsFragment?.onCancelDeleteFavorite(removedStop, recyclerViewPosition)
             }
+            setOnCancelListener() {
+                mFavStopIdsFragment?.onCancelDeleteFavorite(removedStop, recyclerViewPosition)
+            }
         }.show()
     }
 
