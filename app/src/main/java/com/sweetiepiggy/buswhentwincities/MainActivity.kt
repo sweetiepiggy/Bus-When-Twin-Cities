@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .detach(mFavStopIdsFragment!!)
                 .attach(mSearchFragment!!)
-                .commit()
+                .commitAllowingStateLoss()
     }
 
     private fun selectBnvFav() {
@@ -245,7 +245,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .detach(mSearchFragment!!)
                 .attach(mFavStopIdsFragment!!)
-                .commit()
+                .commitAllowingStateLoss()
     }
 
     private inner class SelectDefaultBnv(): AsyncTask<Void, Void, Int>() {
