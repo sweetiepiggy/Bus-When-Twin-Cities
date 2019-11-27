@@ -226,8 +226,19 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             val routeAndTerminalPairs = mDoShowRoutes.keys.filter {
                 it.first != null
             }.toSortedSet(object : Comparator<Pair<String?, String?>>{
-                override fun compare(p1: Pair<String?, String?>, p2: Pair<String?, String?>): Int =
-                    (p1.first!! + (p1.second ?: "")).compareTo(p2.first!! + (p2.second ?: ""))
+                override fun compare(p1: Pair<String?, String?>, p2: Pair<String?, String?>): Int {
+                    try {
+                        val route1 = p1.first!!.toInt()
+                        val route2 = p2.first!!.toInt()
+                        return if (route1 != route2) {
+                        	route1.compareTo(route2)
+                        } else {
+                            (p1.second ?: "").compareTo(p2.second ?: "")
+                        }
+                    } catch (e: NumberFormatException) {
+                        return (p1.first!! + (p1.second ?: "")).compareTo(p2.first!! + (p2.second ?: ""))
+                    }
+                }
             }).toTypedArray()
             val routeAndTerminals = routeAndTerminalPairs.map { routeAndTerminal ->
                 routeAndTerminal.first!! + (routeAndTerminal.second ?: "")
