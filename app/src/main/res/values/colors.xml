@@ -13,5 +13,6 @@
     <color name="colorBackground">#F1F1F1</color>
     <color name="colorOnBackground">#6E6E6E</color>
 
-    <color name="colorHint">#8E8E8E</color>
+    <!-- <color name="colorHint">#8E8E8E</color> -->
+    <color name="colorComplementary">#B21C22</color>
 </resources>

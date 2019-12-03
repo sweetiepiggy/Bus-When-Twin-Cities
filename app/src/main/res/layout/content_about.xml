@@ -279,16 +279,17 @@
 	    app:layout_constraintStart_toStartOf="parent"
 	    app:layout_constraintTop_toBottomOf="@id/license_title" />
 
-	<ImageView
-	    android:id="@+id/license_icon"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:contentDescription="@string/license_content_description"
-	    app:srcCompat="@drawable/ic_gplv3_logo"
-	    android:padding="@dimen/text_margin"
-	    app:layout_constraintStart_toStartOf="parent"
-	    app:layout_constraintTop_toBottomOf="@id/license_text"
-	    app:layout_constraintBottom_toBottomOf="parent" />
+		  <ImageView
+			  android:id="@+id/license_icon"
+			  android:layout_width="wrap_content"
+			  android:layout_height="wrap_content"
+			  android:contentDescription="@string/license_content_description"
+			  android:padding="@dimen/text_margin"
+			  android:tint="@color/colorComplementary"
+			  app:layout_constraintBottom_toBottomOf="parent"
+			  app:layout_constraintStart_toStartOf="parent"
+			  app:layout_constraintTop_toBottomOf="@id/license_text"
+			  app:srcCompat="@drawable/ic_gplv3_logo" />
 
 	<Button
 	    android:id="@+id/license_button"
