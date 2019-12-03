@@ -22,6 +22,9 @@ package com.sweetiepiggy.buswhentwincities
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.location.Location
 import android.os.Bundle
 import android.util.TypedValue
@@ -160,6 +163,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap = googleMap.apply {
             uiSettings.setMapToolbarEnabled(false)
             setIndoorEnabled(false)
+            // see: https://developers.google.com/maps/documentation/android-sdk/styling
+            val isNightMode = (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
+            val mapstyle = if (isNightMode) R.raw.mapstyle_night else R.raw.mapstyle_default
+            setMapStyle(MapStyleOptions.loadRawResourceStyle(context!!, mapstyle))
         }
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
