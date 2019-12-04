@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryVariant">#00574B</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <!-- <color name="colorPrimaryVariant">#00574B</color> -->
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorSecondary">#D81B60</color>
     <!-- <color name="colorSecondaryVariant">#D81B60</color> -->
@@ -15,4 +16,5 @@
 
     <!-- <color name="colorHint">#8E8E8E</color> -->
     <color name="colorComplementary">#B21C22</color>
+    <color name="colorToolbar">#008577</color>
 </resources>

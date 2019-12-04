@@ -21,10 +21,10 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.appcompat.widget.Toolbar
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.app.AppCompatDelegate.*
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -35,6 +35,7 @@ class SettingsActivity : AppCompatActivity() {
                 .beginTransaction()
                 .replace(R.id.settings, SettingsFragment())
                 .commit()
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
