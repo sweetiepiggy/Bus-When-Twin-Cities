@@ -27,6 +27,7 @@
             android:name=".SettingsActivity"
             android:launchMode="singleTop"
             android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

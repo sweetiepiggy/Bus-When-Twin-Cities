@@ -36,12 +36,13 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/colorToolbar"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             style="@style/Widget.MaterialComponents.TabLayout.Colored"
+            android:background="@color/colorToolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:tabGravity="fill"
