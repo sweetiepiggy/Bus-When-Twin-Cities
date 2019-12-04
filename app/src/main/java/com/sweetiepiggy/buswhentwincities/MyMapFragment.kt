@@ -39,6 +39,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -165,7 +166,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             setIndoorEnabled(false)
             // see: https://developers.google.com/maps/documentation/android-sdk/styling
             val isNightMode = (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
-            val mapstyle = if (isNightMode) R.raw.mapstyle_night else R.raw.mapstyle_default
+            val mapstyle = if (isNightMode && !PreferenceManager.getDefaultSharedPreferences(context!!).getBoolean("map_always_light", false)) {
+                R.raw.mapstyle_night
+            } else {
+                R.raw.mapstyle_default
+            }
             setMapStyle(MapStyleOptions.loadRawResourceStyle(context!!, mapstyle))
         }
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

@@ -29,6 +29,10 @@
             app:title="@string/nightmode_title"
             app:useSimpleSummaryProvider="true" />
 
+        <SwitchPreferenceCompat
+            app:key="map_always_light"
+            app:title="@string/map_always_light_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

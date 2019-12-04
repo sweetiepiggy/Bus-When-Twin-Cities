@@ -114,5 +114,6 @@
     <string name="light">Ligero</string>
     <string name="dark">Oscuro</string>
     <string name="sys_default">Sistema por defecto</string>
+    <string name="map_always_light_title">Mapa siempre ligero</string>
 
 </resources>
