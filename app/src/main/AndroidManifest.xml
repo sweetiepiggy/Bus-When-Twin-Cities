@@ -24,25 +24,34 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
- 	    android:name=".BrowseRoutesActivity"
+            android:name=".SettingsActivity"
+            android:launchMode="singleTop"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
+        </activity>
+        <activity
+            android:name=".BrowseRoutesActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
-	</activity>
+        </activity>
         <activity
- 	    android:name=".BrowseDirectionsActivity"
+            android:name=".BrowseDirectionsActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
-	</activity>
+        </activity>
         <activity
- 	    android:name=".BrowseTimestopsActivity"
+            android:name=".BrowseTimestopsActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

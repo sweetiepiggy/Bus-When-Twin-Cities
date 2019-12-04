@@ -17,20 +17,17 @@
     along with Bus When? (Twin Cities) ; if not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.buswhentwincities.MainActivity">
-    <item
-        android:id="@+id/action_about"
-        android:orderInCategory="100"
-	android:icon="@drawable/ic_info_24dp"
-        android:title="@string/action_about"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="200"
-	android:icon="@drawable/ic_settings_24dp"
-        android:title="@string/action_settings"
-        app:showAsAction="ifRoom" />
-</menu>
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="nightmode_entries">
+        <item>@string/light</item>
+        <item>@string/dark</item>
+        <item>@string/sys_default</item>
+    </string-array>
+
+    <string-array name="nightmode_values">
+        <item>no</item>
+        <item>yes</item>
+        <item>follow_system</item>
+    </string-array>
+</resources>
