@@ -116,5 +116,6 @@
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="sys_default">Use system default</string>
+    <string name="map_always_light_title">Map always light</string>
 
 </resources>

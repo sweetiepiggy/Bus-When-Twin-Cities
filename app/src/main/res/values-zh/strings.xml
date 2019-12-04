@@ -113,5 +113,6 @@
     <string name="light">浅色</string>
     <string name="dark">暗色</string>
     <string name="sys_default">系统默认设置</string>
+    <string name="map_always_light_title">始终浅色图</string>
 
 </resources>

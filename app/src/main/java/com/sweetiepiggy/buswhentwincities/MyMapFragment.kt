@@ -78,14 +78,14 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         Configuration.getInstance().apply{
-            load(context, PreferenceManager.getDefaultSharedPreferences(context))
+            load(context, androidx.preference.PreferenceManager.getDefaultSharedPreferences(context))
             setUserAgentValue(activity?.packageName)
         }
 
         // mMap = activity?.findViewById<MapView>(R.id.map)!!.apply {
         mMap = MapView(inflater.context).apply {
             val isNightMode = (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
-            if (isNightMode) {
+            if (isNightMode && !androidx.preference.PreferenceManager.getDefaultSharedPreferences(context!!).getBoolean("map_always_light", false)) {
                 overlayManager.tilesOverlay.setColorFilter(INVERT_COLORS)
             }
 
