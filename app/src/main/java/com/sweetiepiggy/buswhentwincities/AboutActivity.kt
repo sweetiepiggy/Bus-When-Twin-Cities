@@ -55,10 +55,8 @@ class AboutActivity : AppCompatActivity() {
         }
     }
 
-    private fun openLink(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        startActivity(intent)
-    }
+    private fun openLink(url: String) =
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 
     companion object {
         private val PATREON_URL = "https://patreon.com/sweetiepiggyapps"

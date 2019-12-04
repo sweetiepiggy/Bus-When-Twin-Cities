@@ -2,14 +2,14 @@
 <resources>
     <color name="colorPrimary">#25A297</color>
     <color name="colorPrimaryVariant">#7FC9C2</color>
-    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnPrimary">#1A3633</color>
     <color name="colorSecondary">#3DADE0</color>
     <color name="colorSecondaryVariant">#80CEEC</color>
     <!-- <color name="colorOnSecondary">#FFFFFF</color> -->
     <!-- <color name="colorError"></color> -->
     <!-- <color name="colorOnError">#FFFFFF</color> -->
     <!-- <color name="colorSurface">#FFFFFF</color> -->
-    <color name="colorOnSurface">#FFFFFF</color>
+    <!-- <color name="colorOnSurface">#FFFFFF</color> -->
     <!-- <color name="colorBackground">#01493D</color> -->
     <!-- <color name="colorOnBackground">#6E6E6E</color> -->
 

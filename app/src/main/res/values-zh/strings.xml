@@ -43,6 +43,7 @@
     <string name="due">过时了</string>
     <string name="past_due">逾时</string>
     <string name="action_about">关于</string>
+    <string name="action_settings">设定</string>
     <string name="nav_favorites">收藏</string>
     <string name="nav_search">搜索</string>
     <string name="action_refresh">刷新</string>
@@ -101,4 +102,16 @@
 
 \n\n公交车何时？（双城）是基於使用目的而加以發佈，然而不負任何擔保責任；亦無對適售性或特定目的適用性所爲的默示性擔保。詳情請參照GNU通用公共授權。
 	</string>
+
+    <string name="title_activity_settings">设定</string>
+
+    <!-- Preference Titles -->
+    <string name="appearance_header">荧幕设置</string>
+
+    <!-- Appearance Preferences -->
+    <string name="nightmode_title">颜色主题</string>
+    <string name="light">浅色</string>
+    <string name="dark">暗色</string>
+    <string name="sys_default">系统默认设置</string>
+
 </resources>
