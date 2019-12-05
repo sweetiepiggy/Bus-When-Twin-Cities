@@ -20,10 +20,11 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.location.Location
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.TypedValue
@@ -37,20 +38,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import java.util.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.compass.CompassOverlay
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.TilesOverlay.INVERT_COLORS
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.*
 
 class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -85,6 +84,11 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
 
         // mMap = activity?.findViewById<MapView>(R.id.map)!!.apply {
         mMap = MapView(inflater.context).apply {
+            val isNightMode = (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
+            if (isNightMode) {
+                overlayManager.tilesOverlay.setColorFilter(INVERT_COLORS)
+            }
+
             setTileSource(TileSourceFactory.MAPNIK)
             // setTileSource(TileSourceFactory.USGS_SAT)
             // setTileSource(TileSourceFactory.USGS_TOPO)
