@@ -110,7 +110,7 @@
     <string name="appearance_header">Apariencia</string>
 
     <!-- Appearance Preferences -->
-    <string name="nightmode_title">Tema de color</string>
+    <string name="nightmode_title">Tema</string>
     <string name="light">Ligero</string>
     <string name="dark">Oscuro</string>
     <string name="sys_default">Sistema por defecto</string>

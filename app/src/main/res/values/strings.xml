@@ -115,7 +115,7 @@
     <string name="appearance_header">Appearance</string>
 
     <!-- Appearance Preferences -->
-    <string name="nightmode_title">Color theme</string>
+    <string name="nightmode_title">Theme</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
     <string name="sys_default">Use system default</string>
