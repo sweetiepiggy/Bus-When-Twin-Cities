@@ -109,7 +109,7 @@
     <string name="appearance_header">荧幕设置</string>
 
     <!-- Appearance Preferences -->
-    <string name="nightmode_title">颜色主题</string>
+    <string name="nightmode_title">主题</string>
     <string name="light">浅色</string>
     <string name="dark">暗色</string>
     <string name="sys_default">系统默认设置</string>
