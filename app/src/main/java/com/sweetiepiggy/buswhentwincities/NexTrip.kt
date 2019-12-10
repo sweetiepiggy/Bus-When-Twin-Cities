@@ -72,6 +72,10 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
         }
     }
 
+    enum class Vehicle {
+        BUS, LIGHTRAIL, TRAIN
+    }
+
     fun minutesUntilDeparture(timeInMillis: Long): Long? =
     	departureTimeInMillis?.let { (it - timeInMillis) / 1000 / 60 }
 
@@ -190,8 +194,13 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
          }
     }
 
-    fun isTrain(): Boolean =
-    	route == "Blue" || route == "Grn"
+    fun getVehicle(): NexTrip.Vehicle =
+        when (route) {
+            "Blue"  -> NexTrip.Vehicle.LIGHTRAIL
+            "Grn"   -> NexTrip.Vehicle.LIGHTRAIL
+            "Nstar" -> NexTrip.Vehicle.TRAIN
+            else    -> NexTrip.Vehicle.BUS
+        }
 
     companion object {
         fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =

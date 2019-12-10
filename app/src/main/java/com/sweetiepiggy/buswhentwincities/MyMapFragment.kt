@@ -377,7 +377,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                     }
                 } else {
                     Marker(mMap).apply {
-                        setIcon(getIcon(nexTrip.isTrain(), nexTrip.routeDirection))
+                        setIcon(getIcon(nexTrip.getVehicle(), nexTrip.routeDirection))
                         setPosition(nexTrip.position!!)
                         setFlat(true)
                         setAnchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
@@ -425,16 +425,14 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
     }
 
-    private fun getIcon(isTrain: Boolean, direction: NexTrip.Direction?): Drawable? =
-        getDrawable(context!!, if (isTrain) getTrainIconId(direction) else getBusIconId(direction))
+    private fun getIcon(vehicle: NexTrip.Vehicle, direction: NexTrip.Direction?): Drawable? =
+        getDrawable(context!!, getIconId(vehicle, direction))
 
-    private fun getTrainIconId(direction: NexTrip.Direction?): Int =
-        when (direction) {
-            NexTrip.Direction.SOUTH -> R.drawable.ic_baseline_train_south_30px
-            NexTrip.Direction.EAST  -> R.drawable.ic_baseline_train_east_36px
-            NexTrip.Direction.WEST  -> R.drawable.ic_baseline_train_west_36px
-            NexTrip.Direction.NORTH -> R.drawable.ic_baseline_train_north_30px
-            else -> R.drawable.ic_baseline_train_24px
+    private fun getIconId(vehicle: NexTrip.Vehicle, direction: NexTrip.Direction?): Int =
+        when (vehicle) {
+            NexTrip.Vehicle.BUS       -> getBusIconId(direction)
+            NexTrip.Vehicle.LIGHTRAIL -> getLightrailIconId(direction)
+            NexTrip.Vehicle.TRAIN     -> getTrainIconId(direction)
         }
 
     private fun getBusIconId(direction: NexTrip.Direction?): Int =
@@ -444,6 +442,24 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             NexTrip.Direction.WEST  -> R.drawable.ic_baseline_directions_bus_west_36px
             NexTrip.Direction.NORTH -> R.drawable.ic_baseline_directions_bus_north_30px
             else -> R.drawable.ic_baseline_directions_bus_24px
+        }
+
+    private fun getLightrailIconId(direction: NexTrip.Direction?): Int =
+        when (direction) {
+            NexTrip.Direction.SOUTH -> R.drawable.ic_baseline_lightrail_south_30px
+            NexTrip.Direction.EAST  -> R.drawable.ic_baseline_lightrail_east_36px
+            NexTrip.Direction.WEST  -> R.drawable.ic_baseline_lightrail_west_36px
+            NexTrip.Direction.NORTH -> R.drawable.ic_baseline_lightrail_north_30px
+            else -> R.drawable.ic_baseline_lightrail_24px
+        }
+
+    private fun getTrainIconId(direction: NexTrip.Direction?): Int =
+        when (direction) {
+            NexTrip.Direction.SOUTH -> R.drawable.ic_baseline_train_south_30px
+            NexTrip.Direction.EAST  -> R.drawable.ic_baseline_train_east_36px
+            NexTrip.Direction.WEST  -> R.drawable.ic_baseline_train_west_36px
+            NexTrip.Direction.NORTH -> R.drawable.ic_baseline_train_north_30px
+            else -> R.drawable.ic_baseline_train_24px
         }
 
     private fun getBusIconAnchorVertical(direction: NexTrip.Direction?): Float =
