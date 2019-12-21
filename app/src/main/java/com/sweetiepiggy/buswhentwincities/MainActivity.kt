@@ -27,10 +27,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
@@ -41,14 +39,6 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // see: https://developer.android.com/guide/topics/ui/settings/use-saved-values
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        when (sharedPreferences.getString("nightmode", "")) {
-            "yes"           -> setDefaultNightMode(MODE_NIGHT_YES)
-            "no"            -> setDefaultNightMode(MODE_NIGHT_NO)
-            "follow_system" -> setDefaultNightMode(MODE_NIGHT_FOLLOW_SYSTEM)
-        }
 
         setContentView(R.layout.activity_main)
 
