@@ -19,5 +19,6 @@
 
     <!-- <color name="colorHint">#8E8E8E</color> -->
     <color name="colorComplementary">#C13C3D</color>
-    <color name="colorToolbar">#121212</color>
+    <!-- <color name="colorToolbar">#121212</color> -->
+    <color name="colorToolbar">#008577</color>
 </resources>
