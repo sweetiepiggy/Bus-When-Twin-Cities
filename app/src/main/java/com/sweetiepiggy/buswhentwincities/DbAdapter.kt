@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -578,14 +578,16 @@ class DbAdapter {
             val route = c.getString(routeIndex)
             val routeDirection = NexTrip.Direction.from(c.getInt(routeDirectionIndex))
             val terminal = c.getString(terminalIndex)
-            val vehicleHeading = if (suppressLocations) null else c.getDouble(vehicleHeadingIndex)
-            val vehicleLatitude = if (suppressLocations) null else c.getDouble(vehicleLatitudeIndex)
-            val vehicleLongitude = if (suppressLocations) null else c.getDouble(vehicleLongitudeIndex)
-            nexTrips.add(NexTrip(
-                isActual, blockNumber, departureTimeInMillis, description,
-                gate, route, routeDirection, terminal, vehicleHeading,
-                vehicleLatitude, vehicleLongitude
-            ))
+            val vehicleHeading = c.getDouble(vehicleHeadingIndex)
+            val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
+            val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
+            nexTrips.add(
+                NexTrip(isActual, blockNumber, departureTimeInMillis, description,
+                        gate, route, routeDirection, terminal, vehicleHeading,
+                        vehicleLatitude, vehicleLongitude).let {
+                    if (suppressLocations) NexTrip.suppressLocation(it) else it
+                }
+            )
         }
         c.close()
         return nexTrips
@@ -624,14 +626,16 @@ class DbAdapter {
             val route = c.getString(routeIndex)
             val dbRouteDirection = NexTrip.Direction.from(c.getInt(routeDirectionIndex))
             val terminal = c.getString(terminalIndex)
-            val vehicleHeading = if (suppressLocations) null else c.getDouble(vehicleHeadingIndex)
-            val vehicleLatitude = if (suppressLocations) null else c.getDouble(vehicleLatitudeIndex)
-            val vehicleLongitude = if (suppressLocations) null else c.getDouble(vehicleLongitudeIndex)
-            nexTrips.add(NexTrip(
-                isActual, blockNumber, departureTimeInMillis, description,
-                gate, route, dbRouteDirection, terminal, vehicleHeading,
-                vehicleLatitude, vehicleLongitude
-            ))
+            val vehicleHeading = c.getDouble(vehicleHeadingIndex)
+            val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
+            val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
+            nexTrips.add(
+                NexTrip(isActual, blockNumber, departureTimeInMillis, description,
+                        gate, route, dbRouteDirection, terminal, vehicleHeading,
+                        vehicleLatitude, vehicleLongitude).let {
+                    if (suppressLocations) NexTrip.suppressLocation(it) else it
+                }
+            )
         }
         c.close()
         return nexTrips

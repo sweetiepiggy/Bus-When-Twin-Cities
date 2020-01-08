@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -37,7 +37,7 @@ data class RawNexTrip(val isActual: Boolean, val blockNumber: Int?, val departur
 class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInMillis: Long?,
 			val description: String?, val gate: String?, val route: String?,
 			val routeDirection: Direction?, val terminal: String?, val vehicleHeading: Double?,
-        	vehicleLatitude: Double?, vehicleLongitude: Double?) {
+        	vehicleLatitude: Double?, vehicleLongitude: Double?, val locationSuppressed: Boolean = false) {
 
     val position: LatLng? = vehicleLatitude?.let { latitude ->
         vehicleLongitude?.let { longitude ->
@@ -95,10 +95,12 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
             )
         }
 
-        fun suppressLocation(nexTrip: NexTrip): NexTrip =
-        	NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
-        		nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
-        		nexTrip.terminal, null, null, null)
+        fun suppressLocation(nexTrip: NexTrip): NexTrip {
+            val locationSuppressed = nexTrip.position != null || nexTrip.locationSuppressed
+        	return NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
+        		           nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
+        		           nexTrip.terminal, null, null, null, locationSuppressed)
+        }
 
         /** @return departure time in millis since 1970 */
         private fun parseDepartureTime(departureTime: String?): Long? =
@@ -171,6 +173,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val position: LatLng? = nexTrip.position
     val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
     val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(timeInMillis)
+    val locationSuppressed: Boolean = nexTrip.locationSuppressed
 
     val departureText: String?
 	val departureTime: String?
