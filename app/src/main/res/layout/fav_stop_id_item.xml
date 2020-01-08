@@ -81,7 +81,7 @@
 			android:layout_height="wrap_content"
 			android:contentDescription="@string/reorder_favorites_content_description"
 			android:padding="@dimen/fab_margin"
-			android:tint="?attr/colorOnPrimarySurface"
+			android:tint="?attr/colorOnSurface"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
