@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -20,14 +20,13 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.content.Context
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
 
 class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
     private var mClickMapListener: OnClickMapListener? = null
@@ -41,22 +40,27 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val routeTextView: TextView = v.findViewById<TextView>(R.id.route)
         val directionTextView: TextView = v.findViewById<TextView>(R.id.direction)
+        val gpsImageView: ImageView = v.findViewById<ImageView>(R.id.gps_icon)
         val descriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         val departureTextTextView: TextView = v.findViewById<TextView>(R.id.departure_text)
         val departureTimeTextView: TextView = v.findViewById<TextView>(R.id.departure_time)
         val scheduledTextView: TextView = v.findViewById<TextView>(R.id.scheduled)
-        val mapButton: ImageButton = v.findViewById<ImageButton>(R.id.map_button).apply {
-            setOnClickListener {
-                /* FIXME: adapterPosition can be out of mNexTrips array bounds,
-                	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
-                mClickMapListener!!.onClickMap(mNexTrips[adapterPosition].blockNumber)
-            }
-        }
         val fullView: View = v.findViewById<View>(R.id.full_view)
         val minimalView: View = v.findViewById<View>(R.id.minimal_view)
         val minimalRouteTextView: TextView = v.findViewById<TextView>(R.id.minimal_route)
         val minimalDescriptionTextView: TextView = v.findViewById<TextView>(R.id.minimal_description)
         val minimalDepartureTextTextView: TextView = v.findViewById<TextView>(R.id.minimal_departure_text)
+
+        init {
+            v.setOnClickListener {
+                /* FIXME: adapterPosition can be out of mNexTrips array bounds,
+                	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
+                val nexTrip = mNexTrips[adapterPosition]
+                if (doShowLocation(nexTrip)) {
+                    mClickMapListener!!.onClickMap(nexTrip.blockNumber)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopIdAdapter.StopIdViewHolder =
@@ -75,8 +79,25 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         	mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
         holder.departureTimeTextView.visibility =
         	if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
-        holder.mapButton.visibility = if (nexTrip.position != null && (nexTrip.isActual || (nexTrip.minutesUntilDeparture?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false)))
-        	View.VISIBLE else View.GONE
+        val gpsImage = if (nexTrip.isActual ||
+                           (nexTrip.position != null && (nexTrip.minutesUntilDeparture?.let {
+                                it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC
+                            } ?: false))) {
+            if (nexTrip.position == null) {
+                // show as gps off if position is not known and isActual
+                R.drawable.ic_gps_off_black_24dp
+            } else {
+                // show as gps fixed if position is known and isActual (or if arrival is soon)
+                R.drawable.ic_gps_fixed_black_24dp
+            }
+        } else if (nexTrip.position == null) {
+            // show as scheduled if position is not known and !isActual
+            R.drawable.ic_schedule_black_24dp
+        } else {
+            // show as gps not fixed if position is known and !isActual
+            R.drawable.ic_gps_not_fixed_black_24dp
+        }
+        holder.gpsImageView.setImageResource(gpsImage)
 
         holder.minimalRouteTextView.text = nexTrip.routeAndTerminal
         holder.minimalDescriptionTextView.text = nexTrip.description
@@ -106,4 +127,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     fun setOnClickMapListener(clickMapListener: StopIdAdapter.OnClickMapListener) {
         mClickMapListener = clickMapListener
     }
+
+    private fun doShowLocation(nexTrip: PresentableNexTrip) =
+        nexTrip.position != null && (nexTrip.isActual || (nexTrip.minutesUntilDeparture?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
 }
