@@ -83,19 +83,19 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
                            (nexTrip.position != null && (nexTrip.minutesUntilDeparture?.let {
                                 it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC
                             } ?: false))) {
-            if (nexTrip.position == null) {
-                // show as gps off if position is not known and isActual
-                R.drawable.ic_gps_off_black_24dp
-            } else {
+            if (nexTrip.position != null) {
                 // show as gps fixed if position is known and isActual (or if arrival is soon)
                 R.drawable.ic_gps_fixed_black_24dp
+            } else {
+                // show as gps off if position is not known and isActual
+                R.drawable.ic_gps_off_black_24dp
             }
-        } else if (nexTrip.position == null) {
-            // show as scheduled if position is not known and !isActual
-            R.drawable.ic_schedule_black_24dp
-        } else {
+        } else if (nexTrip.position != null || nexTrip.locationSuppressed) {
             // show as gps not fixed if position is known and !isActual
             R.drawable.ic_gps_not_fixed_black_24dp
+        } else {
+            // show as scheduled if position is not known and !isActual
+            R.drawable.ic_schedule_black_24dp
         }
         holder.gpsImageView.setImageResource(gpsImage)
 
