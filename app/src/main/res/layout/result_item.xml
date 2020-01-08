@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -50,17 +50,23 @@
 			app:layout_constraintTop_toTopOf="parent" />
 
 		<TextView
+		    android:id="@+id/pad"
+		    style="@android:style/TextAppearance.Large"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:minEms="2"
+		    android:paddingLeft="@dimen/text_margin"
+		    app:layout_constraintStart_toStartOf="parent"
+		    app:layout_constraintTop_toTopOf="parent" />
+
+		<TextView
 			android:id="@+id/description"
 			style="@android:style/TextAppearance.Medium"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:gravity="center"
-			android:paddingLeft="@dimen/text_margin"
-			android:paddingRight="@dimen/text_margin"
 			android:singleLine="false"
-			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintStart_toEndOf="@id/pad"
 			app:layout_constraintTop_toTopOf="parent" />
 
 	</androidx.constraintlayout.widget.ConstraintLayout>

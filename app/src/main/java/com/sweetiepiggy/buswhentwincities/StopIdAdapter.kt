@@ -100,6 +100,8 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
             // show as scheduled if position is not known and !isActual
             R.drawable.ic_schedule_black_24dp
         }
+        // holder.gpsImageView.visibility = if (gpsImage == R.drawable.ic_schedule_black_24dp)
+        //     View.GONE else View.VISIBLE
         holder.gpsImageView.setImageResource(gpsImage)
 
         holder.minimalRouteTextView.text = nexTrip.routeAndTerminal
