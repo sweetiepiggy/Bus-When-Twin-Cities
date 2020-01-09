@@ -49,6 +49,7 @@
             <TextView
                     android:id="@+id/minimal_route"
                     style="@android:style/TextAppearance.Small"
+                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minEms="3"
@@ -113,13 +114,16 @@
                 android:id="@+id/route_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/route"
                     style="@android:style/TextAppearance.Large"
+                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minEms="2" />
@@ -130,6 +134,7 @@
                     android:layout_height="wrap_content" />
 		<ImageView
                     android:id="@+id/direction_icon"
+		    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
 		    android:layout_marginLeft="-5dp"
@@ -144,6 +149,7 @@
                 android:paddingLeft="@dimen/text_margin"
                 android:paddingRight="@dimen/text_margin"
                 android:singleLine="false"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/departure_layout"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@id/route_layout"
@@ -154,6 +160,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 

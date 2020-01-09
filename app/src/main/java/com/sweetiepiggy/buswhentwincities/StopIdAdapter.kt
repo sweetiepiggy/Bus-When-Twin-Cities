@@ -74,7 +74,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         holder.routeTextView.text = nexTrip.routeAndTerminal
         holder.directionTextView.text = nexTrip.routeDirectionStr
         if (nexTrip.routeDirection != null) {
-            holder.directionImageView.visibility = View.VISIBLE
+//            holder.directionImageView.visibility = View.VISIBLE
             holder.directionImageView.setImageResource(
                 when (nexTrip.routeDirection) {
                     NexTrip.Direction.SOUTH -> R.drawable.ic_keyboard_arrow_down_black_24dp
@@ -84,7 +84,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
                 }
             )
         } else {
-            holder.directionImageView.visibility = View.INVISIBLE
+//            holder.directionImageView.visibility = View.INVISIBLE
         }
         holder.descriptionTextView.text = nexTrip.description
         holder.departureTextTextView.text = nexTrip.departureText
