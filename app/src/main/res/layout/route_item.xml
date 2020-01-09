@@ -34,6 +34,8 @@
       android:layout_height="wrap_content"
       android:minEms="2"
       android:paddingLeft="@dimen/text_margin"
+      android:gravity="center"
+      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,6 +47,7 @@
       android:singleLine="false"
       android:paddingLeft="@dimen/text_margin"
       android:paddingRight="@dimen/text_margin"
+      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/route_id"
       app:layout_constraintTop_toTopOf="parent" />
