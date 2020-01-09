@@ -40,6 +40,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val routeTextView: TextView = v.findViewById<TextView>(R.id.route)
         val directionTextView: TextView = v.findViewById<TextView>(R.id.direction)
+        val directionImageView: ImageView = v.findViewById<ImageView>(R.id.direction_icon)
         val gpsImageView: ImageView = v.findViewById<ImageView>(R.id.gps_icon)
         val descriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         val departureTextTextView: TextView = v.findViewById<TextView>(R.id.departure_text)
@@ -72,6 +73,19 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         val nexTrip = mNexTrips[position]
         holder.routeTextView.text = nexTrip.routeAndTerminal
         holder.directionTextView.text = nexTrip.routeDirectionStr
+        if (nexTrip.routeDirection != null) {
+            holder.directionImageView.visibility = View.VISIBLE
+            holder.directionImageView.setImageResource(
+                when (nexTrip.routeDirection) {
+                    NexTrip.Direction.SOUTH -> R.drawable.ic_keyboard_arrow_down_black_24dp
+                    NexTrip.Direction.EAST -> R.drawable.ic_keyboard_arrow_right_black_24dp
+                    NexTrip.Direction.WEST -> R.drawable.ic_keyboard_arrow_left_black_24dp
+                    NexTrip.Direction.NORTH -> R.drawable.ic_keyboard_arrow_up_black_24dp
+                }
+            )
+        } else {
+            holder.directionImageView.visibility = View.INVISIBLE
+        }
         holder.descriptionTextView.text = nexTrip.description
         holder.departureTextTextView.text = nexTrip.departureText
         holder.departureTimeTextView.text = nexTrip.departureTime

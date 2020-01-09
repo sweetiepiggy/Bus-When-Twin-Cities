@@ -112,7 +112,7 @@
             <LinearLayout
                 android:id="@+id/route_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -120,16 +120,22 @@
                 <TextView
                     android:id="@+id/route"
                     style="@android:style/TextAppearance.Large"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minEms="2" />
 
                 <TextView
                     android:id="@+id/direction"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
+		<ImageView
+                    android:id="@+id/direction_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+		    android:layout_marginLeft="-5dp"
+                    android:tint="?attr/colorOnSurface" />
             </LinearLayout>
-
+ 
             <TextView
                 android:id="@+id/description"
                 style="@android:style/TextAppearance.Medium"
@@ -146,7 +152,7 @@
             <LinearLayout
                 android:id="@+id/departure_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -177,6 +183,7 @@
                       android:layout_gravity="end"
                       android:scaleX="0.75"
                       android:scaleY="0.75"
+		      android:layout_marginRight="-3dp"
                       android:tint="?attr/colorOnSurface"
                       app:srcCompat="@drawable/ic_gps_not_fixed_black_24dp" />
 
