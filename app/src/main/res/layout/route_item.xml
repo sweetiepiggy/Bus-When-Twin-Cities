@@ -21,20 +21,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/colorSurface"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="@dimen/text_margin">
-
-  <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:ems="40"
-      android:visibility="invisible"
-      android:gravity="center"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
       android:id="@+id/route_id"
@@ -52,6 +43,8 @@
       android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:singleLine="false"
+      android:paddingLeft="@dimen/text_margin"
+      android:paddingRight="@dimen/text_margin"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/route_id"
       app:layout_constraintTop_toTopOf="parent" />
