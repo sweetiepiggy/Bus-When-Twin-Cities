@@ -80,7 +80,7 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
     	departureTimeInMillis?.let { (it - timeInMillis) / 1000 / 60 }
 
     companion object {
-        val MINUTES_BEFORE_TO_SHOW_LOC = 20
+        val MINUTES_BEFORE_TO_SHOW_LOC = 30
 
         fun from(rawNexTrip: RawNexTrip, timeInMillis: Long): NexTrip {
             // if we're not given departureTime then try to compute it from departureText

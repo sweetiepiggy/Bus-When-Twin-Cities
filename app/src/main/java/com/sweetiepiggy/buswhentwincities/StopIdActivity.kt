@@ -345,7 +345,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
 
     override fun onClickMap(vehicleBlockNumber: Int?) {
         if (!mDualPane) {
-            findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, false)
+            findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, true)
         }
         vehicleBlockNumber?.let { mMapFragment!!.selectVehicle(it) }
     }
