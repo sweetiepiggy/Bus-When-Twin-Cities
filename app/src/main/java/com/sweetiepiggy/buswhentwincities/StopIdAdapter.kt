@@ -23,9 +23,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
 class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAdapter.StopIdViewHolder>() {
@@ -46,14 +46,14 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         val departureTextTextView: TextView = v.findViewById<TextView>(R.id.departure_text)
         val departureTimeTextView: TextView = v.findViewById<TextView>(R.id.departure_time)
         val scheduledTextView: TextView = v.findViewById<TextView>(R.id.scheduled)
-        val fullView: View = v.findViewById<View>(R.id.full_view)
+        val fullView: CardView = v.findViewById<CardView>(R.id.full_view)
         val minimalView: View = v.findViewById<View>(R.id.minimal_view)
         val minimalRouteTextView: TextView = v.findViewById<TextView>(R.id.minimal_route)
         val minimalDescriptionTextView: TextView = v.findViewById<TextView>(R.id.minimal_description)
         val minimalDepartureTextTextView: TextView = v.findViewById<TextView>(R.id.minimal_departure_text)
 
         init {
-            v.setOnClickListener {
+            fullView.setOnClickListener {
                 /* FIXME: adapterPosition can be out of mNexTrips array bounds,
                 	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
                 val nexTrip = mNexTrips[adapterPosition]

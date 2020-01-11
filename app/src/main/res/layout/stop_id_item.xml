@@ -89,6 +89,7 @@
 	android:layout_marginRight="6dp"
 	android:layout_marginTop="1dp"
 	android:layout_marginBottom="1dp"
+	android:foreground="?selectableItemBackground"
         app:cardElevation="1dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -124,11 +125,12 @@
                 <TextView
                     android:id="@+id/route"
                     style="@android:style/TextAppearance.Large"
-		    android:textColor="@color/colorSecondary"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minEms="2" />
+                    android:gravity="center"
+                    android:minEms="2"
+                    android:textColor="@color/colorSecondary"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/direction"
@@ -174,7 +176,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
-                    android:gravity="end" />
+                    android:gravity="end"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/departure_time"

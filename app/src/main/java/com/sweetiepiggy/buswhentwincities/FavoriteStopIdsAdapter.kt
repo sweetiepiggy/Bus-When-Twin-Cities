@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
@@ -53,7 +54,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
         }
 
         init {
-            v.setOnClickListener {
+            v.findViewById<CardView>(R.id.card_view).setOnClickListener {
                 mFavoriteListener.onClickFavorite(mFavStops[adapterPosition])
             }
         }
