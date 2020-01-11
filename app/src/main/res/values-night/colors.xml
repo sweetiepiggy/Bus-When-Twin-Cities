@@ -6,7 +6,8 @@
     <color name="colorPrimaryVariant">#7FC9C2</color>
     <!-- <color name="colorOnPrimary">#1A3633</color> -->
     <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorSecondary">#3DADE0</color>
+    <color name="colorSecondary">#FFC251</color>
+    <!-- <color name="colorSecondary">#3DADE0</color> -->
     <color name="colorSecondaryVariant">#80CEEC</color>
     <!-- <color name="colorOnSecondary">#FFFFFF</color> -->
     <!-- <color name="colorError"></color> -->

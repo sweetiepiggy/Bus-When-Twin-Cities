@@ -49,6 +49,7 @@
             <TextView
                     android:id="@+id/minimal_route"
                     style="@android:style/TextAppearance.Small"
+		    android:textColor="@color/colorSecondary"
                     android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -132,7 +133,9 @@
                 <TextView
                     android:id="@+id/direction"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:alpha="0.75"
+                    android:textColor="@color/colorSecondary" />
 		<ImageView
                     android:id="@+id/direction_icon"
 		    android:visibility="gone"
