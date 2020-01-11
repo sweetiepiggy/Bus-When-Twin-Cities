@@ -4,7 +4,8 @@
     <color name="colorPrimaryDark">#00574B</color>
     <!-- <color name="colorPrimaryVariant">#00574B</color> -->
     <color name="colorOnPrimary">#FFFFFF</color>
-    <color name="colorSecondary">#D81B60</color>
+    <color name="colorSecondary">#D1000F</color>
+    <!-- <color name="colorSecondary">#D81B60</color> -->
     <!-- <color name="colorSecondaryVariant">#D81B60</color> -->
     <color name="colorOnSecondary">#FFFFFF</color>
     <!-- <color name="colorError"></color> -->
