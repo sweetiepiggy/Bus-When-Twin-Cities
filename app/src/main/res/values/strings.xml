@@ -57,6 +57,11 @@
     <string name="select_direction">Select direction</string>
     <string name="select_stop">Select stop</string>
 
+    <string name="context_menu_edit">Edit</string>
+    <string name="context_menu_remove">Remove</string>
+    <string name="context_menu_pin">Pin</string>
+    <string name="context_menu_hide">Hide this route</string>
+
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
     <string name="select_routes">Select routes to show</string>

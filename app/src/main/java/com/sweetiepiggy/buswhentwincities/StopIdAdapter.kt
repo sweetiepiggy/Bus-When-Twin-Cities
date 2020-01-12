@@ -20,9 +20,7 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -37,7 +35,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         fun onClickMap(vehicleBlockNumber: Int?)
     }
 
-    inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnCreateContextMenuListener {
         val routeTextView: TextView = v.findViewById<TextView>(R.id.route)
         val directionTextView: TextView = v.findViewById<TextView>(R.id.direction)
         val directionImageView: ImageView = v.findViewById<ImageView>(R.id.direction_icon)
@@ -61,7 +59,14 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
                     mClickMapListener!!.onClickMap(nexTrip.blockNumber)
                 }
             }
-        }
+            fullView.setOnCreateContextMenuListener(this)
+       }
+
+       override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+           // menu.setHeaderTitle("Header Title")
+           menu.add(Menu.NONE, ACTION_PIN, adapterPosition, R.string.context_menu_pin)
+           menu.add(Menu.NONE, ACTION_HIDE, adapterPosition, R.string.context_menu_hide)
+       }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopIdAdapter.StopIdViewHolder =
@@ -149,4 +154,9 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
 
     private fun doShowLocation(nexTrip: PresentableNexTrip) =
         nexTrip.position != null && (nexTrip.isActual || (nexTrip.minutesUntilDeparture?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
+
+    companion object {
+        val ACTION_PIN = 0
+        val ACTION_HIDE = 1
+    }
 }

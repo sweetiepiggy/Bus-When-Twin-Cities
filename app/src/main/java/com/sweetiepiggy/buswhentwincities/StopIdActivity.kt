@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -182,6 +182,26 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             R.id.action_filter -> { onClickFilter(); true }
             R.id.action_favorite -> { onClickFavorite(item); true }
             else -> super.onOptionsItemSelected(item)
+        }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
+//            StopIdAdapter.ACTION_PIN ->
+            StopIdAdapter.ACTION_HIDE -> {
+                val hideNexTrip = mNexTrips[item.order]
+                val routeAndTerminal = Pair(hideNexTrip.route, hideNexTrip.terminal)
+                val changedRoutes = setOf<Pair<String?, String?>>(routeAndTerminal)
+                mDoShowRoutes[routeAndTerminal] = false
+                mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
+                mNexTripsFragment?.onChangeHiddenRoutes(changedRoutes)
+                mMapFragment?.onChangeHiddenRoutes(changedRoutes)
+                if (mIsFavorite ?: false) {
+                    StoreDoShowRoutesInDbTask(mDoShowRoutes).execute()
+                }
+                mFilteredButWasntFavorite = true
+                true
+            }
+            else -> super.onContextItemSelected(item)
         }
 
     override fun onDownloadError(err: MetroTransitDownloader.DownloadError) {

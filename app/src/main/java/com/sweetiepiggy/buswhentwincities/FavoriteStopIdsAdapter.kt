@@ -19,10 +19,8 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.view.*
 import android.view.KeyEvent.ACTION_DOWN
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -41,7 +39,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
         fun onPromptDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int, recyclerViewPosition: Int)
     }
 
-    inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+    inner class FavoriteStopIdsViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnCreateContextMenuListener {
         var mStopIdTextView: TextView = v.findViewById<TextView>(R.id.stop_id)
         var mStopDescTextView: TextView = v.findViewById<TextView>(R.id.stop_desc)
         var mReorderView: View = v.findViewById<View>(R.id.reorder).apply {
@@ -57,7 +55,15 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
             v.findViewById<CardView>(R.id.card_view).setOnClickListener {
                 mFavoriteListener.onClickFavorite(mFavStops[adapterPosition])
             }
+            v.findViewById<CardView>(R.id.card_view).setOnCreateContextMenuListener(this)
         }
+
+        override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+            // menu.setHeaderTitle("Header Title")
+            menu.add(Menu.NONE, ACTION_EDIT, adapterPosition, R.string.context_menu_edit)
+            menu.add(Menu.NONE, ACTION_REMOVE, adapterPosition, R.string.context_menu_remove)
+        }
+
     }
 
     init {
@@ -116,5 +122,10 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
     fun onCancelDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, position: Int) {
         mFavStops.add(position, removedStop)
         notifyItemInserted(position)
+    }
+
+    companion object {
+        val ACTION_EDIT = 0
+        val ACTION_REMOVE = 1
     }
 }
