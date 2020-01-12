@@ -22,6 +22,7 @@ package com.sweetiepiggy.buswhentwincities.ui.favoritestopids
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -102,6 +103,19 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
     fun onCancelDeleteFavorite(removedStop: FavoriteStopIdsViewModel.FavoriteStop, recyclerViewPosition: Int) {
         mAdapter.onCancelDeleteFavorite(removedStop, recyclerViewPosition)
     }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
+//            FavoriteStopIdsAdapter.ACTION_EDIT ->
+            FavoriteStopIdsAdapter.ACTION_REMOVE -> {
+                val position = item.order
+                val removedStop = mFavoriteStops.removeAt(position)
+                mAdapter.notifyItemRemoved(position)
+                onPromptDeleteFavorite(removedStop, mFavoriteStops.size - position, position)
+                true
+            }
+            else -> super.onContextItemSelected(item)
+        }
 
     private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {
         if (mDoUpdateFavoriteStops) {
