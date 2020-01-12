@@ -58,6 +58,12 @@
     <string name="select_direction">选择方向</string>
     <string name="select_stop">选择公交站</string>
 
+    <string name="context_menu_edit">编辑</string>
+    <string name="context_menu_remove">删除</string>
+    <string name="context_menu_pin">锁定</string>
+    <string name="context_menu_hide">隐藏路线</string>
+
+    <string name="edit_stop_name_dialog_title">编辑收藏夹</string>
     <string name="enter_stop_name_dialog_title">保存为收藏夹</string>
     <string name="enter_stop_name_dialog_message">输入公交站的名称</string>
     <string name="select_routes">选择路线</string>

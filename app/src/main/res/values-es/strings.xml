@@ -58,6 +58,12 @@
     <string name="select_direction">Selecciona una dirección</string>
     <string name="select_stop">Seleccione una parada</string>
 
+    <string name="context_menu_edit">Editar</string>
+    <string name="context_menu_remove">Eliminar</string>
+    <string name="context_menu_pin">Alfiler</string>
+    <string name="context_menu_hide">Minimizar esta ruta</string>
+
+    <string name="edit_stop_name_dialog_title">Editar favorito</string>
     <string name="enter_stop_name_dialog_title">Guardar en favoritas</string>
     <string name="enter_stop_name_dialog_message">Ingresa un nombre para esta parada</string>
     <string name="select_routes">Selecciona las rutas para mostrar</string>
