@@ -62,6 +62,7 @@
     <string name="context_menu_pin">Pin</string>
     <string name="context_menu_hide">Hide this route</string>
 
+    <string name="edit_stop_name_dialog_title">Edit favorite</string>
     <string name="enter_stop_name_dialog_title">Save as favorite</string>
     <string name="enter_stop_name_dialog_message">Enter a name for this stop</string>
     <string name="select_routes">Select routes to show</string>

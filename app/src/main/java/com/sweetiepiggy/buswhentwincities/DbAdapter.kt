@@ -274,6 +274,15 @@ class DbAdapter {
         return mDbHelper!!.mDb!!.insert(TABLE_FAV_STOPS, null, cv)
     }
 
+    /** @return number of rows affected */
+    fun updateFavStop(stopId: Int, stopDescription: String?): Int {
+        val cv = ContentValues().apply {
+            put(KEY_STOP_DESCRIPTION, stopDescription)
+        }
+
+        return mDbHelper!!.mDb!!.update(TABLE_FAV_STOPS, cv, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+    }
+
     private fun getNewFavPosition(): Int =
         maxOf(getNewFavPosition(TABLE_FAV_STOPS), getNewFavPosition(TABLE_FAV_TIMESTOPS))
 
@@ -381,6 +390,15 @@ class DbAdapter {
         }
 
         return mDbHelper!!.mDb!!.insert(TABLE_FAV_TIMESTOPS, null, cv)
+    }
+
+    /** @return number of rows affected */
+    fun updateFavTimestop(timestopId: String, stopDescription: String?): Int {
+        val cv = ContentValues().apply {
+            put(KEY_STOP_DESCRIPTION, stopDescription)
+        }
+
+        return mDbHelper!!.mDb!!.update(TABLE_FAV_TIMESTOPS, cv, "$KEY_TIMESTOP_ID == ?", arrayOf(timestopId))
     }
 
     fun deleteFavTimestop(timestopId: String, routeId: String, routeDirection: Int) {

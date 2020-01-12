@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -63,6 +63,12 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
                 when (f) {
                     is FavoriteStopId -> f.position
                     is FavoriteTimestop -> f.position
+                }
+
+            fun updateDesc(f: FavoriteStop, desc: String): FavoriteStop =
+                when (f) {
+                    is FavoriteStopId -> FavoriteStopId(f.stopId, desc, f.position)
+                    is FavoriteTimestop -> FavoriteTimestop(f.timestop, desc, f.position)
                 }
         }
     }

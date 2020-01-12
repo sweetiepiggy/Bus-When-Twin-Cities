@@ -20,19 +20,20 @@
 package com.sweetiepiggy.buswhentwincities.ui.favoritestopids
 
 import android.content.Context
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsAdapter
-import com.sweetiepiggy.buswhentwincities.FavoriteStopIdsViewModel
-import com.sweetiepiggy.buswhentwincities.R
+import com.google.android.material.textfield.TextInputEditText
+import com.sweetiepiggy.buswhentwincities.*
 
 class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavoriteListener {
     private lateinit var mClickFavoriteListener: FavoriteStopIdsAdapter.OnClickFavoriteListener
@@ -106,7 +107,43 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
 
     override fun onContextItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
-//            FavoriteStopIdsAdapter.ACTION_EDIT ->
+            FavoriteStopIdsAdapter.ACTION_EDIT -> {
+                val position = item.order
+                val favStop = mFavoriteStops[position]
+                AlertDialog.Builder(context!!).apply {
+                    val favStopIdDialog = layoutInflater.inflate(R.layout.dialog_fav_stop_id, null)
+                    setTitle(R.string.edit_stop_name_dialog_title)
+                    setView(favStopIdDialog)
+                    favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.setText(FavoriteStopIdsViewModel.FavoriteStop.stopDesc(favStop))
+                    setPositiveButton(android.R.string.ok) { _, _ ->
+                        val stopDesc = favStopIdDialog.findViewById<TextInputEditText>(R.id.stop_name)?.text.toString()
+                        val newFavStop = FavoriteStopIdsViewModel.FavoriteStop.updateDesc(favStop, stopDesc)
+                        mFavoriteStops[position] = newFavStop
+                        mAdapter.notifyDataSetChanged()
+
+                        object : AsyncTask<Void, Void, Void>() {
+                            override fun doInBackground(vararg params: Void): Void? {
+                                DbAdapter().apply {
+                                    openReadWrite(context!!)
+                                    when (newFavStop) {
+                                        is FavoriteStopIdsViewModel.FavoriteStop.FavoriteStopId ->
+                                            updateFavStop(newFavStop.stopId, stopDesc)
+                                        is FavoriteStopIdsViewModel.FavoriteStop.FavoriteTimestop -> {
+                                            val timestop = newFavStop.timestop
+                                            updateFavTimestop(timestop.timestopId, stopDesc)}
+                                    }
+                                    close()
+                                }
+                                return null
+                            }
+                            override fun onPostExecute(result: Void?) {}
+                        }.execute()
+                    }
+                    setNegativeButton(android.R.string.cancel) { _, _ -> }
+                }.show()
+                true
+            }
+
             FavoriteStopIdsAdapter.ACTION_REMOVE -> {
                 val position = item.order
                 val removedStop = mFavoriteStops.removeAt(position)
