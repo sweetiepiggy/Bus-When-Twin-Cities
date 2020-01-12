@@ -98,7 +98,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             mStop = it
             if (mStopDesc == null) {
                 title = makeTitle(mStopId, it.stopName)
-            } else {
                 mStopDesc = it.stopName
             }
         })
