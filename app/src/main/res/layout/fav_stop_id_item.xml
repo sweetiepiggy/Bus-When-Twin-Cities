@@ -45,7 +45,7 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:ems="40"
+				android:ems="38"
 				android:visibility="invisible"
 				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toTopOf="parent" />
@@ -57,6 +57,7 @@
 				android:layout_height="wrap_content"
 				android:gravity="center"
 				android:minEms="3"
+				android:paddingRight="@dimen/text_margin"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintEnd_toStartOf="@id/stop_desc"
 				app:layout_constraintStart_toStartOf="parent"
@@ -68,8 +69,6 @@
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
 				android:gravity="center"
-				android:paddingLeft="@dimen/text_margin"
-				android:paddingRight="@dimen/text_margin"
 				android:singleLine="false"
 				app:layout_constraintBottom_toBottomOf="parent"
 				app:layout_constraintEnd_toStartOf="@id/reorder"

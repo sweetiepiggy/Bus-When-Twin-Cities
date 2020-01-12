@@ -64,7 +64,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
 
        override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
            // menu.setHeaderTitle("Header Title")
-           menu.add(Menu.NONE, ACTION_PIN, adapterPosition, R.string.context_menu_pin)
+           // menu.add(Menu.NONE, ACTION_PIN, adapterPosition, R.string.context_menu_pin)
            menu.add(Menu.NONE, ACTION_HIDE, adapterPosition, R.string.context_menu_hide)
        }
     }
