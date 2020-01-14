@@ -138,13 +138,6 @@
                     android:layout_height="wrap_content"
                     android:alpha="0.75"
                     android:textColor="@color/colorSecondary" />
-		<ImageView
-                    android:id="@+id/direction_icon"
-		    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-		    android:layout_marginLeft="-5dp"
-                    android:tint="?attr/colorOnSurface" />
             </LinearLayout>
  
             <TextView

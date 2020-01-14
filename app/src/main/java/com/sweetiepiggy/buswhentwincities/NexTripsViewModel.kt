@@ -300,7 +300,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     }
 
     companion object {
-        private val MIN_SECONDS_BETWEEN_REFRESH: Long = 30
+        private val MIN_SECONDS_BETWEEN_REFRESH: Long = 15
         // don't display NexTrips that were due this long or more before now
         private val SECONDS_BEFORE_NOW_TO_IGNORE = 60
         private val SECONDS_BEFORE_SUPPRESS_LOCATIONS = 30
