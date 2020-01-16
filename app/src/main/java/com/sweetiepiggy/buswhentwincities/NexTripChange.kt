@@ -243,6 +243,7 @@ sealed class NexTripChange {
                 nexTrip1.isActual == nexTrip2.isActual &&
                 nexTrip1.routeDirection == nexTrip2.routeDirection &&
 	            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
+                nexTrip1.locationSuppressed == nexTrip2.locationSuppressed &&
     		    (nexTrip1.position == null) == (nexTrip2.position == null)))
             return ret
 }
