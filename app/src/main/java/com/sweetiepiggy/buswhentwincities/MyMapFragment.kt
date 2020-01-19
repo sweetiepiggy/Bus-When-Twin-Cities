@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -26,6 +26,7 @@ import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.location.Location
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.TypedValue
 import android.util.TypedValue.complexToDimensionPixelSize
@@ -53,17 +54,28 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
     private var mMap: GoogleMap? = null
     private var mVehicleBlockNumber: Int? = null
+    /** map from blockNumber to nexTrip */
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
+    private lateinit var mModel: NexTripsViewModel
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
+    /** map from shapeId to shape */
+    private var mShapes: Map<Int, List<LatLng>>? = null
     private var mInitCameraDone: Boolean = false
+    private var mDoShowRoutesInitDone: Boolean = false
     // note that Marker.position is the current position on the map which will
     // not match the NexTrip.position if the Marker is undergoing animation,
     // we keep track of the NexTrip.positions here so we can avoid jumpy
     // animation behavior that occurs if animation is started a second time
     // before the first animation is finished
     private val mMarkers: MutableMap<Int?, Pair<Marker, LatLng>> = mutableMapOf()
+    /** map from blockNumber to route Polyline */
+    private val mRouteLines: MutableMap<Int?, Polyline> = mutableMapOf()
+    /** set of blockNumbers */
+    private val mFindingShapeIdFor: MutableSet<Int> = mutableSetOf()
+    /** set of shapeIds */
+    private val mFindingShapeFor: MutableSet<Int> = mutableSetOf()
     private val mBusIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
     }
@@ -139,23 +151,29 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
 
-        val model = activity?.run {
+        mModel = activity?.run {
             ViewModelProvider(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
-        model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+        mModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
             updateDoShowRoutes(it)
-        })
-        model.getStop().observe(this, Observer<Stop>{
-            mStop = it
-            mMap?.addMarker(MarkerOptions()
-                    .position(LatLng(it.stopLat, it.stopLon))
-                    .title(resources.getString(R.string.stop_number) + it.stopId.toString())
-                    .snippet(it.stopName)
-                    .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
-            )
-            if (!mInitCameraDone) {
-                initCamera()
+            if (!mDoShowRoutesInitDone) {
+                mDoShowRoutesInitDone = true
+                mModel.getStop().observe(this, Observer<Stop?>{
+                    mStop = it
+                    mStop?.let { stop ->
+                        mMap?.addMarker(MarkerOptions()
+                                .position(LatLng(stop.stopLat, stop.stopLon))
+                                .title(resources.getString(R.string.stop_number) + stop.stopId.toString())
+                                .snippet(stop.stopName)
+                                .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
+                    )}
+                    mModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
+                        updateNexTrips(it)
+                    })
+                    mModel.getShapes().observe(this, Observer<Map<Int, List<LatLng>>>{
+                        updateShapes(it)
+                    })
+                })
             }
         })
 
@@ -176,6 +194,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        android.util.Log.d("got here", "got here: in onMapReady")
         mMap = googleMap.apply {
             uiSettings.setMapToolbarEnabled(false)
             setIndoorEnabled(false)
@@ -187,6 +206,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 R.raw.mapstyle_default
             }
             setMapStyle(MapStyleOptions.loadRawResourceStyle(context!!, mapstyle))
+            moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
         }
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
@@ -218,18 +238,57 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         initCamera()
     }
 
-    fun selectVehicle(blockNumber: Int) {
-        mVehicleBlockNumber = blockNumber
+    fun selectVehicle(nexTrip: PresentableNexTrip) {
+        if (nexTrip.blockNumber == null) {
+            return
+        }
+        val blockNumber = nexTrip.blockNumber
+        android.util.Log.d("got here", "got here: shapeId of $blockNumber in selectVehicle(${blockNumber}) is ${nexTrip.shapeId}")
+        mVehicleBlockNumber = nexTrip.blockNumber
+
+        if (nexTrip.shapeId == null) {
+            // get shapeId then shape then create polyline
+            //     mShapeIds[blockNumber] = 110005
+            if (!mFindingShapeIdFor.contains(blockNumber)) {
+                mFindingShapeIdFor.add(blockNumber)
+                mModel.findShapeId(nexTrip.nexTrip)
+            }
+        } else if (!(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
+            // get shape then create polyline
+            android.util.Log.d("got here", "got here: know shapeId of $blockNumber is ${nexTrip.shapeId} but need shape")
+            if (!mFindingShapeFor.contains(nexTrip.shapeId)) {
+                mFindingShapeFor.add(nexTrip.shapeId)
+                mModel.findShape(nexTrip.shapeId)
+//                FindShapeTask(shapeId).execute()
+            }
+        } else if (!mRouteLines.containsKey(blockNumber)) {
+            // is this necessary? can this ever be reached?
+            mMap?.run {
+                mRouteLines[blockNumber] = addPolyline(
+                    PolylineOptions().apply {
+                        addAll(mShapes!![nexTrip.shapeId])
+                        color(ContextCompat.getColor(context!!, R.color.colorRoute))
+                    }
+                )
+            }
+        }
+
         mMap?.run {
             for (marker in mMarkers.values.map { it.first }) {
-                val nexTrip = marker.tag as PresentableNexTrip
-                if (blockNumber == nexTrip.blockNumber) {
+                val taggedNexTrip = marker.tag as PresentableNexTrip
+                if (blockNumber == taggedNexTrip.blockNumber) {
                     marker.alpha = 1f
                     marker.showInfoWindow()
-                    zoomToPosition(nexTrip.position!!)
+                    zoomToPosition(taggedNexTrip.position!!)
                 } else {
                     marker.alpha = UNSELECTED_MARKER_ALPHA
                 }
+            }
+            for ((bn, routeLine) in mRouteLines) {
+                val color = if (blockNumber == bn) R.color.colorRoute else R.color.colorRouteUnselected
+                routeLine.setColor(ContextCompat.getColor(context!!, color))
+//                routeLine.alpha = if (blockNumber == bn) 1f else UNSELECTED_MARKER_ALPHA
+//                routeLine.setVisible(blockNumber == bn)
             }
         }
     }
@@ -248,7 +307,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun initCamera() {
-        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
         mStop?.let {
             mMap?.addMarker(MarkerOptions()
                     .position(LatLng(it.stopLat, it.stopLon))
@@ -259,11 +317,13 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
             // }
         }
+        // in case map was not initialized when mNexTrips updated?
         if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
         }
         if (!mNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
+            mInitCameraDone = !mNexTrips.isNullOrEmpty()
         }
     }
 
@@ -341,6 +401,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
+        android.util.Log.d("got here", "got here: in updateNexTrips")
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
@@ -356,17 +417,21 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         if (mNexTrips != null) {
             updateMarkers()
         }
-        if (!mInitCameraDone && mNexTrips != null) {
+        if (!mInitCameraDone) {
             initCamera()
-            mInitCameraDone = true
         }
     }
 
-    fun updateDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
+    private fun updateShapes(shapes: Map<Int, List<LatLng>>) {
+        mShapes = shapes
+    }
+
+    private fun updateDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes = doShowRoutes
     }
 
     private fun updateMarkers() {
+        android.util.Log.d("got here", "got here: in updateMarkers()")
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, markerAndPosition) in mMarkers) {
             if (!mNexTrips!!.containsKey(blockNumber)) {
@@ -374,10 +439,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 blockNumbersToRemove.add(blockNumber)
             }
         }
-        blockNumbersToRemove.forEach { mMarkers.remove(it) }
+        blockNumbersToRemove.forEach {
+            mMarkers.remove(it)
+            mRouteLines.remove(it)
+        }
 
         mMap?.run {
             for (nexTrip in mNexTrips!!.values) {
+                android.util.Log.d("got here", "got here: blockNumber = ${nexTrip.blockNumber}")
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
                         if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second, nexTrip.position)) {
@@ -406,6 +475,24 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     }
                 }
                 mMarkers[nexTrip.blockNumber] = Pair(marker, nexTrip.position!!)
+                if (nexTrip.shapeId != null) {
+                    android.util.Log.d("got here", "got here: shapeId for blockNumber ${nexTrip.blockNumber} is ${nexTrip.shapeId}")
+                    mFindingShapeIdFor.remove(nexTrip.blockNumber)
+                }
+                if (mShapes?.containsKey(nexTrip.shapeId) ?: false) {
+                    if (!mRouteLines.containsKey(nexTrip.blockNumber)) {
+                        mRouteLines[nexTrip.blockNumber] = addPolyline(
+                            PolylineOptions().apply {
+                                addAll(mShapes!![nexTrip.shapeId])
+                                color(ContextCompat.getColor(context!!, R.color.colorRoute))
+                            }
+                        )
+                    }
+                    val color = if (nexTrip.blockNumber == mVehicleBlockNumber) R.color.colorRoute else R.color.colorRouteUnselected
+                    mRouteLines[nexTrip.blockNumber]?.setColor(ContextCompat.getColor(context!!, color))
+//                    mRouteLines[nexTrip.blockNumber]?.alpha = if (blockNumber == bn) 1f else UNSELECTED_MARKER_ALPHA
+//                    mRouteLines[nexTrip.blockNumber]?.setVisible(nexTrip.blockNumber == mVehicleBlockNumber)
+                }
             }
         }
     }
@@ -424,6 +511,27 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             }
         }
     }
+
+//     private inner class FindShapeTask(private val shapeId: Int): AsyncTask<Void, Void, List<LatLng>?>() {
+//         override fun doInBackground(vararg params: Void): List<LatLng>? {
+//             var shape: List<LatLng>? = null
+//             DbAdapter().run {
+//                 open(context!!)
+// //                shape = getShape(shapeId)
+//                 close()
+//             }
+//             return shape
+//         }
+
+//         override fun onPostExecute(shape: List<LatLng>?) {
+//             if (shape != null) {
+//                 mShapes[shapeId] = shape
+//                 mFindingShapeFor.remove(shapeId)
+//             } else {
+// //                DownloadShapeTask(this@MyMapFragment, shapeId).execute()
+//             }
+//         }
+//     }
 
     private fun getIcon(vehicle: NexTrip.Vehicle, direction: NexTrip.Direction?): BitmapDescriptor =
         when (vehicle) {

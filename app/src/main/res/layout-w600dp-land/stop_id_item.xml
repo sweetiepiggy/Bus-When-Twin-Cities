@@ -50,10 +50,9 @@
                     android:id="@+id/minimal_route"
                     style="@android:style/TextAppearance.Small"
 		    android:textColor="@color/colorSecondary"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minEms="3"
+                    android:minEms="2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -85,8 +84,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 	android:layout_gravity="center"
-	android:layout_marginLeft="6dp"
-	android:layout_marginRight="6dp"
+	android:layout_marginLeft="3dp"
+	android:layout_marginRight="3dp"
 	android:layout_marginTop="1dp"
 	android:layout_marginBottom="1dp"
 	android:foreground="?selectableItemBackground"
