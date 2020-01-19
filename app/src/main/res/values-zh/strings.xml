@@ -31,10 +31,10 @@
     <string name="route_hint">例如：10</string>
     <string name="real_time">即时</string>
     <string name="scheduled">规划时间</string>
-    <string name="north">北向</string>
-    <string name="south">南向</string>
-    <string name="east">东向</string>
-    <string name="west">西向</string>
+    <string name="north">北行</string>
+    <string name="south">南行</string>
+    <string name="east">东行</string>
+    <string name="west">西行</string>
     <string name="northbound">北行</string>
     <string name="southbound">南行</string>
     <string name="eastbound">东行</string>
