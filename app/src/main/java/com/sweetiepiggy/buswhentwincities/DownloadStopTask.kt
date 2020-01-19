@@ -107,7 +107,7 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedListener,
             while (reader.hasNext()) {
                 val n = reader.nextName()
                 when (n) {
-                    "id" -> stopId = reader.nextInt()
+                    "_id" -> stopId = reader.nextInt()
                     "stop_name" -> stopName = reader.nextString()
                     "stop_desc" -> stopDesc = reader.nextString()
                     "stop_lat" -> stopLat = reader.nextDouble()

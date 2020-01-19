@@ -124,7 +124,7 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
                         object : AsyncTask<Void, Void, Void>() {
                             override fun doInBackground(vararg params: Void): Void? {
                                 DbAdapter().apply {
-                                    openReadWrite(context!!)
+                                    openReadWrite(context)
                                     when (newFavStop) {
                                         is FavoriteStopIdsViewModel.FavoriteStop.FavoriteStopId ->
                                             updateFavStop(newFavStop.stopId, stopDesc)

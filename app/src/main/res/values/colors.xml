@@ -18,4 +18,5 @@
     <!-- <color name="colorHint">#8E8E8E</color> -->
     <color name="colorComplementary">#B21C22</color>
     <color name="colorToolbar">#008577</color>
+    <color name="colorRoute">#18B100</color>
 </resources>
