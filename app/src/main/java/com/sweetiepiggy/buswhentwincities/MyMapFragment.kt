@@ -315,7 +315,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
         if (!mNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
-            mInitCameraDone = !mNexTrips.isNullOrEmpty()
+            mInitCameraDone = true
         }
     }
 
