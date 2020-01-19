@@ -323,7 +323,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
         if (!mNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
-            mInitCameraDone = !mNexTrips.isNullOrEmpty()
+            mInitCameraDone = true
         }
     }
 
