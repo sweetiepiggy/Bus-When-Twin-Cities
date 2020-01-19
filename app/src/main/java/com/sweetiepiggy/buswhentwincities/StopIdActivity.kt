@@ -84,18 +84,20 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
         mNexTripsModel.setChangeRefreshingListener(this)
-        mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateRoutes(it) })
-        mNexTripsModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+        mNexTripsModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>> {
             if (!mDoShowRoutesInitDone) {
-                initDoShowRoutes(it)
                 mDoShowRoutesInitDone = true
-            }
-        })
-        mNexTripsModel.getStop().observe(this, Observer<Stop>{
-            mStop = it
-            if (mStopDesc == null) {
-                title = makeTitle(mStopId, it.stopName)
-                mStopDesc = it.stopName
+                initDoShowRoutes(it)
+                mNexTripsModel.getStop().observe(this, Observer<Stop>{
+                    mStop = it
+                    if (mStopDesc == null) {
+                        title = makeTitle(mStopId, it.stopName)
+                        mStopDesc = it.stopName
+                    }
+                    mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
+                        updateRoutes(it)
+                    })
+                })
             }
         })
 
@@ -447,10 +449,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
 
     private fun updateRoutes(nexTrips: List<NexTrip>) {
         mNexTrips = nexTrips
-
-        if (!mDoShowRoutesInitDone) {
-            return
-        }
 
         val changedRoutes: MutableSet<Pair<String?, String?>> = mutableSetOf()
         val routeAndTerminalPairs = nexTrips.filter {
