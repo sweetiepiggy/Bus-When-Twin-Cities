@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -19,6 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
+import android.content.Context
 import android.os.AsyncTask
 import android.util.JsonReader
 import java.io.IOException
@@ -29,13 +30,15 @@ import java.net.SocketException
 import java.net.URL
 import java.net.UnknownHostException
 import javax.net.ssl.HttpsURLConnection
+import org.osmdroid.util.GeoPoint
 
-class DownloadStopTask(private val mDownloadedListener: OnDownloadedStopListener,
-                           private val mStopId: Int) : AsyncTask<Void, Int, Void>() {
-    private var mStop: Stop? = null
+class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListener,
+                        private val mContext: Context,
+                        private val mShapeId: Int) : AsyncTask<Void, Int, Void>() {
+    private var mShape: List<GeoPoint>? = null
 
-    interface OnDownloadedStopListener {
-        fun onDownloadedStop(stop: Stop)
+    interface OnDownloadedShapeListener {
+        fun onDownloadedShape(shapeId: Int, shape: List<GeoPoint>)
     }
 
     inner class UnauthorizedException : IOException()
@@ -46,7 +49,7 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedStopListener
         do {
             retry = false
             try {
-                mStop = downloadStop(mStopId)
+                mShape = downloadShape(mShapeId)
             } catch (e: UnknownHostException) { // probably no internet connection
             } catch (e: java.io.FileNotFoundException) {
             } catch (e: java.net.SocketTimeoutException) {
@@ -72,65 +75,69 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedStopListener
 
     override fun onPostExecute(result: Void?) {
         if (!isCancelled) {
-            mStop?.let { mDownloadedListener.onDownloadedStop(it) }
+            mShape?.let { mDownloadedListener.onDownloadedShape(mShapeId, it) }
         }
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class,
 			IllegalStateException::class)
-    private fun downloadStop(stopId: Int): Stop? {
-        val stopUrl = ((if (mUseHttps) "https://" else "http://")
-                + STOP_URL + stopId.toString())
-        val urlConnection = URL(stopUrl).openConnection() as HttpsURLConnection
+    private fun downloadShape(shapeId: Int): List<GeoPoint>?  {
+        android.util.Log.d("got here", "got here: in downloadShape")
+        var shape: List<GeoPoint>?
+
+        val shapesUrl = ((if (mUseHttps) "https://" else "http://")
+                         + "$SHAPES_URL/$shapeId")
+        android.util.Log.d("got here", "got here: shapesUrl is $shapesUrl")
+        val urlConnection = URL(shapesUrl).openConnection() as HttpsURLConnection
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
-        var stop: Stop?
-
         try {
-            stop = parseStop(reader)
+            shape = parseShape(reader)
         } finally {
             reader.close()
         }
 
-        return stop
+        return shape
     }
 
     @Throws(IOException::class, IllegalStateException::class)
-    private fun parseStop(reader: JsonReader): Stop? {
-        var stop: Stop? = null
+    private fun parseShape(reader: JsonReader): List<GeoPoint> {
+        android.util.Log.d("got here", "got here: in parseShape for $mShapeId")
+        val shape: MutableList<Pair<Int, GeoPoint>> = mutableListOf()
 
-        if (!isCancelled && reader.hasNext()) {
+        val dbHelper = DbAdapter().openReadWrite(mContext)
+        reader.beginArray()
+        while (!isCancelled && reader.hasNext()) {
             reader.beginObject()
-            var stopId: Int? = null
-            var stopName: String? = null
-            var stopDesc: String? = null
-            var stopLat: Double? = null
-            var stopLon: Double? = null
-            var wheelchairBoarding: Int? = null
+            var shapeId: Int? = null
+            var shapePtLat: Double? = null
+            var shapePtLon: Double? = null
+            var shapePtSequence: Int? = null
             while (reader.hasNext()) {
                 val n = reader.nextName()
                 when (n) {
-                    "_id" -> stopId = reader.nextInt()
-                    "stop_name" -> stopName = reader.nextString()
-                    "stop_desc" -> stopDesc = reader.nextString()
-                    "stop_lat" -> stopLat = reader.nextDouble()
-                    "stop_lon" -> stopLon = reader.nextDouble()
-                    "wheelchair_boarding" -> wheelchairBoarding = reader.nextInt()
+                    "shape_id" -> shapeId = reader.nextInt()
+                    "shape_pt_lat" -> shapePtLat = reader.nextDouble()
+                    "shape_pt_lon" -> shapePtLon = reader.nextDouble()
+                    "shape_pt_sequence" -> shapePtSequence = reader.nextInt()
                     else -> reader.skipValue()
                 }
             }
             reader.endObject()
-            if (stopId != null && stopName != null && stopLat != null && stopLon != null) {
-                stop = Stop(stopId, stopName, stopDesc, stopLat, stopLon, wheelchairBoarding)
+            if (shapeId != null && shapePtLat != null && shapePtLon != null && shapePtSequence != null) {
+                android.util.Log.d("got here", "got here: replaceShapeSegment for $shapeId")
+                dbHelper.replaceShapeSegment(shapeId, shapePtLat, shapePtLon, shapePtSequence)
+                shape.add(Pair(shapePtSequence, GeoPoint(shapePtLat, shapePtLon)))
             }
         }
+        reader.endArray()
+        dbHelper.close()
 
-        return stop
+        return shape.sortedWith(compareBy({ it.first })).map { it.second }
     }
 
     companion object {
-        private val STOP_URL = "buswhentwincities.herokuapp.com/stops/"
-        // private val STOP_URL = "buswhentwincities.appspot.com/stops/"
+        private val SHAPES_URL = "buswhentwincities.herokuapp.com/shapes"
         private var mUseHttps = true
     }
 }

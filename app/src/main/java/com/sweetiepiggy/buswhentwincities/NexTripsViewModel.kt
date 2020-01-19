@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -26,8 +26,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.*
+import org.osmdroid.util.GeoPoint
 
-class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedListener {
+class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedStopListener, DownloadShapeIdTask.OnDownloadedShapeIdListener, DownloadShapeTask.OnDownloadedShapeListener {
     private var mDownloadNexTripsTask: AsyncTask<Void, Int, Void>? = null
     private var mDownloadStopTask: DownloadStopTask? = null
     private var mLoadNexTripsErrorListener: OnDownloadErrorListener? = null
@@ -47,8 +48,13 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         }
     }
 
-    private val mStop: MutableLiveData<Stop> by lazy {
-        MutableLiveData<Stop>().also { LoadStopTask().execute() }
+    private val mStop: MutableLiveData<Stop?> by lazy {
+        MutableLiveData<Stop?>().also { LoadStopTask().execute() }
+    }
+
+    /** map from shapeId to shape */
+    private val mShapes: MutableLiveData<Map<Int, List<GeoPoint>>> by lazy {
+        MutableLiveData<Map<Int, List<GeoPoint>>>().also { LoadShapesTask().execute() }
     }
 
     private val unixTime: Long
@@ -61,7 +67,17 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         mDoShowRoutes.value = doShowRoutes
     }
 
-    fun getStop(): LiveData<Stop> = mStop
+    fun getStop(): LiveData<Stop?> = mStop
+
+    fun getShapes(): LiveData<Map<Int, List<GeoPoint>>> = mShapes
+    fun findShapeId(nexTrip: NexTrip) {
+        android.util.Log.d("got here", "got here: in findShapeId(${nexTrip.blockNumber})")
+        DownloadShapeIdTask(this, nexTrip).execute()
+    }
+    fun findShape(shapeId: Int) {
+        android.util.Log.d("got here", "got here: in findShape($shapeId)")
+        DownloadShapeTask(this, mContext, shapeId).execute()
+    }
 
     fun loadNexTrips() {
         val stopId = mStopId
@@ -101,9 +117,23 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
     override fun onDownloadedNexTrips(nexTrips: List<NexTrip>) {
         mLastUpdate = unixTime
-        mNexTrips.value = nexTrips
+        val oldNexTrips = mNexTrips.value
+        val newNexTrips = nexTrips.map { nexTrip ->
+            if (nexTrip.shapeId == null) {
+                val oldNexTrip = oldNexTrips?.find { NexTrip.guessIsSameNexTrip(it, nexTrip) }
+                if (oldNexTrip != null && oldNexTrip.shapeId != null) {
+                    NexTrip.setShapeId(nexTrip, oldNexTrip.shapeId)
+                } else {
+                    nexTrip
+                }
+            } else {
+                nexTrip
+            }
+        }
+        mNexTrips.value = newNexTrips
         mRefreshingListener?.setRefreshing(false)
-        StoreNexTripsInDbTask(nexTrips).execute()
+        android.util.Log.d("got here", "got here: calling StoreNexTripsInDbTask")
+        StoreNexTripsInDbTask(newNexTrips).execute()
         mLoadingNexTrips = false
     }
 
@@ -270,18 +300,16 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         }
 
         override fun onPostExecute(result: Stop?) {
-            if (result == null) {
-                mStopId?.let { stopId ->
-                    mDownloadStopTask = DownloadStopTask(this@NexTripsViewModel, stopId)
-                    mDownloadStopTask!!.execute()
-                }
+            if (result == null && mStopId != null) {
+                mDownloadStopTask = DownloadStopTask(this@NexTripsViewModel, mStopId)
+                mDownloadStopTask!!.execute()
             } else {
                 mStop.value = result
             }
         }
     }
 
-    override fun onDownloaded(stop: Stop) {
+    override fun onDownloadedStop(stop: Stop) {
         mStop.value = stop
         StoreStopInDbTask(stop).execute()
     }
@@ -297,6 +325,65 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         }
 
         override fun onPostExecute(result: Void?) { }
+    }
+
+    private inner class LoadShapesTask(): AsyncTask<Void, Void, Map<Int, List<GeoPoint>>>() {
+        override fun doInBackground(vararg params: Void): Map<Int, List<GeoPoint>> {
+            val shapes: MutableMap<Int, List<GeoPoint>> = mutableMapOf()
+            DbAdapter().apply {
+                open(mContext)
+                val shapeIds = mNexTrips.value?.filter {
+                    it.shapeId != null
+                }?.map {
+                    it.shapeId!!
+                }?.toSet() ?: setOf()
+
+                for (shapeId in shapeIds) {
+                        val shape = getShape(shapeId)
+                        if (!shape.isEmpty()) {
+                            shapes[shapeId] = shape
+                        }
+                }
+                close()
+            }
+            return shapes
+        }
+
+        override fun onPostExecute(shapes: Map<Int, List<GeoPoint>>) {
+            mShapes.value = shapes
+        }
+    }
+
+    override fun onDownloadedShapeId(nexTrip: NexTrip, shapeId: Int) {
+        android.util.Log.d("got here", "got here: shapeId = ${shapeId}")
+        val newNexTrip = NexTrip.setShapeId(nexTrip, shapeId)
+        mNexTrips.value?.let { oldNexTrips ->
+            val newNexTrips = oldNexTrips.map { oldNexTrip ->
+                if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
+                    newNexTrip
+                } else {
+                    oldNexTrip
+                }
+            }
+            mNexTrips.value = newNexTrips
+            StoreNexTripsInDbTask(newNexTrips).execute()
+        }
+    }
+
+    override fun onDownloadedShape(shapeId: Int, shape: List<GeoPoint>) {
+        android.util.Log.d("got here", "got here: onDownloadedShape shapeId = ${shapeId}")
+        mShapes.value = (mShapes.value ?: mapOf()) + Pair(shapeId, shape)
+        // val newNexTrip = NexTrip.setShapeId(nexTrip, shapeId)
+        // mNexTrips.value?.let { oldNexTrips ->
+        //     val newNexTrips = oldNexTrips.map { oldNexTrip ->
+        //         if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
+        //             newNexTrip
+        //         } else {
+        //             oldNexTrip
+        //         }
+        //     }
+        //     mNexTrips.value = newNexTrips
+        // }
     }
 
     companion object {

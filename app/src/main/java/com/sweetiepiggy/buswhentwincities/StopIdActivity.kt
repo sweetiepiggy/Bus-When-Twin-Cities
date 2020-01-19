@@ -50,7 +50,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
     private var mNexTripsFragment: NexTripsFragment? = null
     private var mMenu: Menu? = null
     private var mIsFavorite: Boolean? = null
-    private var mDualPane = false
+    private var mDualPane: Boolean = false
     private lateinit var mNexTripsModel: NexTripsViewModel
     private var mNexTrips: List<NexTrip> = listOf()
     private var mDoShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
@@ -88,11 +88,13 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             if (!mDoShowRoutesInitDone) {
                 mDoShowRoutesInitDone = true
                 initDoShowRoutes(it)
-                mNexTripsModel.getStop().observe(this, Observer<Stop>{
+                mNexTripsModel.getStop().observe(this, Observer<Stop?>{
                     mStop = it
-                    if (mStopDesc == null) {
-                        title = makeTitle(mStopId, it.stopName)
-                        mStopDesc = it.stopName
+                    mStop?.let { stop ->
+                        if (mStopDesc == null) {
+                            title = makeTitle(mStopId, stop.stopName)
+                            mStopDesc = stop.stopName
+                        }
                     }
                     mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
                         updateRoutes(it)
@@ -364,11 +366,11 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         }
     }
 
-    override fun onClickMap(vehicleBlockNumber: Int?) {
+    override fun onClickMap(nexTrip: PresentableNexTrip) {
         if (!mDualPane) {
             findViewById<ViewPager>(R.id.pager)!!.setCurrentItem(ITEM_IDX_MAP, true)
         }
-        vehicleBlockNumber?.let { mMapFragment!!.selectVehicle(it) }
+        mMapFragment!!.selectVehicle(nexTrip)
     }
 
     inner class StopIdPagerAdapter(fm: FragmentManager, private val mClickMapListener: StopIdAdapter.OnClickMapListener) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -40,6 +40,7 @@ class NexTripsFragment : Fragment() {
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
     private var mNexTrips: List<PresentableNexTrip> = listOf()
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
+    private var mDoShowRoutesInitDone: Boolean = false
 
     companion object {
         fun newInstance(): NexTripsFragment = NexTripsFragment()
@@ -64,7 +65,6 @@ class NexTripsFragment : Fragment() {
         val model = activity?.run {
             ViewModelProvider(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        model.getNexTrips().observe(this, Observer<List<NexTrip>>{ updateNexTrips(it) })
 
         mResultsRecyclerView.layoutManager = LinearLayoutManager(context)
         mAdapter = StopIdAdapter(context!!)
@@ -74,6 +74,12 @@ class NexTripsFragment : Fragment() {
         mSwipeRefreshLayout.setOnRefreshListener { model.loadNexTrips() }
         model.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
             updateDoShowRoutes(it)
+            if (!mDoShowRoutesInitDone) {
+                mDoShowRoutesInitDone = true
+                model.getNexTrips().observe(this, Observer<List<NexTrip>>{
+                    updateNexTrips(it)
+                })
+            }
         })
     }
 

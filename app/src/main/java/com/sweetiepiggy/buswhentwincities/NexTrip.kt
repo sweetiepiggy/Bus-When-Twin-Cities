@@ -24,6 +24,7 @@ import android.content.res.Resources
 import android.location.Location
 import android.text.format.DateFormat
 import org.osmdroid.util.GeoPoint
+import java.lang.Math.abs
 import java.util.*
 
 // the raw data as it comes
@@ -37,7 +38,8 @@ data class RawNexTrip(val isActual: Boolean, val blockNumber: Int?, val departur
 class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInMillis: Long?,
 			val description: String?, val gate: String?, val route: String?,
 			val routeDirection: Direction?, val terminal: String?, val vehicleHeading: Double?,
-        	vehicleLatitude: Double?, vehicleLongitude: Double?, val locationSuppressed: Boolean = false) {
+        	vehicleLatitude: Double?, vehicleLongitude: Double?, val shapeId: Int?,
+            val locationSuppressed: Boolean = false) {
 
     val position: GeoPoint? = vehicleLatitude?.let { latitude ->
         vehicleLongitude?.let { longitude ->
@@ -91,7 +93,8 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
                 rawNexTrip.isActual, rawNexTrip.blockNumber, departureTimeInMillis,
                 rawNexTrip.description, rawNexTrip.gate, rawNexTrip.route,
                 Direction.from(rawNexTrip.routeDirection), rawNexTrip.terminal,
-                rawNexTrip.vehicleHeading, rawNexTrip.vehicleLatitude, rawNexTrip.vehicleLongitude
+                rawNexTrip.vehicleHeading, rawNexTrip.vehicleLatitude, rawNexTrip.vehicleLongitude,
+                null
             )
         }
 
@@ -99,8 +102,14 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
             val locationSuppressed = nexTrip.position != null || nexTrip.locationSuppressed
         	return NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
         		           nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
-        		           nexTrip.terminal, null, null, null, locationSuppressed)
+        		           nexTrip.terminal, null, null, null, nexTrip.shapeId, locationSuppressed)
         }
+
+        fun setShapeId(nexTrip: NexTrip, shapeId: Int): NexTrip =
+        	NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
+        		    nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
+        		    nexTrip.terminal, nexTrip.vehicleHeading, nexTrip.position?.latitude,
+                    nexTrip.position?.longitude, shapeId, nexTrip.locationSuppressed)
 
         /** @return departure time in millis since 1970 */
         private fun parseDepartureTime(departureTime: String?): Long? =
@@ -144,12 +153,25 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
 
         private val ORIGIN_LAT_LNG: GeoPoint = GeoPoint(0.0, 0.0)
 
+        fun guessIsSameNexTrip(a: NexTrip, b: NexTrip) =
+        	a.blockNumber == b.blockNumber &&
+                // blockNumber is not unique, but hopefully it is unique per 20 minutes,
+                //   and hopefully departure time doesn't change by more than 20 minutes
+        		(abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 20 * 60 * 1000)
+
         fun getDirectionId(dir: NexTrip.Direction): Int =
 	    	when(dir) {
         	    NexTrip.Direction.SOUTH -> SOUTH_ID
         	    NexTrip.Direction.EAST  -> EAST_ID
         	    NexTrip.Direction.WEST  -> WEST_ID
         	    NexTrip.Direction.NORTH -> NORTH_ID
+            }
+        fun getGtfsDirectionId(dir: NexTrip.Direction): Int =
+	    	when(dir) {
+        	    NexTrip.Direction.SOUTH -> 1
+        	    NexTrip.Direction.EAST  -> 0
+        	    NexTrip.Direction.WEST  -> 1
+        	    NexTrip.Direction.NORTH -> 0
             }
 
         private val SOUTH_ID = 1
@@ -160,7 +182,7 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
 }
 
 // processed data for presentation
-class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context) {
+class PresentableNexTrip(val nexTrip: NexTrip, timeInMillis: Long, context: Context) {
 
     val isActual: Boolean = nexTrip.isActual
     val blockNumber: Int? = nexTrip.blockNumber
@@ -174,6 +196,7 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
     val position: GeoPoint? = nexTrip.position
     val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
     val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(timeInMillis)
+    val shapeId: Int? = nexTrip.shapeId
     val locationSuppressed: Boolean = nexTrip.locationSuppressed
 
     val departureText: String?
@@ -207,6 +230,9 @@ class PresentableNexTrip(nexTrip: NexTrip, timeInMillis: Long, context: Context)
         }
 
     companion object {
+        fun guessIsSameNexTrip(a: PresentableNexTrip, b: PresentableNexTrip) =
+            NexTrip.guessIsSameNexTrip(a.nexTrip, b.nexTrip)
+
         fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =
         	when (dir) {
                 NexTrip.Direction.SOUTH -> resources.getString(R.string.south)

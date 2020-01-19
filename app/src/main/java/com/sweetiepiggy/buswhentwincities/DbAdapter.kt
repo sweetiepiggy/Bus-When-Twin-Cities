@@ -539,7 +539,9 @@ class DbAdapter {
                     put(KEY_VEHICLE_HEADING, nexTrip.vehicleHeading)
                     put(KEY_VEHICLE_LATITUDE, nexTrip.position?.latitude)
                     put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
+                    nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
                 }
+                android.util.Log.d("got here", "got here: db setting blockNumber = ${nexTrip.blockNumber} and shapeId = ${nexTrip.shapeId}")
                 db.insert(TABLE_NEXTRIPS, null, cv)
             }
             setLastUpdate(stopId, lastUpdate)
@@ -573,7 +575,9 @@ class DbAdapter {
                     put(KEY_VEHICLE_HEADING, nexTrip.vehicleHeading)
                     put(KEY_VEHICLE_LATITUDE, nexTrip.position?.latitude)
                     put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
+                    nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
                 }
+                android.util.Log.d("got here", "got here: db setting blockNumber = ${nexTrip.blockNumber} and shapeId = ${nexTrip.shapeId}")
                 db.insert(TABLE_TIMESTOP_NEXTRIPS, null, cv)
             }
             setTimestopLastUpdate(timestopId, routeId, routeDirection, lastUpdate)
@@ -588,7 +592,7 @@ class DbAdapter {
         val c = mDbHelper!!.mDb!!.query(TABLE_NEXTRIPS,
             arrayOf(KEY_IS_ACTUAL, KEY_BLOCK_NUMBER, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
                 KEY_GATE, KEY_ROUTE, KEY_ROUTE_DIRECTION, KEY_TERMINAL, KEY_VEHICLE_HEADING,
-                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE),
+                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE, KEY_SHAPE_ID),
             "$KEY_STOP_ID == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
             arrayOf(stopId.toString(), secondsBeforeNowToIgnore.toString()), null, null,
             "$KEY_DEPARTURE_UNIX_TIME ASC", null)
@@ -603,6 +607,7 @@ class DbAdapter {
         val vehicleHeadingIndex = c.getColumnIndex(KEY_VEHICLE_HEADING)
         val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
         val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
+        val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
             val blockNumber = c.getInt(blockNumberIndex)
@@ -615,10 +620,12 @@ class DbAdapter {
             val vehicleHeading = c.getDouble(vehicleHeadingIndex)
             val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
             val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
+            val rawShapeId = c.getInt(shapeIdIndex)
+            val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
                 NexTrip(isActual, blockNumber, departureTimeInMillis, description,
                         gate, route, routeDirection, terminal, vehicleHeading,
-                        vehicleLatitude, vehicleLongitude).let {
+                        vehicleLatitude, vehicleLongitude, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
             )
@@ -632,7 +639,7 @@ class DbAdapter {
         val c = mDbHelper!!.mDb!!.query(TABLE_TIMESTOP_NEXTRIPS,
             arrayOf(KEY_IS_ACTUAL, KEY_BLOCK_NUMBER, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
                 KEY_GATE, KEY_ROUTE, KEY_ROUTE_DIRECTION, KEY_TERMINAL, KEY_VEHICLE_HEADING,
-                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE),
+                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE, KEY_SHAPE_ID),
             /* query without consideration of KEY_ROUTE because the NexTrip
              * route might not match the route from the GetRoutes operation,
              * for example: route "901" becomes route "Blue" */
@@ -651,6 +658,7 @@ class DbAdapter {
         val vehicleHeadingIndex = c.getColumnIndex(KEY_VEHICLE_HEADING)
         val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
         val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
+        val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
             val blockNumber = c.getInt(blockNumberIndex)
@@ -663,10 +671,12 @@ class DbAdapter {
             val vehicleHeading = c.getDouble(vehicleHeadingIndex)
             val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
             val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
+            val rawShapeId = c.getInt(shapeIdIndex)
+            val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
                 NexTrip(isActual, blockNumber, departureTimeInMillis, description,
                         gate, route, dbRouteDirection, terminal, vehicleHeading,
-                        vehicleLatitude, vehicleLongitude).let {
+                        vehicleLatitude, vehicleLongitude, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
             )
@@ -780,8 +790,8 @@ class DbAdapter {
         return stop
     }
 
-    fun getShape(shapeId: Int): List<LatLng> {
-        val ret = ArrayList<LatLng>()
+    fun getShape(shapeId: Int): List<GeoPoint> {
+        val ret = ArrayList<GeoPoint>()
         val c = mDbHelper!!.mDb!!.query(TABLE_SHAPES,
             arrayOf(KEY_SHAPE_PT_LAT, KEY_SHAPE_PT_LON),
             "$KEY_SHAPE_ID == ?", arrayOf(shapeId.toString()), null, null,
@@ -789,13 +799,19 @@ class DbAdapter {
         val latIdx = c.getColumnIndex(KEY_SHAPE_PT_LAT)
         val lonIdx = c.getColumnIndex(KEY_SHAPE_PT_LON)
         while (c.moveToNext()) {
-            ret.add(LatLng(c.getDouble(latIdx), c.getDouble(lonIdx)))
+            ret.add(GeoPoint(c.getDouble(latIdx), c.getDouble(lonIdx)))
         }
         c.close()
         return ret
     }
 
-    fun replaceShape(cv: ContentValues) {
+    fun replaceShapeSegment(shapeId: Int, shapePtLat: Double, shapePtLon: Double, shapePtSequence: Int) {
+        val cv = ContentValues().apply {
+            put(KEY_SHAPE_ID, shapeId)
+            put(KEY_SHAPE_PT_LAT, shapePtLat)
+            put(KEY_SHAPE_PT_LON, shapePtLon)
+            put(KEY_SHAPE_PT_SEQUENCE, shapePtSequence)
+        }
         mDbHelper!!.mDb!!.replace(TABLE_SHAPES, null, cv)
     }
 

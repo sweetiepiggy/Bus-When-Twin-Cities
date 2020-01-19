@@ -32,7 +32,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
 
     interface OnClickMapListener {
-        fun onClickMap(vehicleBlockNumber: Int?)
+        fun onClickMap(nexTrip: PresentableNexTrip)
     }
 
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnCreateContextMenuListener {
@@ -55,9 +55,9 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
                 /* FIXME: adapterPosition can be out of mNexTrips array bounds,
                 	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
                 val nexTrip = mNexTrips[adapterPosition]
-                if (doShowLocation(nexTrip)) {
-                    mClickMapListener!!.onClickMap(nexTrip.blockNumber)
-                }
+//                if (doShowLocation(nexTrip)) {
+                    mClickMapListener!!.onClickMap(nexTrip)
+//                }
             }
             fullView.setOnCreateContextMenuListener(this)
        }

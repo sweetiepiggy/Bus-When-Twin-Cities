@@ -23,4 +23,5 @@
     <!-- <color name="colorToolbar">#121212</color> -->
     <color name="colorToolbar">#008577</color>
     <color name="colorRoute">#FFC251</color>
+    <color name="colorRouteUnselected">#40FFC251</color>
 </resources>

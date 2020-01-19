@@ -85,6 +85,8 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
     override fun getItemCount(): Int = mFavStops.size
 
+    /* FIXME: position is not a stable ID, when moving positions then returning
+       from another activity this causes spurious moves */
     override fun getItemId(position: Int): Long = FavoriteStopIdsViewModel.FavoriteStop.position(mFavStops[position]).toLong()
 
     private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -18,8 +18,6 @@
 */
 
 package com.sweetiepiggy.buswhentwincities
-
-import java.lang.Math.abs
 
 sealed class NexTripChange {
 
@@ -61,7 +59,7 @@ sealed class NexTripChange {
                         // origNexTrip doesn't exist in the new list
                         removes.add(NexTripChange.ItemRemoved(origIdx - removeCnt))
                         removeCnt += 1
-                    } else if (!isSameNexTrip(origNexTrip, newNexTrip)) {
+                    } else if (!PresentableNexTrip.guessIsSameNexTrip(origNexTrip, newNexTrip)) {
                         // this is not the NexTrip we are looking for, come back to it later
                         dumpOrig.add(IndexedValue(origIdx, origNexTrip))
                     } else {
@@ -229,13 +227,8 @@ sealed class NexTripChange {
             return groupedChanges
         }
 
-        private fun isSameNexTrip(a: PresentableNexTrip, b: PresentableNexTrip) =
-        	a.blockNumber == b.blockNumber && (a.departureTimeInMillis == b.departureTimeInMillis ||
-                // turns out blockNumber is not unique, but hopefully it is unique per 10 minutes
-        		abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 10 * 60 * 1000)
-
-        fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip,
-    			isHidden: Boolean): Boolean {
+        private fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip,
+    			                       isHidden: Boolean): Boolean {
             val ret = nexTrip1.departureText == nexTrip2.departureText &&
         	nexTrip1.description == nexTrip2.description &&
         	(isHidden ||
