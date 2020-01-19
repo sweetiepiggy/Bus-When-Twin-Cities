@@ -46,6 +46,8 @@ class DbAdapter {
             db.execSQL(DATABASE_CREATE_STOPS)
             db.execSQL(DATABASE_CREATE_LAST_UPDATE)
             db.execSQL(DATABASE_CREATE_LAST_TIMESTOP_UPDATE)
+            db.execSQL(DATABASE_CREATE_SHAPES)
+            db.execSQL(DATABASE_CREATE_SHAPES_INDEX)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
@@ -225,6 +227,20 @@ class DbAdapter {
                         PRIMARY KEY(timestop_id, route, route_direction, terminal)
                     )
                 """)
+            }
+            // create gtfs shapes table, versionCode 62
+            if (oldVer < 10) {
+                db.execSQL("""
+                    CREATE TABLE shapes (
+                        shape_id INTEGER NOT NULL,
+                        shape_pt_lat DOUBLE NOT NULL,
+                        shape_pt_lon DOUBLE NOT NULL,
+                        shape_pt_sequence INTEGER NOT NULL
+                    )
+                """)
+                db.execSQL("CREATE INDEX index_shapes ON shapes (shape_id)")
+                db.execSQL("ALTER TABLE nextrips ADD COLUMN shape_id INTEGER")
+                db.execSQL("ALTER TABLE timestop_nextrips ADD COLUMN shape_id INTEGER")
             }
         }
 
@@ -764,6 +780,25 @@ class DbAdapter {
         return stop
     }
 
+    fun getShape(shapeId: Int): List<LatLng> {
+        val ret = ArrayList<LatLng>()
+        val c = mDbHelper!!.mDb!!.query(TABLE_SHAPES,
+            arrayOf(KEY_SHAPE_PT_LAT, KEY_SHAPE_PT_LON),
+            "$KEY_SHAPE_ID == ?", arrayOf(shapeId.toString()), null, null,
+            "$KEY_SHAPE_PT_SEQUENCE ASC", null)
+        val latIdx = c.getColumnIndex(KEY_SHAPE_PT_LAT)
+        val lonIdx = c.getColumnIndex(KEY_SHAPE_PT_LON)
+        while (c.moveToNext()) {
+            ret.add(LatLng(c.getDouble(latIdx), c.getDouble(lonIdx)))
+        }
+        c.close()
+        return ret
+    }
+
+    fun replaceShape(cv: ContentValues) {
+        mDbHelper!!.mDb!!.replace(TABLE_SHAPES, null, cv)
+    }
+
     companion object {
         val KEY_STOP_ID = "stop_id"
         val KEY_TIMESTOP_ID = "timestop_id"
@@ -787,6 +822,10 @@ class DbAdapter {
         private val KEY_STOP_LAT = "stop_lat"
         private val KEY_STOP_LON = "stop_lon"
         private val KEY_WHEELCHAIR_BOARDING = "wheelchair_boarding"
+        private val KEY_SHAPE_ID = "shape_id"
+        private val KEY_SHAPE_PT_LAT = "shape_pt_lat"
+        private val KEY_SHAPE_PT_LON = "shape_pt_lon"
+        private val KEY_SHAPE_PT_SEQUENCE = "shape_pt_sequence"
 
         private val KEY_LAST_UPDATE = "last_update"
 
@@ -799,12 +838,14 @@ class DbAdapter {
         private val TABLE_STOPS = "stops"
         private val TABLE_LAST_UPDATE = "last_update"
         private val TABLE_LAST_TIMESTOP_UPDATE = "last_timestop_update"
+        private val TABLE_SHAPES = "shapes"
 
         private val INDEX_NEXTRIPS = "index_nextrips"
         private val INDEX_TIMESTOP_NEXTRIPS = "index_timestop_nextrips"
+        private val INDEX_SHAPES = "index_shapes"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 9
+        private val DATABASE_VERSION = 10
 
         private val DATABASE_CREATE_FAV_STOPS = """
             CREATE TABLE $TABLE_FAV_STOPS (
@@ -861,7 +902,8 @@ class DbAdapter {
                 $KEY_TERMINAL TEXT,
                 $KEY_VEHICLE_HEADING DOUBLE,
                 $KEY_VEHICLE_LATITUDE DOUBLE,
-                $KEY_VEHICLE_LONGITUDE DOUBLE
+                $KEY_VEHICLE_LONGITUDE DOUBLE,
+                $KEY_SHAPE_ID INTEGER
             )
             """
 
@@ -878,7 +920,8 @@ class DbAdapter {
                 $KEY_TERMINAL TEXT,
                 $KEY_VEHICLE_HEADING DOUBLE,
                 $KEY_VEHICLE_LATITUDE DOUBLE,
-                $KEY_VEHICLE_LONGITUDE DOUBLE
+                $KEY_VEHICLE_LONGITUDE DOUBLE,
+                $KEY_SHAPE_ID INTEGER
             )
             """
 
@@ -917,6 +960,19 @@ class DbAdapter {
                 $KEY_LAST_UPDATE DATETIME,
                 PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_ROUTE_DIRECTION)
             )
+            """
+
+        private val DATABASE_CREATE_SHAPES = """
+            CREATE TABLE $TABLE_SHAPES (
+                $KEY_SHAPE_ID INTEGER NOT NULL,
+                $KEY_SHAPE_PT_LAT DOUBLE NOT NULL,
+                $KEY_SHAPE_PT_LON DOUBLE NOT NULL,
+                $KEY_SHAPE_PT_SEQUENCE INTEGER NOT NULL
+            )
+            """
+
+        private val DATABASE_CREATE_SHAPES_INDEX = """
+            CREATE INDEX $INDEX_SHAPES ON $TABLE_SHAPES ($KEY_SHAPE_ID)
             """
 
         private fun directionToInt(dir: NexTrip.Direction?): Int? =
