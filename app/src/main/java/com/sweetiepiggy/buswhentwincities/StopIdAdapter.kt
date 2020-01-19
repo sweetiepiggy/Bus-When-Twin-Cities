@@ -37,7 +37,8 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
 
     inner class StopIdViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnCreateContextMenuListener {
         val routeTextView: TextView = v.findViewById<TextView>(R.id.route)
-        val directionTextView: TextView = v.findViewById<TextView>(R.id.direction)
+        val directionTextView: TextView? = v.findViewById<TextView?>(R.id.direction)
+        val directionBoundTextView: TextView? = v.findViewById<TextView?>(R.id.directionBound)
         val gpsImageView: ImageView = v.findViewById<ImageView>(R.id.gps_icon)
         val descriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         val departureTextTextView: TextView = v.findViewById<TextView>(R.id.departure_text)
@@ -76,7 +77,8 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     override fun onBindViewHolder(holder: StopIdViewHolder, position: Int) {
         val nexTrip = mNexTrips[position]
         holder.routeTextView.text = nexTrip.routeAndTerminal
-        holder.directionTextView.text = nexTrip.routeDirectionStr
+        holder.directionTextView?.text = nexTrip.routeDirectionStr
+        holder.directionBoundTextView?.text = nexTrip.routeDirectionBoundStr?.toLowerCase()
         holder.descriptionTextView.text = nexTrip.description
         holder.departureTextTextView.text = nexTrip.departureText
         holder.departureTimeTextView.text = nexTrip.departureTime
