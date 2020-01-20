@@ -37,6 +37,10 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     private var mDbLastUpdate: Long = 0
     private var mDbNexTrips: List<NexTrip>? = null
     private var mLoadingNexTrips: Boolean = false
+    private var mNexTripsLoaded: Boolean = false
+    private var mShapesLoaded: Boolean = false
+    /** set of shapeIds */
+    private val mFindingShapeFor: MutableSet<Int> = mutableSetOf()
 
     private val mNexTrips: MutableLiveData<List<NexTrip>> by lazy {
         MutableLiveData<List<NexTrip>>().also { loadNexTrips() }
@@ -61,6 +65,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         get() = Calendar.getInstance().timeInMillis / 1000L
 
     fun getNexTrips(): LiveData<List<NexTrip>> = mNexTrips
+    fun nexTripsLoaded() = mNexTripsLoaded
 
     fun getDoShowRoutes(): LiveData<Map<Pair<String?, String?>, Boolean>> = mDoShowRoutes
     fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
@@ -72,11 +77,14 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     fun getShapes(): LiveData<Map<Int, List<LatLng>>> = mShapes
     fun findShapeId(nexTrip: NexTrip) {
         android.util.Log.d("got here", "got here: in findShapeId(${nexTrip.blockNumber})")
-        DownloadShapeIdTask(this, nexTrip).execute()
+        DownloadShapeIdTask(this, nexTrip, mStopId).execute()
     }
     fun findShape(shapeId: Int) {
         android.util.Log.d("got here", "got here: in findShape($shapeId)")
-        DownloadShapeTask(this, mContext, shapeId).execute()
+        if (mShapesLoaded && !(mShapes.value?.contains(shapeId) ?: false) && !mFindingShapeFor.contains(shapeId)) {
+            mFindingShapeFor.add(shapeId)
+            LoadShapeTask(shapeId).execute()
+        }
     }
 
     fun loadNexTrips() {
@@ -130,6 +138,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                 nexTrip
             }
         }
+        mNexTripsLoaded = true
         mNexTrips.value = newNexTrips
         mRefreshingListener?.setRefreshing(false)
         android.util.Log.d("got here", "got here: calling StoreNexTripsInDbTask")
@@ -351,16 +360,37 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
         override fun onPostExecute(shapes: Map<Int, List<LatLng>>) {
             mShapes.value = shapes
+            mShapesLoaded = true
+        }
+    }
+
+    private inner class LoadShapeTask(private val shapeId: Int): AsyncTask<Void, Void, List<LatLng>>() {
+        override fun doInBackground(vararg params: Void): List<LatLng> {
+            var shape: List<LatLng>
+            DbAdapter().apply {
+                open(mContext)
+                shape = getShape(shapeId)
+                close()
+            }
+            return shape
+        }
+
+        override fun onPostExecute(shape: List<LatLng>) {
+            if (!shape.isEmpty()) {
+                mShapes.value = (mShapes.value ?: mapOf()) + Pair(shapeId, shape)
+                // mFindingShapeFor.remove(shapeId)
+            } else {
+                DownloadShapeTask(this@NexTripsViewModel, mContext, shapeId).execute()
+            }
         }
     }
 
     override fun onDownloadedShapeId(nexTrip: NexTrip, shapeId: Int) {
         android.util.Log.d("got here", "got here: shapeId = ${shapeId}")
-        val newNexTrip = NexTrip.setShapeId(nexTrip, shapeId)
         mNexTrips.value?.let { oldNexTrips ->
             val newNexTrips = oldNexTrips.map { oldNexTrip ->
                 if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
-                    newNexTrip
+                    NexTrip.setShapeId(oldNexTrip, shapeId)
                 } else {
                     oldNexTrip
                 }
@@ -373,17 +403,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     override fun onDownloadedShape(shapeId: Int, shape: List<LatLng>) {
         android.util.Log.d("got here", "got here: onDownloadedShape shapeId = ${shapeId}")
         mShapes.value = (mShapes.value ?: mapOf()) + Pair(shapeId, shape)
-        // val newNexTrip = NexTrip.setShapeId(nexTrip, shapeId)
-        // mNexTrips.value?.let { oldNexTrips ->
-        //     val newNexTrips = oldNexTrips.map { oldNexTrip ->
-        //         if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
-        //             newNexTrip
-        //         } else {
-        //             oldNexTrip
-        //         }
-        //     }
-        //     mNexTrips.value = newNexTrips
-        // }
     }
 
     companion object {

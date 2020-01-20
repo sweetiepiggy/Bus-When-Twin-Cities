@@ -24,14 +24,10 @@ import android.util.JsonReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
-import java.net.MalformedURLException
-import java.net.SocketException
-import java.net.URL
-import java.net.UnknownHostException
-import javax.net.ssl.HttpsURLConnection
+import java.net.*
 
 class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdListener,
-                           private val mNexTrip: NexTrip) : AsyncTask<Void, Int, Void>() {
+                           private val mNexTrip: NexTrip, private val mStopId: Int?) : AsyncTask<Void, Int, Void>() {
     private var mShapeId: Int? = null
 
     interface OnDownloadedShapeIdListener {
@@ -88,9 +84,9 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
             val dt = nexTrip.departureTimeInMillis / 1000
             val dir = NexTrip.getGtfsDirectionId(nexTrip.routeDirection)
             val tripsUrl = ((if (mUseHttps) "https://" else "http://")
-                             + TRIPS_URL + "?block_id=${nexTrip.blockNumber}&departure_time=${dt}&direction_id=${dir}&description=${nexTrip.description}")
+                             + TRIPS_URL + "?block_id=${nexTrip.blockNumber}&departure_time=${dt}&direction_id=${dir}&description=${nexTrip.description}" + (mStopId?.let { "&stop_id=$it" } ?: ""))
             android.util.Log.d("got here", "got here: tripsUrl is $tripsUrl")
-            val urlConnection = URL(tripsUrl).openConnection() as HttpsURLConnection
+            val urlConnection = URL(tripsUrl).openConnection() as HttpURLConnection
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
             try {
