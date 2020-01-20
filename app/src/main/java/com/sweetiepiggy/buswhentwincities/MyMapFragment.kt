@@ -209,6 +209,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
+            // initialize camera only if we previously thought we initialized the
+            // camera but the map wasn't ready
+            if (mInitCameraDone) {
+                initCamera()
+            }
         } else {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
@@ -233,6 +238,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mMap?.isMyLocationEnabled = true
                 }
+        }
+        // initialize camera only if we previously thought we initialized the
+        // camera but the map wasn't ready
+        if (mInitCameraDone) {
+            initCamera()
         }
     }
 
@@ -369,7 +379,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        android.util.Log.d("got here", "got here: in updateNexTrips")
+        android.util.Log.d("got here", "got here2: in updateNexTrips")
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
@@ -383,6 +393,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             mNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
         }
         if (mNexTrips != null) {
+            android.util.Log.d("got here", "got here2: calling updateMarkers")
             updateMarkers()
         }
         updateRouteLines()
@@ -419,7 +430,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun updateMarkers() {
-        android.util.Log.d("got here", "got here: in updateMarkers()")
+        android.util.Log.d("got here", "got here: in updateMarkers(), mMap is null = ${mMap == null}")
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, markerAndPosition) in mMarkers) {
             if (!mNexTrips!!.containsKey(blockNumber)) {
