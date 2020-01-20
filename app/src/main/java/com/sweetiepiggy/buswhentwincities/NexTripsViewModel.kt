@@ -113,6 +113,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                 }
                 mDownloadNexTripsTask!!.execute()
             } else {
+                mNexTripsLoaded = true
                 // too soon to download again, just refresh the displayed times
                 mNexTrips.value = mNexTrips.value?.let {
                     filterOldNexTrips(it, unixTime, mLastUpdate)
@@ -147,6 +148,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     }
 
     override fun onDownloadedNexTripsError(err: MetroTransitDownloader.DownloadError) {
+        mNexTripsLoaded = true
         if (mLastUpdate == 0L) {
             val dbNexTrips = mDbNexTrips
             // fall back to nexTrips from database if they exist
