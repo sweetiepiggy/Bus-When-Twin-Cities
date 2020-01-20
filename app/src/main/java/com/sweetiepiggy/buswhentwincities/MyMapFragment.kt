@@ -234,16 +234,19 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         selectRouteLine(nexTrip)
 
         mMap?.run {
+            var markerToShow: Marker? = null
             for ((marker, taggedNexTrip) in mMarkers.values) {
                 if (nexTrip.blockNumber == taggedNexTrip.blockNumber) {
                     marker.alpha = 1f
-                    marker.showInfoWindow()
+                    markerToShow = marker
                     zoomToPosition(taggedNexTrip.position!!)
                 } else {
                     marker.alpha = UNSELECTED_MARKER_ALPHA
                     marker.closeInfoWindow()
                 }
             }
+            // workaround bug where closeInfoWindow() closes other info window
+            markerToShow?.showInfoWindow()
         }
     }
 
