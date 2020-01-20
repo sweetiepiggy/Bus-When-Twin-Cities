@@ -53,6 +53,7 @@ sealed class NexTripChange {
             while (origItr.hasNext()) {
                 // come back to these later
                 val dumpOrig: MutableList<IndexedValue<PresentableNexTrip>> = mutableListOf()
+                var foundMatch = false
 
                 for ((origIdx, origNexTrip) in origItr) {
                     if (newNexTrip == null) {
@@ -79,10 +80,11 @@ sealed class NexTripChange {
                             newIdx = -1
                             newNexTrip = null
                         }
+                        foundMatch = true
                     }
                 }
 
-                if (newNexTrip != null) {
+                if (newNexTrip != null && !foundMatch) {
                     movesAndInserts.add(Either.Right(NexTripChange.ItemInserted(newIdx)))
                     insertedCnt += 1
                     if (newItr.hasNext()) {
