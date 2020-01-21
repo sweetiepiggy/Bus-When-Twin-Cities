@@ -23,10 +23,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.TypedValue
 import android.util.TypedValue.complexToDimensionPixelSize
 import android.view.LayoutInflater
@@ -329,7 +327,8 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
 //                    zoomTo(latLngsWithMyLoc, 5.236f)
 //                }
 //            }
-//            .addOnFailureListener { zoomTo(latLngs, 5.236f) }
+//            .addOnFailureListener { zoomTo(latLngsWithStop, 5.236f) }
+        zoomTo(latLngsWithStop, 5.2356f)
     }
 
     private fun zoomToPosition(pos: GeoPoint) {
@@ -365,7 +364,14 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             val height = resources.displayMetrics.heightPixels - actionBarHeight
             val mapWidth = if (width > height) (width * 0.618).toInt() else width
             val padding = (minOf(mapWidth, height) / paddingRatio).toInt()
-            mMap?.zoomToBoundingBox(BoundingBox.fromGeoPoints(latLngs), true, padding)
+            // FIXME: this crashes on orientation change?
+            // java.lang.IllegalArgumentException: north must be in [-85.05112877980658,85.05112877980658]
+            // maybe related: https://github.com/osmdroid/osmdroid/issues/1339
+            // possibly view not inflated when this is called?
+            try {
+                zoomToBoundingBox(BoundingBox.fromGeoPoints(latLngs), true, padding)
+            } catch (e: IllegalArgumentException) {
+            }
             // animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, mapWidth, height, padding))
         }
     }
