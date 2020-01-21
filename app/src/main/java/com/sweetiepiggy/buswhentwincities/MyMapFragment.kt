@@ -506,6 +506,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 }
             }
 
+            // in case mMap==null when updateShapes last called
+            mShapes?.let { updateShapes(it) }
+
             for ((shapeId, routeLine) in mRouteLines) {
                 val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
                 val color = if (wantShapeId != shapeId)
