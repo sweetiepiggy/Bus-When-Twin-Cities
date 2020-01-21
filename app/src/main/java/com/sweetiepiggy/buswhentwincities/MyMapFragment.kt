@@ -55,6 +55,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private var mMap: GoogleMap? = null
     private var mVehicleBlockNumber: Int? = null
     private var mSelectedRouteLineBlockNumber: Int? = null
+    private var mSelectedShapeId: Int? = null
     /** map from blockNumber to nexTrip */
     private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mModel: NexTripsViewModel
@@ -297,8 +298,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         // in case map was not initialized when mNexTrips updated?
         if (!mNexTrips.isNullOrEmpty()) {
             updateMarkers()
+            updateRouteLines(mNexTrips!!.values.map { it.nexTrip } )
         }
-        updateRouteLines()
         if (!mNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
             mInitCameraDone = true
@@ -396,7 +397,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             android.util.Log.d("got here", "got here2: calling updateMarkers")
             updateMarkers()
         }
-        updateRouteLines()
+        updateRouteLines(nexTrips)
         for (nexTrip in nexTrips) {
             if (nexTrip.shapeId != null) {
                 mFindingShapeIdFor.remove(nexTrip.blockNumber)
@@ -412,7 +413,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
-                    val color = if (mVehicleBlockNumber != null && mNexTrips!![mVehicleBlockNumber]?.shapeId != shapeId)
+                    val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
+                    val color = if (wantShapeId != shapeId)
                         R.color.colorRouteUnselected else R.color.colorRoute
                     mRouteLines[shapeId] = addPolyline(
                         PolylineOptions().apply {
@@ -478,14 +480,22 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
     }
 
-    private fun updateRouteLines() {
+    private fun updateRouteLines(nexTrips: List<NexTrip>) {
         android.util.Log.d("got here", "got here: in updateRouteLines()")
 
         mMap?.run {
+            for (nexTrip in nexTrips) {
+                if (nexTrip.shapeId != null && !(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
+                    android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
+                    mModel.findShape(nexTrip.shapeId)
+                }
+            }
+
             for ((shapeId, routeLine) in mRouteLines) {
-                    val color = if (mSelectedRouteLineBlockNumber != null && mNexTrips!![mSelectedRouteLineBlockNumber]?.shapeId != shapeId)
-                        R.color.colorRouteUnselected else R.color.colorRoute
-                    routeLine.setColor(ContextCompat.getColor(context!!, color))
+                val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
+                val color = if (wantShapeId != shapeId)
+                    R.color.colorRouteUnselected else R.color.colorRoute
+                routeLine.setColor(ContextCompat.getColor(context!!, color))
             }
         }
     }
@@ -496,6 +506,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }
 
         mSelectedRouteLineBlockNumber = nexTrip.blockNumber
+        mSelectedShapeId = nexTrip.shapeId
 
         if (nexTrip.shapeId == null) {
             // get shapeId then shape then create polyline
@@ -503,12 +514,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 mFindingShapeIdFor.add(nexTrip.blockNumber)
                 mModel.findShapeId(nexTrip.nexTrip)
             }
-        } else if (!(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
-            // get shape then create polyline
-            android.util.Log.d("got here", "got here: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
-            mModel.findShape(nexTrip.shapeId)
         }
-        updateRouteLines()
+        updateRouteLines(listOf(nexTrip.nexTrip))
     }
 
     fun onChangeHiddenRoutes(changedRoutes: Set<Pair<String?, String?>>) {
