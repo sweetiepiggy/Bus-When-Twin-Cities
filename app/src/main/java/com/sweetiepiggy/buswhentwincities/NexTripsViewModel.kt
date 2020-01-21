@@ -217,15 +217,19 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         override fun onPostExecute(result: List<NexTrip>?) {
             val curTime = unixTime
             mDbNexTrips = result?.let { filterOldNexTrips(it, curTime, mDbLastUpdate) }
+            val doDownload = (result == null || curTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH)
 
             // display the database results now in case internet connection is slow
             if (!mDbNexTrips.isNullOrEmpty()) {
+                if (!doDownload) {
+                    mNexTripsLoaded = true
+                }
                 mNexTrips.value = mDbNexTrips
                 mLastUpdate = mDbLastUpdate
             }
 
             // download nexTrips if no or not-fresh results in database
-            if (result == null || curTime - mDbLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+            if (doDownload) {
                 val stopId = mStopId
                 val timestop = mTimestop
                 if (stopId != null || timestop != null) {
@@ -238,6 +242,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                 }
             // show results from database if they exist and are fresh
             } else {
+                mNexTripsLoaded = true
                 // mNexTrips.value = filterOldNexTrips(result, unixTime, mLastUpdate)
 
                 // actually, we already showed database results above if they
