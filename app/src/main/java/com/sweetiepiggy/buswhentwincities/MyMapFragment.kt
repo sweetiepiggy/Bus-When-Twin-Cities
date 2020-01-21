@@ -121,6 +121,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private val mLightrailNorthIcon: BitmapDescriptor by lazy {
         drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_north_30px)
     }
+    private var mColorRoute = R.color.colorRoute
+    private var mColorRouteUnselected = R.color.colorRouteUnselected
 
     companion object {
         fun newInstance() = MyMapFragment()
@@ -149,6 +151,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             loadState(savedInstanceState)
         }
 
+        if (PreferenceManager.getDefaultSharedPreferences(context!!).getBoolean("map_always_light", false)) {
+            mColorRoute = R.color.colorRouteAlwaysLight
+            mColorRouteUnselected = R.color.colorRouteUnselectedAlwaysLight
+        }
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
 
         mModel = activity?.run {
@@ -415,7 +421,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 if (!mRouteLines.containsKey(shapeId)) {
                     val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
                     val color = if (wantShapeId != shapeId)
-                        R.color.colorRouteUnselected else R.color.colorRoute
+                        mColorRouteUnselected else mColorRoute
                     mRouteLines[shapeId] = addPolyline(
                         PolylineOptions().apply {
                             addAll(shape)
@@ -494,7 +500,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for ((shapeId, routeLine) in mRouteLines) {
                 val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
                 val color = if (wantShapeId != shapeId)
-                    R.color.colorRouteUnselected else R.color.colorRoute
+                    mColorRouteUnselected else mColorRoute
                 routeLine.setColor(ContextCompat.getColor(context!!, color))
             }
         }
