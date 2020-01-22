@@ -235,9 +235,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(marker: Marker): Boolean {
                 val nexTrip = (marker.tag as PresentableNexTrip?)
-                if (mVehicleBlockNumber != null && mVehicleBlockNumber != nexTrip?.blockNumber) {
+                mSelectedRouteLineBlockNumber = null
+                mSelectedShapeId = null
+//                if (mVehicleBlockNumber != null && mVehicleBlockNumber != nexTrip?.blockNumber) {
                     deselectVehicle()
-                }
+//                }
                 nexTrip?.let { selectRouteLine(it) }
                 marker.showInfoWindow()
                 return true
@@ -248,9 +250,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 mSelectedRouteLineBlockNumber = null
                 mSelectedShapeId = (polyline.tag as Int)
                 updateRouteLines()
-                if (mVehicleBlockNumber != null) {
-                    deselectVehicle()
-                }
+                deselectVehicle()
             }
         })
     }
@@ -305,10 +305,12 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
-                if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) {
+                if ((mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) ||
+                        mSelectedShapeId != null) {
                     marker.apply {
                         setZIndex(VEHICLE_Z_INDEX)
-                        alpha = 1f
+                        alpha = if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
+                            UNSELECTED_MARKER_ALPHA else 1f
                     }
                 } else {
                     marker.apply {
@@ -458,11 +460,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private fun updateShapes(shapes: Map<Int, List<LatLng>>) {
         mShapes = shapes
         mMap?.run {
+            val wantShapeId = mSelectedShapeId ?:
+                mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
-                    val wantShapeId = mSelectedShapeId ?:
-                        mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
-                        findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
                     android.util.Log.d("got here", "got here: updateShapes(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, visibleShapeId = ${mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId}")
                     val color = if (wantShapeId == shapeId)
                         mColorRoute else mColorRouteUnselected
@@ -535,10 +537,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         }
                     ).apply {
                         val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
-                        if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
+                        if (mVehicleBlockNumber != null ||
+                                (mSelectedShapeId == null &&
+                                    !(mDoShowRoutes.get(routeAndTerminal) ?: true))) {
                             alpha = UNSELECTED_MARKER_ALPHA
                             setZIndex(UNSELECTED_VEHICLE_Z_INDEX)
                         } else {
+                            alpha = if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
+                                UNSELECTED_MARKER_ALPHA else 1f
                             setZIndex(VEHICLE_Z_INDEX)
                         }
                     }
@@ -573,10 +579,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 mShapes?.let { updateShapes(it) }
             }
 
+            val wantShapeId = mSelectedShapeId ?:
+                mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, routeLine) in mRouteLines) {
-               val wantShapeId = mSelectedShapeId ?:
-                   mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
-                   findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
                android.util.Log.d("got here", "got here: updateRouteLines(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, visibleShapeId = ${mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId}")
                 val color = if (wantShapeId == shapeId)
                     mColorRoute else mColorRouteUnselected
