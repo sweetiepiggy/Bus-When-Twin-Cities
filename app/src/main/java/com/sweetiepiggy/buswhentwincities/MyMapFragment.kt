@@ -131,6 +131,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val UNSELECTED_MARKER_ALPHA = 0.3f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
+        private val UNSELECTED_VEHICLE_Z_INDEX = 0f
+        private val UNSELECTED_ROUTE_Z_INDEX = 1f
+        private val ROUTE_Z_INDEX = 2f
+        private val VEHICLE_Z_INDEX = 3f
+        private val STOP_Z_INDEX = 4f
 
         private fun drawableToBitmap(context: Context, id: Int): BitmapDescriptor =
             BitmapDescriptorFactory.fromBitmap(getDrawable(context, id)?.toBitmap())
@@ -266,12 +271,18 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for (marker in mMarkers.values.map { it.first }) {
                 val taggedNexTrip = marker.tag as PresentableNexTrip
                 if (nexTrip.blockNumber == taggedNexTrip.blockNumber) {
-                    marker.alpha = 1f
-                    marker.showInfoWindow()
+                    marker.apply {
+                        setZIndex(VEHICLE_Z_INDEX)
+                        alpha = 1f
+                        showInfoWindow()
+                    }
                     zoomToPosition(taggedNexTrip.position!!)
                 } else {
-                    marker.alpha = UNSELECTED_MARKER_ALPHA
-                    marker.hideInfoWindow()
+                    marker.apply {
+                        setZIndex(UNSELECTED_VEHICLE_Z_INDEX)
+                        alpha = UNSELECTED_MARKER_ALPHA
+                        hideInfoWindow()
+                    }
                 }
             }
         }
@@ -282,21 +293,31 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         mMap?.run {
             for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
-                marker.alpha = if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true)
-                    1f
-                else
-                    UNSELECTED_MARKER_ALPHA
+                if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) {
+                    marker.apply {
+                        setZIndex(VEHICLE_Z_INDEX)
+                        alpha = 1f
+                    }
+                } else {
+                    marker.apply {
+                        setZIndex(UNSELECTED_VEHICLE_Z_INDEX)
+                        alpha = UNSELECTED_MARKER_ALPHA
+                    }
+                }
             }
         }
     }
 
     private fun initCamera() {
         mStop?.let {
-            mMap?.addMarker(MarkerOptions()
-                    .position(LatLng(it.stopLat, it.stopLon))
-                    .title(resources.getString(R.string.stop_number) + it.stopId.toString())
-                    .snippet(it.stopName)
-                    .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
+            mMap?.addMarker(
+                MarkerOptions().apply {
+                    position(LatLng(it.stopLat, it.stopLon))
+                    title(resources.getString(R.string.stop_number) + it.stopId.toString())
+                    snippet(it.stopName)
+                    icon(drawableToBitmap(context!!, R.drawable.ic_stop))
+                    zIndex(STOP_Z_INDEX)
+                }
             )// ?.apply {
             //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
             // }
@@ -420,12 +441,17 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
                     val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
-                    val color = if (wantShapeId != shapeId)
-                        mColorRouteUnselected else mColorRoute
+                    val color = if (wantShapeId == shapeId)
+                        mColorRoute else mColorRouteUnselected
+                    val zIndex = if (wantShapeId == shapeId)
+                        ROUTE_Z_INDEX else UNSELECTED_ROUTE_Z_INDEX
                     mRouteLines[shapeId] = addPolyline(
                         PolylineOptions().apply {
                             addAll(shape)
                             color(ContextCompat.getColor(context!!, color))
+                            startCap(RoundCap())
+                            endCap(RoundCap())
+                            zIndex(zIndex)
                         }
                     )
                 }
@@ -461,15 +487,20 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         }
                     }
                 } else {
-                    addMarker(MarkerOptions()
-                        .icon(getIcon(nexTrip.getVehicle(), nexTrip.routeDirection))
-                        .position(nexTrip.position!!)
-                        .flat(true)
-                        .anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
+                    addMarker(
+                        MarkerOptions().apply {
+                            icon(getIcon(nexTrip.getVehicle(), nexTrip.routeDirection))
+                            position(nexTrip.position!!)
+                            flat(true)
+                            anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
+                        }
                     ).apply {
                         val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
                         if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
                             alpha = UNSELECTED_MARKER_ALPHA
+                            setZIndex(UNSELECTED_VEHICLE_Z_INDEX)
+                        } else {
+                            setZIndex(VEHICLE_Z_INDEX)
                         }
                     }
                 }.apply {
@@ -502,9 +533,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
             for ((shapeId, routeLine) in mRouteLines) {
                 val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
-                val color = if (wantShapeId != shapeId)
-                    mColorRouteUnselected else mColorRoute
-                routeLine.setColor(ContextCompat.getColor(context!!, color))
+                val color = if (wantShapeId == shapeId)
+                    mColorRoute else mColorRouteUnselected
+                val zIndex = if (wantShapeId == shapeId)
+                    ROUTE_Z_INDEX else UNSELECTED_ROUTE_Z_INDEX
+                routeLine.apply {
+                    setColor(ContextCompat.getColor(context!!, color))
+                    setZIndex(zIndex)
+                }
             }
         }
     }
