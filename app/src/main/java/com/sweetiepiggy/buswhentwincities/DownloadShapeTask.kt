@@ -25,8 +25,12 @@ import android.util.JsonReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
-import java.net.*
 import org.osmdroid.util.GeoPoint
+import java.net.MalformedURLException
+import java.net.SocketException
+import java.net.URL
+import java.net.UnknownHostException
+import javax.net.ssl.HttpsURLConnection
 
 class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListener,
                         private val mContext: Context,
@@ -84,7 +88,7 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
         val shapesUrl = ((if (mUseHttps) "https://" else "http://")
                          + "$SHAPES_URL/$shapeId")
         android.util.Log.d("got here", "got here: shapesUrl is $shapesUrl")
-        val urlConnection = URL(shapesUrl).openConnection() as HttpURLConnection
+        val urlConnection = URL(shapesUrl).openConnection() as HttpsURLConnection
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
         try {

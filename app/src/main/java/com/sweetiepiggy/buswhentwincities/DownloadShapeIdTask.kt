@@ -25,6 +25,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.UnsupportedEncodingException
 import java.net.*
+import javax.net.ssl.HttpsURLConnection
 
 class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdListener,
                            private val mNexTrip: NexTrip, private val mStopId: Int?) : AsyncTask<Void, Int, Void>() {
@@ -86,7 +87,7 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
             val tripsUrl = ((if (mUseHttps) "https://" else "http://")
                              + TRIPS_URL + "?block_id=${nexTrip.blockNumber}&departure_time=${dt}&direction_id=${dir}&description=${nexTrip.description}" + (mStopId?.let { "&stop_id=$it" } ?: ""))
             android.util.Log.d("got here", "got here: tripsUrl is $tripsUrl")
-            val urlConnection = URL(tripsUrl).openConnection() as HttpURLConnection
+            val urlConnection = URL(tripsUrl).openConnection() as HttpsURLConnection
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
             try {
