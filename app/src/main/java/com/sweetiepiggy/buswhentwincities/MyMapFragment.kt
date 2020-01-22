@@ -391,7 +391,12 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         mNexTrips = nexTrips
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
-            it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
+            it.position != null &&
+            (it.isActual ||
+             (it.minutesUntilDeparture(timeInMillis)?.let {
+                  it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC
+              } ?: false)
+            )
         }
 
         if (mVisibleNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
@@ -399,7 +404,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
         mVisibleNexTrips?.clear()
         nexTripsWithActualPosition.forEach {
-            mVisibleNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
+            if (!mVisibleNexTrips!!.contains(it.blockNumber)) {
+                mVisibleNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
+            }
         }
         if (mVisibleNexTrips != null) {
             android.util.Log.d("got here", "got here2: calling updateMarkers")
