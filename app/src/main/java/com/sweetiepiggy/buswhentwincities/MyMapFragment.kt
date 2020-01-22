@@ -243,6 +243,16 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 return true
             }
         })
+        googleMap.setOnPolylineClickListener(object : GoogleMap.OnPolylineClickListener {
+            override fun onPolylineClick(polyline: Polyline) {
+                mSelectedRouteLineBlockNumber = null
+                mSelectedShapeId = (polyline.tag as Int)
+                updateRouteLines()
+                if (mVehicleBlockNumber != null) {
+                    deselectVehicle()
+                }
+            }
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -458,8 +468,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                             startCap(RoundCap())
                             endCap(RoundCap())
                             zIndex(zIndex)
+                            clickable(true)
                         }
-                    )
+                    ).apply { tag = shapeId }
                 }
             }
             mShapesInitDone = true
