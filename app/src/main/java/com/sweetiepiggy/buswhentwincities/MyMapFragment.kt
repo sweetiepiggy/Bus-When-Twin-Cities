@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -56,8 +57,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private var mVehicleBlockNumber: Int? = null
     private var mSelectedRouteLineBlockNumber: Int? = null
     private var mSelectedShapeId: Int? = null
+    private var mNexTrips: List<NexTrip>? = null
     /** map from blockNumber to nexTrip */
-    private var mNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
+    private var mVisibleNexTrips: MutableMap<Int?, PresentableNexTrip>? = null
     private lateinit var mModel: NexTripsViewModel
     private var mDoShowRoutes: Map<Pair<String?, String?>, Boolean> = mapOf()
     private var mStop: Stop? = null
@@ -293,15 +295,15 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                         }
                     })
             })// ?.apply {
-            //     if (mNexTrips.isNullOrEmpty()) showInfoWindow()
+            //     if (mVisibleNexTrips.isNullOrEmpty()) showInfoWindow()
             // }
         }
-        // in case map was not initialized when mNexTrips updated?
-        if (!mNexTrips.isNullOrEmpty()) {
+        // in case map was not initialized when mVisibleNexTrips updated?
+        if (!mVisibleNexTrips.isNullOrEmpty()) {
             updateMarkers()
-            updateRouteLines(mNexTrips!!.values.map { it.nexTrip } )
+            updateRouteLines()
         }
-        if (!mNexTrips.isNullOrEmpty() || mStop != null) {
+        if (!mVisibleNexTrips.isNullOrEmpty() || mStop != null) {
             zoomToAllVehicles()
             mInitCameraDone = true
         }
@@ -386,23 +388,24 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
         android.util.Log.d("got here", "got here2: in updateNexTrips")
+        mNexTrips = nexTrips
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
             it.position != null && (it.isActual || (it.minutesUntilDeparture(timeInMillis)?.let { it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC } ?: false))
         }
 
-        if (mNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
-            mNexTrips = mutableMapOf()
+        if (mVisibleNexTrips == null && !nexTripsWithActualPosition.isEmpty()) {
+            mVisibleNexTrips = mutableMapOf()
         }
-        mNexTrips?.clear()
+        mVisibleNexTrips?.clear()
         nexTripsWithActualPosition.forEach {
-            mNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
+            mVisibleNexTrips!![it.blockNumber] = PresentableNexTrip(it, timeInMillis, context!!)
         }
-        if (mNexTrips != null) {
+        if (mVisibleNexTrips != null) {
             android.util.Log.d("got here", "got here2: calling updateMarkers")
             updateMarkers()
         }
-        updateRouteLines(nexTrips)
+        updateRouteLines()
         for (nexTrip in nexTrips) {
             if (nexTrip.shapeId != null) {
                 mFindingShapeIdFor.remove(nexTrip.blockNumber)
@@ -418,7 +421,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         mMap?.run {
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
-                    val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
+                    val wantShapeId = mSelectedShapeId ?:
+                        mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                        findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
                     val color = if (wantShapeId != shapeId)
                         mColorRouteUnselected else mColorRoute
                     val polyline = Polyline().apply {
@@ -433,6 +438,20 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
     }
 
+    private fun findShapeIdForBlockNumber(nexTrips: List<NexTrip>?, blockNumber: Int?) =
+        nexTrips?.filter {
+            it.blockNumber == blockNumber
+        }?.map {
+            it.shapeId
+        }?.distinct()?.let { possibleShapeIds ->
+            android.util.Log.d("got here", "got here: possibleShapeIds.size = ${possibleShapeIds.size}")
+            if (possibleShapeIds.size == 1) {
+                possibleShapeIds[0]
+            } else {
+                null
+            }
+        }
+
     private fun updateDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes = doShowRoutes
     }
@@ -441,7 +460,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         android.util.Log.d("got here", "got here: in updateMarkers(), mMap is null = ${mMap == null}")
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, markerAndNexTrip) in mMarkers) {
-            if (!mNexTrips!!.containsKey(blockNumber)) {
+            if (!mVisibleNexTrips!!.containsKey(blockNumber)) {
                 markerAndNexTrip.first.remove(mMap)
                 blockNumbersToRemove.add(blockNumber)
             }
@@ -452,7 +471,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
 
         mMap?.run {
-            for (nexTrip in mNexTrips!!.values) {
+            for (nexTrip in mVisibleNexTrips!!.values) {
                 android.util.Log.d("got here", "got here: blockNumber = ${nexTrip.blockNumber}")
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
@@ -497,24 +516,30 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }
     }
 
-    private fun updateRouteLines(nexTrips: List<NexTrip>) {
-        android.util.Log.d("got here", "got here: in updateRouteLines()")
+    private fun updateRouteLines() {
+        android.util.Log.d("got here", "got here: in updateRouteLines(), mMap is null = ${mMap == null}, mNexTrips?.size = ${mNexTrips?.size}")
 
         mMap?.run {
-            for (nexTrip in nexTrips) {
-                if (nexTrip.shapeId != null && !(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
-                    android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
-                    mModel.findShape(nexTrip.shapeId)
-                }
+            mNexTrips?.let { nexTrips ->
+               for (nexTrip in nexTrips) {
+                   if (nexTrip.shapeId != null && !(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
+                       android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
+                       mModel.findShape(nexTrip.shapeId)
+                   } else {
+                       android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} and have shape")
+                   }
+               }
             }
-
             // in case mMap==null when updateShapes last called
             if (!mShapesInitDone) {
                 mShapes?.let { updateShapes(it) }
             }
 
             for ((shapeId, routeLine) in mRouteLines) {
-                val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
+                val wantShapeId = mSelectedShapeId ?:
+                    mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                    findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
+                android.util.Log.d("got here", "got here: in updateRouteLines(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, mSelectedRouteLineBlockNumber = $mSelectedRouteLineBlockNumber")
                 val color = if (wantShapeId != shapeId)
                     mColorRouteUnselected else mColorRoute
                 routeLine.setColor(ContextCompat.getColor(context!!, color))
@@ -537,7 +562,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 mModel.findShapeId(nexTrip.nexTrip)
             }
         }
-        updateRouteLines(listOf(nexTrip.nexTrip))
+        updateRouteLines()
     }
 
     fun onChangeHiddenRoutes(changedRoutes: Set<Pair<String?, String?>>) {
