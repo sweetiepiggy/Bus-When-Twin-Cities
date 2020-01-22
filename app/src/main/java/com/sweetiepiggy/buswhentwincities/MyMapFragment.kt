@@ -272,10 +272,13 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         mVehicleBlockNumber = null
         mMap?.run {
             for ((marker, nexTrip) in mMarkers.values) {
-                marker.alpha = if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true)
-                    1f
-                else
-                    UNSELECTED_MARKER_ALPHA
+                if ((mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) ||
+                        mSelectedShapeId != null) {
+                    marker.alpha = if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
+                        UNSELECTED_MARKER_ALPHA else 1f
+                } else {
+                    marker.alpha = UNSELECTED_MARKER_ALPHA
+                }
             }
         }
     }
@@ -426,11 +429,11 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private fun updateShapes(shapes: Map<Int, List<GeoPoint>>) {
         mShapes = shapes
         mMap?.run {
+            val wantShapeId = mSelectedShapeId ?:
+                mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
-                    val wantShapeId = mSelectedShapeId ?:
-                        mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
-                        findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
                     val color = if (wantShapeId != shapeId)
                         mColorRouteUnselected else mColorRoute
                     val polyline = Polyline().apply {
@@ -494,8 +497,13 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                         setFlat(true)
                         setAnchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
                         val routeAndTerminal = Pair(nexTrip.route, nexTrip.terminal)
-                        if (mVehicleBlockNumber != null || !(mDoShowRoutes.get(routeAndTerminal) ?: true)) {
+                        if (mVehicleBlockNumber != null ||
+                                (mSelectedShapeId == null &&
+                                    !(mDoShowRoutes.get(routeAndTerminal) ?: true))) {
                             setAlpha(UNSELECTED_MARKER_ALPHA)
+                        } else {
+                            setAlpha(if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
+                                UNSELECTED_MARKER_ALPHA else 1f)
                         }
                         mMap?.overlays?.add(this)
                         setOnMarkerClickListener(object : Marker.OnMarkerClickListener {
@@ -542,10 +550,10 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 mShapes?.let { updateShapes(it) }
             }
 
+            val wantShapeId = mSelectedShapeId ?:
+                mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
+                findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, routeLine) in mRouteLines) {
-                val wantShapeId = mSelectedShapeId ?:
-                    mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
-                    findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
                 android.util.Log.d("got here", "got here: in updateRouteLines(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, mSelectedRouteLineBlockNumber = $mSelectedRouteLineBlockNumber")
                 val color = if (wantShapeId != shapeId)
                     mColorRouteUnselected else mColorRoute
