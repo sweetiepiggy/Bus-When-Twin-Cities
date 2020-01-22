@@ -65,6 +65,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private var mShapes: Map<Int, List<GeoPoint>>? = null
     private var mInitCameraDone: Boolean = false
     private var mDoShowRoutesInitDone: Boolean = false
+    private var mShapesInitDone: Boolean = false
     // note that Marker.position is the current position on the map which will
     // not match the NexTrip.position if the Marker is undergoing animation,
     // we keep track of the NexTrip.positions here so we can avoid jumpy
@@ -428,6 +429,7 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                     overlays?.add(polyline)
                 }
             }
+            mShapesInitDone = true
         }
     }
 
@@ -507,7 +509,9 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             }
 
             // in case mMap==null when updateShapes last called
-            mShapes?.let { updateShapes(it) }
+            if (!mShapesInitDone) {
+                mShapes?.let { updateShapes(it) }
+            }
 
             for ((shapeId, routeLine) in mRouteLines) {
                 val wantShapeId = mSelectedShapeId ?: mNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId
