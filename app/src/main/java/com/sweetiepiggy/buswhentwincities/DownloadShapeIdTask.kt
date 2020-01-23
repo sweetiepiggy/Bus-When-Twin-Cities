@@ -85,7 +85,12 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
             val dt = nexTrip.departureTimeInMillis / 1000
             val dir = NexTrip.getGtfsDirectionId(nexTrip.routeDirection)
             val tripsUrl = ((if (mUseHttps) "https://" else "http://")
-                             + TRIPS_URL + "?block_id=${nexTrip.blockNumber}&departure_time=${dt}&direction_id=${dir}&description=${nexTrip.description}" + (mStopId?.let { "&stop_id=$it" } ?: ""))
+                             + TRIPS_URL
+                             + "?block_id=${nexTrip.blockNumber}"
+                             + "&departure_time=$dt"
+                             + "&direction_id=$dir"
+                             + "&description=" + URLEncoder.encode(nexTrip.description, "UTF-8")
+                             + (mStopId?.let { "&stop_id=$it" } ?: ""))
             android.util.Log.d("got here", "got here: tripsUrl is $tripsUrl")
             val urlConnection = URL(tripsUrl).openConnection() as HttpsURLConnection
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
