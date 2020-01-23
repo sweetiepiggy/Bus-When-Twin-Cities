@@ -30,7 +30,6 @@ import java.net.MalformedURLException
 import java.net.SocketException
 import java.net.URL
 import java.net.UnknownHostException
-import javax.net.ssl.HttpsURLConnection
 
 class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListener,
                         private val mContext: Context,
@@ -86,7 +85,7 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
 
         val shapesUrl = ((if (mUseHttps) "https://" else "http://")
                          + "$SHAPES_URL/$shapeId")
-        val urlConnection = URL(shapesUrl).openConnection() as HttpsURLConnection
+        val urlConnection = URL(shapesUrl).openConnection()
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
         try {

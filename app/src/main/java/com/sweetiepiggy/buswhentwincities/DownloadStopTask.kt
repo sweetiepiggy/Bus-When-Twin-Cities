@@ -28,7 +28,6 @@ import java.net.MalformedURLException
 import java.net.SocketException
 import java.net.URL
 import java.net.UnknownHostException
-import javax.net.ssl.HttpsURLConnection
 
 class DownloadStopTask(private val mDownloadedListener: OnDownloadedStopListener,
                            private val mStopId: Int) : AsyncTask<Void, Int, Void>() {
@@ -81,7 +80,7 @@ class DownloadStopTask(private val mDownloadedListener: OnDownloadedStopListener
     private fun downloadStop(stopId: Int): Stop? {
         val stopUrl = ((if (mUseHttps) "https://" else "http://")
                 + STOP_URL + stopId.toString())
-        val urlConnection = URL(stopUrl).openConnection() as HttpsURLConnection
+        val urlConnection = URL(stopUrl).openConnection()
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
         var stop: Stop?
