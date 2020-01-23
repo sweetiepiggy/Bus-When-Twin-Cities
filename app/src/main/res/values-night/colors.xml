@@ -22,6 +22,6 @@
     <color name="colorComplementary">#C13C3D</color>
     <!-- <color name="colorToolbar">#121212</color> -->
     <color name="colorToolbar">#008577</color>
-    <color name="colorRoute">#FFC251</color>
-    <color name="colorRouteUnselected">#40FFC251</color>
+    <color name="colorRoute">#FFDFA4</color>
+    <color name="colorRouteUnselected">#40FFDFA4</color>
 </resources>
