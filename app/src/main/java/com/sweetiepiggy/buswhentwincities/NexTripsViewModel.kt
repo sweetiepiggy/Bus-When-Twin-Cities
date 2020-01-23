@@ -76,11 +76,9 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
     fun getShapes(): LiveData<Map<Int, List<LatLng>>> = mShapes
     fun findShapeId(nexTrip: NexTrip) {
-        android.util.Log.d("got here", "got here: in findShapeId(${nexTrip.blockNumber})")
         DownloadShapeIdTask(this, nexTrip, mStopId).execute()
     }
     fun findShape(shapeId: Int) {
-        android.util.Log.d("got here", "got here: in findShape($shapeId)")
         if (mShapesLoaded && !(mShapes.value?.contains(shapeId) ?: false) && !mFindingShapeFor.contains(shapeId)) {
             mFindingShapeFor.add(shapeId)
             LoadShapeTask(shapeId).execute()
@@ -142,7 +140,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         mNexTripsLoaded = true
         mNexTrips.value = newNexTrips
         mRefreshingListener?.setRefreshing(false)
-        android.util.Log.d("got here", "got here: calling StoreNexTripsInDbTask")
         StoreNexTripsInDbTask(newNexTrips).execute()
         mLoadingNexTrips = false
     }
@@ -393,7 +390,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     }
 
     override fun onDownloadedShapeId(nexTrip: NexTrip, shapeId: Int) {
-        android.util.Log.d("got here", "got here: shapeId = ${shapeId}")
         mNexTrips.value?.let { oldNexTrips ->
             val newNexTrips = oldNexTrips.map { oldNexTrip ->
                 if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
@@ -408,7 +404,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     }
 
     override fun onDownloadedShape(shapeId: Int, shape: List<LatLng>) {
-        android.util.Log.d("got here", "got here: onDownloadedShape shapeId = ${shapeId}")
         mShapes.value = (mShapes.value ?: mapOf()) + Pair(shapeId, shape)
     }
 

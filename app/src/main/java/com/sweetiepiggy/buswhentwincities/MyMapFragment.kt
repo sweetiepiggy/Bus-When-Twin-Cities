@@ -207,7 +207,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        android.util.Log.d("got here", "got here: in onMapReady")
         mMap = googleMap.apply {
             uiSettings.setMapToolbarEnabled(false)
             setIndoorEnabled(false)
@@ -275,7 +274,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             return
         }
         mVehicleBlockNumber = nexTrip.blockNumber
-        android.util.Log.d("got here", "got here: shapeId of ${nexTrip.blockNumber} in selectVehicle(${nexTrip.blockNumber}) is ${nexTrip.shapeId}")
 
         selectRouteLine(nexTrip)
 
@@ -421,7 +419,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        android.util.Log.d("got here", "got here2: in updateNexTrips")
         mNexTrips = nexTrips
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
@@ -443,7 +440,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             }
         }
         if (mVisibleNexTrips != null) {
-            android.util.Log.d("got here", "got here2: calling updateMarkers")
             updateMarkers()
         }
         updateRouteLines()
@@ -465,7 +461,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, shape) in shapes) {
                 if (!mRouteLines.containsKey(shapeId)) {
-                    android.util.Log.d("got here", "got here: updateShapes(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, visibleShapeId = ${mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId}")
                     val color = if (wantShapeId == shapeId)
                         mColorRoute else mColorRouteUnselected
                     val zIndex = if (wantShapeId == shapeId)
@@ -492,7 +487,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         }?.map {
             it.shapeId
         }?.distinct()?.let { possibleShapeIds ->
-            android.util.Log.d("got here", "got here: possibleShapeIds.size = ${possibleShapeIds.size}")
             if (possibleShapeIds.size == 1) {
                 possibleShapeIds[0]
             } else {
@@ -505,7 +499,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun updateMarkers() {
-        android.util.Log.d("got here", "got here: in updateMarkers(), mMap is null = ${mMap == null}")
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, markerAndPosition) in mMarkers) {
             if (!mVisibleNexTrips!!.containsKey(blockNumber)) {
@@ -520,7 +513,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 
         mMap?.run {
             for (nexTrip in mVisibleNexTrips!!.values) {
-                android.util.Log.d("got here", "got here: blockNumber = ${nexTrip.blockNumber}")
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
                         if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second, nexTrip.position)) {
@@ -563,13 +555,10 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     }
 
     private fun updateRouteLines() {
-        android.util.Log.d("got here", "got here: in updateRouteLines()")
-
         mMap?.run {
             mNexTrips?.let { nexTrips ->
                for (nexTrip in nexTrips) {
                    if (nexTrip.shapeId != null && !(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
-                       android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
                        mModel.findShape(nexTrip.shapeId)
                    }
                }
@@ -583,7 +572,6 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
                 findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, routeLine) in mRouteLines) {
-               android.util.Log.d("got here", "got here: updateRouteLines(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, visibleShapeId = ${mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId}")
                 val color = if (wantShapeId == shapeId)
                     mColorRoute else mColorRouteUnselected
                 val zIndex = if (wantShapeId == shapeId)
