@@ -8,8 +8,8 @@ android {
         applicationId "com.sweetiepiggy.buswhentwincities"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 63
-        versionName "0.23-osm"
+        versionCode 64
+        versionName "0.24-osm"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
