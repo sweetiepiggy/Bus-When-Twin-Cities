@@ -247,7 +247,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             return
         }
         mVehicleBlockNumber = nexTrip.blockNumber
-        android.util.Log.d("got here", "got here: shapeId of ${nexTrip.blockNumber} in selectVehicle(${nexTrip.blockNumber}) is ${nexTrip.shapeId}")
 
         selectRouteLine(nexTrip)
 
@@ -390,7 +389,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        android.util.Log.d("got here", "got here2: in updateNexTrips")
         mNexTrips = nexTrips
         val timeInMillis = Calendar.getInstance().timeInMillis
         val nexTripsWithActualPosition = nexTrips.filter {
@@ -412,7 +410,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             }
         }
         if (mVisibleNexTrips != null) {
-            android.util.Log.d("got here", "got here2: calling updateMarkers")
             updateMarkers()
         }
         updateRouteLines()
@@ -454,7 +451,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
         }?.map {
             it.shapeId
         }?.distinct()?.let { possibleShapeIds ->
-            android.util.Log.d("got here", "got here: possibleShapeIds.size = ${possibleShapeIds.size}")
             if (possibleShapeIds.size == 1) {
                 possibleShapeIds[0]
             } else {
@@ -467,7 +463,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     }
 
     private fun updateMarkers() {
-        android.util.Log.d("got here", "got here: in updateMarkers(), mMap is null = ${mMap == null}")
         val blockNumbersToRemove = mutableListOf<Int?>()
         for ((blockNumber, markerAndNexTrip) in mMarkers) {
             if (!mVisibleNexTrips!!.containsKey(blockNumber)) {
@@ -482,7 +477,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
 
         mMap?.run {
             for (nexTrip in mVisibleNexTrips!!.values) {
-                android.util.Log.d("got here", "got here: blockNumber = ${nexTrip.blockNumber}")
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
                         position = nexTrip.position
@@ -532,16 +526,11 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     }
 
     private fun updateRouteLines() {
-        android.util.Log.d("got here", "got here: in updateRouteLines(), mMap is null = ${mMap == null}, mNexTrips?.size = ${mNexTrips?.size}")
-
         mMap?.run {
             mNexTrips?.let { nexTrips ->
                for (nexTrip in nexTrips) {
                    if (nexTrip.shapeId != null && !(mShapes?.containsKey(nexTrip.shapeId) ?: false)) {
-                       android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} but need shape")
                        mModel.findShape(nexTrip.shapeId)
-                   } else {
-                       android.util.Log.d("got here", "got here: updateRouteLines: know shapeId of ${nexTrip.blockNumber} is ${nexTrip.shapeId} and have shape")
                    }
                }
             }
@@ -554,7 +543,6 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                 mVisibleNexTrips?.get(mSelectedRouteLineBlockNumber)?.shapeId ?:
                 findShapeIdForBlockNumber(mNexTrips, mSelectedRouteLineBlockNumber)
             for ((shapeId, routeLine) in mRouteLines) {
-                android.util.Log.d("got here", "got here: in updateRouteLines(), shapeId = $shapeId, wantShapeId = $wantShapeId, mSelectedShapeId = $mSelectedShapeId, mSelectedRouteLineBlockNumber = $mSelectedRouteLineBlockNumber")
                 val color = if (wantShapeId != shapeId)
                     mColorRouteUnselected else mColorRoute
                 routeLine.setColor(ContextCompat.getColor(context!!, color))

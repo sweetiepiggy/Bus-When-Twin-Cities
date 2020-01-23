@@ -541,7 +541,6 @@ class DbAdapter {
                     put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
                     nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
                 }
-                android.util.Log.d("got here", "got here: db setting blockNumber = ${nexTrip.blockNumber} and shapeId = ${nexTrip.shapeId}")
                 db.insert(TABLE_NEXTRIPS, null, cv)
             }
             setLastUpdate(stopId, lastUpdate)
@@ -577,7 +576,6 @@ class DbAdapter {
                     put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
                     nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
                 }
-                android.util.Log.d("got here", "got here: db setting blockNumber = ${nexTrip.blockNumber} and shapeId = ${nexTrip.shapeId}")
                 db.insert(TABLE_TIMESTOP_NEXTRIPS, null, cv)
             }
             setTimestopLastUpdate(timestopId, routeId, routeDirection, lastUpdate)

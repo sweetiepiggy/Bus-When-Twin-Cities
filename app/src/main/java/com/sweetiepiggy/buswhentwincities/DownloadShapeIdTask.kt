@@ -76,12 +76,10 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class,
 			IllegalStateException::class)
     private fun downloadShapeId(nexTrip: NexTrip): Int?  {
-        android.util.Log.d("got here", "got here: in downloadShapeId")
         var possibleShapeIds: Set<Int> = setOf()
 
         if (nexTrip.blockNumber != null && nexTrip.departureTimeInMillis != null &&
                 nexTrip.routeDirection != null && nexTrip.description != null) {
-            android.util.Log.d("got here", "got here: nexTrip not null ok")
             val dt = nexTrip.departureTimeInMillis / 1000
             val dir = NexTrip.getGtfsDirectionId(nexTrip.routeDirection)
             val tripsUrl = ((if (mUseHttps) "https://" else "http://")
@@ -91,7 +89,6 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
                              + "&direction_id=$dir"
                              + "&description=" + URLEncoder.encode(nexTrip.description, "UTF-8")
                              + (mStopId?.let { "&stop_id=$it" } ?: ""))
-            android.util.Log.d("got here", "got here: tripsUrl is $tripsUrl")
             val urlConnection = URL(tripsUrl).openConnection() as HttpsURLConnection
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
@@ -107,7 +104,6 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
 
     @Throws(IOException::class, IllegalStateException::class)
     private fun parseTrips(reader: JsonReader): Set<Int> {
-        android.util.Log.d("got here", "got here: in parseTrips")
         val possibleShapeIds: MutableSet<Int> = mutableSetOf()
 
         reader.beginArray()
@@ -141,10 +137,6 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
             }
         }
         reader.endArray()
-
-        for (shapeId in possibleShapeIds) {
-            android.util.Log.d("got here", "got here: possibleShapeId = $shapeId")
-        }
 
         return possibleShapeIds
     }

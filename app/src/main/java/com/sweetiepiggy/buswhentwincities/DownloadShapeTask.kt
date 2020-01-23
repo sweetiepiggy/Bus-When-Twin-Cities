@@ -82,12 +82,10 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class,
 			IllegalStateException::class)
     private fun downloadShape(shapeId: Int): List<GeoPoint>?  {
-        android.util.Log.d("got here", "got here: in downloadShape")
         var shape: List<GeoPoint>?
 
         val shapesUrl = ((if (mUseHttps) "https://" else "http://")
                          + "$SHAPES_URL/$shapeId")
-        android.util.Log.d("got here", "got here: shapesUrl is $shapesUrl")
         val urlConnection = URL(shapesUrl).openConnection() as HttpsURLConnection
         val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
@@ -102,7 +100,6 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
 
     @Throws(IOException::class, IllegalStateException::class)
     private fun parseShape(reader: JsonReader): List<GeoPoint> {
-        android.util.Log.d("got here", "got here: in parseShape for $mShapeId")
         val shape: MutableList<Pair<Int, GeoPoint>> = mutableListOf()
 
         val dbHelper = DbAdapter().openReadWrite(mContext)
@@ -125,7 +122,6 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
             }
             reader.endObject()
             if (shapeId != null && shapePtLat != null && shapePtLon != null && shapePtSequence != null) {
-                android.util.Log.d("got here", "got here: replaceShapeSegment for $shapeId")
                 dbHelper.replaceShapeSegment(shapeId, shapePtLat, shapePtLon, shapePtSequence)
                 shape.add(Pair(shapePtSequence, GeoPoint(shapePtLat, shapePtLon)))
             }
