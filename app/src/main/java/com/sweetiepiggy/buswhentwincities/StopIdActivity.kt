@@ -91,6 +91,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             if (!mDoShowRoutesInitDone) {
                 mDoShowRoutesInitDone = true
                 initDoShowRoutes(it)
+                mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
+                    updateRoutes(it)
+                })
                 mNexTripsModel.getStop().observe(this, Observer<Stop?>{
                     mStop = it
                     mStop?.let { stop ->
@@ -99,9 +102,6 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                             mStopDesc = stop.stopName
                         }
                     }
-                    mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
-                        updateRoutes(it)
-                    })
                 })
             }
         })
