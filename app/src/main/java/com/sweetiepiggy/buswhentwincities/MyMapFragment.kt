@@ -133,8 +133,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val UNSELECTED_MARKER_ALPHA = 0.3f
         private val TWIN_CITIES_LATLNG = LatLng(44.950864, -93.187336)
         private val TWIN_CITIES_ZOOM = 11f
-        private val UNSELECTED_VEHICLE_Z_INDEX = 0f
-        private val UNSELECTED_ROUTE_Z_INDEX = 1f
+        private val UNSELECTED_ROUTE_Z_INDEX = 0f
+        private val UNSELECTED_VEHICLE_Z_INDEX = 1f
         private val ROUTE_Z_INDEX = 2f
         private val VEHICLE_Z_INDEX = 3f
         private val STOP_Z_INDEX = 4f
