@@ -803,14 +803,27 @@ class DbAdapter {
         return ret
     }
 
-    fun replaceShapeSegment(shapeId: Int, shapePtLat: Double, shapePtLon: Double, shapePtSequence: Int) {
-        val cv = ContentValues().apply {
-            put(KEY_SHAPE_ID, shapeId)
-            put(KEY_SHAPE_PT_LAT, shapePtLat)
-            put(KEY_SHAPE_PT_LON, shapePtLon)
-            put(KEY_SHAPE_PT_SEQUENCE, shapePtSequence)
+    fun replaceShape(shapeId: Int, shape: List<Pair<Int, GeoPoint>>) {
+        val db = mDbHelper!!.mDb!!
+        db.beginTransaction();
+        try {
+            val stmt = db.compileStatement("""
+                REPLACE INTO $TABLE_SHAPES
+                    ($KEY_SHAPE_ID, $KEY_SHAPE_PT_LAT, $KEY_SHAPE_PT_LON, $KEY_SHAPE_PT_SEQUENCE)
+                    VALUES (?, ?, ?, ?)
+                """)
+            for (shapeSegment in shape) {
+                stmt.bindLong(1, shapeId.toLong())
+                stmt.bindDouble(2, shapeSegment.second.latitude)
+                stmt.bindDouble(3, shapeSegment.second.longitude)
+                stmt.bindLong(4, shapeSegment.first.toLong())
+                stmt.executeInsert()
+                stmt.clearBindings()
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        mDbHelper!!.mDb!!.replace(TABLE_SHAPES, null, cv)
     }
 
     companion object {
