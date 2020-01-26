@@ -125,7 +125,8 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
         }
         reader.endArray()
 
-        DbAdapter().openReadWrite(mContext).apply {
+        DbAdapter().run {
+            openReadWrite(mContext)
             replaceShape(mShapeId, shape)
             close()
         }
