@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.Fragment
@@ -73,10 +74,15 @@ class SearchStopIdFragment : Fragment() {
                     null, null, null)
             }
             stopIdEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
-                override fun onFocusChange(v: View, hasFocus: Boolean) =
+                override fun onFocusChange(v: View, hasFocus: Boolean) {
+                    if (hasFocus) {
+                        (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                            .showSoftInput(stopIdEntry, InputMethodManager.SHOW_IMPLICIT);
+                    }
             		stopIdEntry.setHint(
                     	if (hasFocus) activity?.resources?.getString(R.string.stop_id_hint) else ""
                     )
+                }
             })
         }
 
@@ -95,10 +101,15 @@ class SearchStopIdFragment : Fragment() {
                     null, null, null)
             }
             routeEntry.setOnFocusChangeListener(object : View.OnFocusChangeListener {
-                override fun onFocusChange(v: View, hasFocus: Boolean) =
+                override fun onFocusChange(v: View, hasFocus: Boolean) {
+                    if (hasFocus) {
+                        (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                            .showSoftInput(routeEntry, InputMethodManager.SHOW_IMPLICIT);
+                    }
             		routeEntry.setHint(
                     	if (hasFocus) activity?.resources?.getString(R.string.route_hint) else ""
                     )
+                }
             })
         }
 
