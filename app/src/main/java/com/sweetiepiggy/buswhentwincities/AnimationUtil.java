@@ -53,13 +53,13 @@ public class AnimationUtil {
      */
     public static void animateMarkerTo(final Marker marker, final GeoPoint finalPosition) {
         // Use the appropriate implementation per API Level
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            animateMarkerToICS(marker, finalPosition);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-            animateMarkerToHC(marker, finalPosition);
-        } else {
-            animateMarkerToGB(marker, finalPosition);
-        }
+       // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            // animateMarkerToICS(marker, finalPosition);
+        /* } else */ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+           animateMarkerToHC(marker, finalPosition);
+       } else {
+           animateMarkerToGB(marker, finalPosition);
+       }
     }
 
     private static void animateMarkerToGB(final Marker marker, final GeoPoint finalPosition) {

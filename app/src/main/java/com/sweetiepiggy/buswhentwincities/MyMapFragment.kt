@@ -479,10 +479,10 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
             for (nexTrip in mVisibleNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.blockNumber)) {
                     mMarkers[nexTrip.blockNumber]!!.first.apply {
-                        position = nexTrip.position
-                        // if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second.position, nexTrip.position)) {
-                        //     AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
-                        // }
+                        // position = nexTrip.position
+                        if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.blockNumber]!!.second.position, nexTrip.position)) {
+                            AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
+                        }
                     }
                 } else {
                     Marker(mMap).apply {
