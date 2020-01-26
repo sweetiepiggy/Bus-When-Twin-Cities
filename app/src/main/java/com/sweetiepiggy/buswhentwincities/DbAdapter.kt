@@ -525,23 +525,27 @@ class DbAdapter {
         db.beginTransaction();
         try {
             db.delete(TABLE_NEXTRIPS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+            val stmt = db.compileStatement("""
+                INSERT INTO $TABLE_NEXTRIPS
+                    ($KEY_STOP_ID, $KEY_IS_ACTUAL, $KEY_BLOCK_NUMBER, $KEY_DEPARTURE_UNIX_TIME,
+                     $KEY_DESCRIPTION, $KEY_GATE, $KEY_ROUTE, $KEY_ROUTE_DIRECTION,
+                     $KEY_TERMINAL, $KEY_VEHICLE_HEADING, $KEY_VEHICLE_LATITUDE,
+                     $KEY_VEHICLE_LONGITUDE, $KEY_SHAPE_ID)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """)
             for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
-                val cv = ContentValues().apply {
-                    put(KEY_STOP_ID, stopId)
-                    put(KEY_IS_ACTUAL, nexTrip.isActual)
-                    put(KEY_BLOCK_NUMBER, nexTrip.blockNumber)
-                    put(KEY_DEPARTURE_UNIX_TIME, nexTrip.departureTimeInMillis!! / 1000)
-                    put(KEY_DESCRIPTION, nexTrip.description)
-                    put(KEY_GATE, nexTrip.gate)
-                    put(KEY_ROUTE, nexTrip.route)
-                    directionToInt(nexTrip.routeDirection)?.let { put(KEY_ROUTE_DIRECTION, it) }
-                    put(KEY_TERMINAL, nexTrip.terminal)
-                    put(KEY_VEHICLE_HEADING, nexTrip.vehicleHeading)
-                    put(KEY_VEHICLE_LATITUDE, nexTrip.position?.latitude)
-                    put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
-                    nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
-                }
-                db.insert(TABLE_NEXTRIPS, null, cv)
+                stmt.bindAllArgsAsStrings(arrayOf(
+                    stopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
+                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description,
+                    nexTrip.gate, nexTrip.route,
+                    directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
+                    nexTrip.terminal, nexTrip.vehicleHeading?.toString() ?: "null",
+                    nexTrip.position?.latitude?.toString() ?: "null",
+                    nexTrip.position?.longitude?.toString() ?: "null",
+                    nexTrip.shapeId?.toString() ?: "null"
+                ))
+                stmt.execute()
+                stmt.clearBindings()
             }
             setLastUpdate(stopId, lastUpdate)
             db.setTransactionSuccessful();
@@ -560,23 +564,27 @@ class DbAdapter {
 //            db.delete(TABLE_TIMESTOP_NEXTRIPS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?", arrayOf(timestopId, routeId, routeDirection.toString()))
             db.delete(TABLE_TIMESTOP_NEXTRIPS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_DIRECTION == ?", arrayOf(timestopId, routeDirection.toString()))
 
+            val stmt = db.compileStatement("""
+                INSERT INTO $TABLE_TIMESTOP_NEXTRIPS
+                    ($KEY_TIMESTOP_ID, $KEY_IS_ACTUAL, $KEY_BLOCK_NUMBER, $KEY_DEPARTURE_UNIX_TIME,
+                     $KEY_DESCRIPTION, $KEY_GATE, $KEY_ROUTE, $KEY_ROUTE_DIRECTION,
+                     $KEY_TERMINAL, $KEY_VEHICLE_HEADING, $KEY_VEHICLE_LATITUDE,
+                     $KEY_VEHICLE_LONGITUDE, $KEY_SHAPE_ID)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """)
             for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
-                val cv = ContentValues().apply {
-                    put(KEY_TIMESTOP_ID, timestopId)
-                    put(KEY_IS_ACTUAL, nexTrip.isActual)
-                    put(KEY_BLOCK_NUMBER, nexTrip.blockNumber)
-                    put(KEY_DEPARTURE_UNIX_TIME, nexTrip.departureTimeInMillis!! / 1000)
-                    put(KEY_DESCRIPTION, nexTrip.description)
-                    put(KEY_GATE, nexTrip.gate)
-                    put(KEY_ROUTE, nexTrip.route)
-                    directionToInt(nexTrip.routeDirection)?.let { put(KEY_ROUTE_DIRECTION, it) }
-                    put(KEY_TERMINAL, nexTrip.terminal)
-                    put(KEY_VEHICLE_HEADING, nexTrip.vehicleHeading)
-                    put(KEY_VEHICLE_LATITUDE, nexTrip.position?.latitude)
-                    put(KEY_VEHICLE_LONGITUDE, nexTrip.position?.longitude)
-                    nexTrip.shapeId?.let { put(KEY_SHAPE_ID, it) }
-                }
-                db.insert(TABLE_TIMESTOP_NEXTRIPS, null, cv)
+                stmt.bindAllArgsAsStrings(arrayOf(
+                    timestopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
+                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description,
+                    nexTrip.gate, nexTrip.route,
+                    directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
+                    nexTrip.terminal, nexTrip.vehicleHeading?.toString() ?: "null",
+                    nexTrip.position?.latitude?.toString() ?: "null",
+                    nexTrip.position?.longitude?.toString() ?: "null",
+                    nexTrip.shapeId?.toString() ?: "null"
+                ))
+                stmt.execute()
+                stmt.clearBindings()
             }
             setTimestopLastUpdate(timestopId, routeId, routeDirection, lastUpdate)
             db.setTransactionSuccessful();
@@ -813,12 +821,14 @@ class DbAdapter {
                     VALUES (?, ?, ?, ?)
                 """)
             for (shapeSegment in shape) {
-                stmt.bindLong(1, shapeId.toLong())
-                stmt.bindDouble(2, shapeSegment.second.latitude)
-                stmt.bindDouble(3, shapeSegment.second.longitude)
-                stmt.bindLong(4, shapeSegment.first.toLong())
-                stmt.executeInsert()
-                stmt.clearBindings()
+                stmt.run {
+                    bindLong(1, shapeId.toLong())
+                    bindDouble(2, shapeSegment.second.latitude)
+                    bindDouble(3, shapeSegment.second.longitude)
+                    bindLong(4, shapeSegment.first.toLong())
+                    executeInsert()
+                    clearBindings()
+                }
             }
             db.setTransactionSuccessful();
         } finally {
