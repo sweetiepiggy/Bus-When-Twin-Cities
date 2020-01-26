@@ -101,7 +101,6 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
     private fun parseShape(reader: JsonReader): List<LatLng> {
         val shape: MutableList<Pair<Int, LatLng>> = mutableListOf()
 
-        val dbHelper = DbAdapter().openReadWrite(mContext)
         reader.beginArray()
         while (!isCancelled && reader.hasNext()) {
             reader.beginObject()
@@ -120,13 +119,16 @@ class DownloadShapeTask(private val mDownloadedListener: OnDownloadedShapeListen
                 }
             }
             reader.endObject()
-            if (shapeId != null && shapePtLat != null && shapePtLon != null && shapePtSequence != null) {
-                dbHelper.replaceShapeSegment(shapeId, shapePtLat, shapePtLon, shapePtSequence)
+            if (shapeId == mShapeId && shapePtLat != null && shapePtLon != null && shapePtSequence != null) {
                 shape.add(Pair(shapePtSequence, LatLng(shapePtLat, shapePtLon)))
             }
         }
         reader.endArray()
-        dbHelper.close()
+
+        DbAdapter().openReadWrite(mContext).apply {
+            replaceShape(mShapeId, shape)
+            close()
+        }
 
         return shape.sortedWith(compareBy({ it.first })).map { it.second }
     }
