@@ -436,6 +436,16 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                     val polyline = Polyline().apply {
                         setPoints(shape)
                         setColor(ContextCompat.getColor(context!!, color))
+                        setOnClickListener(object : Polyline.OnClickListener {
+                            override fun onClick(polyline: Polyline, mapView: MapView,
+                                                 eventPos: GeoPoint): Boolean {
+                                mSelectedRouteLineBlockNumber = null
+                                mSelectedShapeId = shapeId
+                                updateRouteLines()
+                                deselectVehicle()
+                                return true
+                            }
+                        })
                     }
                     mRouteLines[shapeId] = polyline
                     overlays?.add(polyline)
@@ -502,9 +512,12 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
                         mMap?.overlays?.add(this)
                         setOnMarkerClickListener(object : Marker.OnMarkerClickListener {
                             override fun onMarkerClick(marker: Marker, mapView: MapView): Boolean {
-                                if (mVehicleBlockNumber != null && mVehicleBlockNumber != nexTrip.blockNumber) {
+                                mSelectedRouteLineBlockNumber = null
+                                mSelectedShapeId = null
+//                                if (mVehicleBlockNumber != null && mVehicleBlockNumber != nexTrip.blockNumber) {
                                     deselectVehicle()
-                                }
+//                                }
+                                selectRouteLine(nexTrip)
                                 marker.showInfoWindow()
                                 // mapView.controller.animateTo(marker.position)
                                 return true
