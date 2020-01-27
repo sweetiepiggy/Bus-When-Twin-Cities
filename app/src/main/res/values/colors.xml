@@ -19,7 +19,7 @@
     <color name="colorComplementary">#B21C22</color>
     <color name="colorToolbar">#008577</color>
     <color name="colorRoute">#669DF6</color>
-    <color name="colorRouteUnselected">#54669DF6</color>
+    <color name="colorRouteUnselected">#40A3000C</color>
     <color name="colorRouteAlwaysLight">#669DF6</color>
-    <color name="colorRouteUnselectedAlwaysLight">#54669DF6</color>
+    <color name="colorRouteUnselectedAlwaysLight">#40A3000C</color>
 </resources>
