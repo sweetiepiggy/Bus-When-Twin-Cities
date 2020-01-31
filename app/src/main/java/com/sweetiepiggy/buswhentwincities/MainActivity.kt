@@ -110,6 +110,10 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
+            R.id.action_contact -> {
+                startActivity(Intent(this, ContactActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
 

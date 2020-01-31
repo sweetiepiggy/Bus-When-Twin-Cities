@@ -1,5 +1,5 @@
 <!--
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -34,5 +34,12 @@
 	android:icon="@drawable/ic_settings_24dp"
         app:iconTint="@color/colorOnPrimary"
         android:title="@string/action_settings"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_contact"
+        android:orderInCategory="50"
+	android:icon="@drawable/ic_contacts_black_24dp"
+        app:iconTint="@color/colorOnPrimary"
+        android:title="@string/action_contact"
         app:showAsAction="ifRoom" />
 </menu>
