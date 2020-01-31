@@ -44,16 +44,16 @@ class ContactActivity : AppCompatActivity() {
         findViewById<Button>(R.id.text_for_info_button)?.run {
             text = TEXT_FOR_INFO_NUMBER
             setOnClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("sms:")).apply {
-                    putExtra("address", TEXT_FOR_INFO_NUMBER)
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("smsto:${TEXT_FOR_INFO_NUMBER}")).apply {
+//                    putExtra("address", TEXT_FOR_INFO_NUMBER)
                 })
             }
         }
         findViewById<Button>(R.id.text_for_safety_button)?.run {
             text = TEXT_FOR_SAFETY_NUMBER
             setOnClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("sms:")).apply {
-                    putExtra("address", TEXT_FOR_SAFETY_NUMBER)
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("smsto:${TEXT_FOR_SAFETY_NUMBER}")).apply {
+//                    putExtra("address", TEXT_FOR_SAFETY_NUMBER)
                 })
             }
         }
