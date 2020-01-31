@@ -102,6 +102,7 @@
     <string name="comment">Comenta sobre el servicio de Metro Transit</string>
     <string name="comment_description">Utilice el siguiente formulario para elogiar a un empleado para un excelente rendimiento, para registrar una queja sobre servicio de autobús o ferrocarril, localizar un objeto perdido o proporcionar una sugerencia.</string>
     <string name="comment_button">Comentar o Quejarse</string>
+    <string name="social_media">Medios de Comunicación Social</string>
     <string name="patreon_content_description">Patreon</string>
     <string name="facebook_content_description">Facebook</string>
     <string name="twitter_content_description">Twitter</string>

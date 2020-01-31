@@ -357,7 +357,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:singleLine="false"
-            android:text="Social Media" />
+            android:text="@string/social_media" />
 
 	<ImageView
 	    android:id="@+id/fb_icon"

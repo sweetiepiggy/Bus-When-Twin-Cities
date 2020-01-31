@@ -104,6 +104,7 @@
     <string name="comment">Comment on Metro Transit Service</string>
     <string name="comment_description">Commend an employee for excellent performance, register a complaint about bus or rail service, locate a lost item or provide a suggestion.</string>
     <string name="comment_button">Comment or Complain</string>
+    <string name="social_media">Social Media</string>
     <string name="patreon_content_description">Patreon</string>
     <string name="facebook_content_description">Facebook</string>
     <string name="twitter_content_description">Twitter</string>
