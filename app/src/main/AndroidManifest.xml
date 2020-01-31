@@ -76,6 +76,15 @@
                 android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
         </activity>
         <activity
+            android:name=".ContactActivity"
+            android:label="@string/action_contact"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sweetiepiggy.buswhentwincities.MainActivity" />
+        </activity>
+        <activity
             android:name=".StopIdActivity"
             android:hardwareAccelerated="false"
             android:launchMode="singleTop"

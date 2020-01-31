@@ -44,6 +44,7 @@
     <string name="past_due">逾时</string>
     <string name="action_about">关于</string>
     <string name="action_settings">设定</string>
+    <string name="action_contact">联系Metro Transit</string>
     <string name="nav_favorites">收藏</string>
     <string name="nav_search">搜索</string>
     <string name="action_refresh">刷新</string>
@@ -92,12 +93,22 @@
     <string name="twitter">在推特上关注我们</string>
     <string name="github">在GitHub上获取源代码</string>
     <string name="rate">在Google Play评价我们</string>
+    <string name="call">Call</string>
+    <string name="phone_description">一个号码包括所有Metro Transit服务。</string>
+    <string name="text_for_info">信息获取资讯</string>
+    <string name="text_for_info_description">有关一切行程问题，请在星期一至星期五上午8点至下午4:30之间发短信至以下号码。</string>
+    <string name="text_for_safety">安全说明</string>
+    <string name="text_for_safety_description">如果您在公交车或火车上或在公交车站或车站看到可疑或不适当的东西，请输入安全提示以静默方式将其报告给Metro Transit。 请提供路线号码，巴士或火车号码，位置和问题所在。 如果您目睹犯罪或紧急情况，请致电9-1-1。</string>
+    <string name="comment">提呈有关Metro Transit的意见</string>
+    <string name="comment_description">赞扬或投诉任何有关Metro Transit的员工或服务，寻找丢失物品或提供改良意见。</string>
+    <string name="comment_button">意见或投诉</string>
     <string name="patreon_content_description">Patreon</string>
     <string name="facebook_content_description">Facebook</string>
     <string name="twitter_content_description">推特</string>
     <string name="github_content_description">GitHub</string>
     <string name="rate_content_description">Google Play</string>
     <string name="license_content_description">GPLv3</string>
+    <string name="phone_content_description">电话</string>
 
     <string name="license_title">执照</string>
     <string name="read_license">读取执照</string>
