@@ -14,6 +14,8 @@ feature on the official [Metro Transit](https://www.metrotransit.org/) website, 
 
 ![Screenshot](screenshots/screenshot_tablet.png)
 
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JCYU29FB6VQBN&item_name=Simple,+useful,+free+and+open-source+Android+apps&currency_code=USD&source=url)
+
 <a href='https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities'><img height=90 alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
 
