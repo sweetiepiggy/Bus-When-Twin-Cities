@@ -92,6 +92,7 @@
     <string name="facebook">在Facebook赞我们</string>
     <string name="twitter">在推特上关注我们</string>
     <string name="github">在GitHub上获取源代码</string>
+    <string name="donate">给我们买咖啡</string>
     <string name="rate">在Google Play评价我们</string>
     <string name="call">Call</string>
     <string name="phone_description">一个号码包括所有Metro Transit服务。</string>
@@ -107,6 +108,7 @@
     <string name="facebook_content_description">Facebook</string>
     <string name="twitter_content_description">推特</string>
     <string name="github_content_description">GitHub</string>
+    <string name="donate_content_description">捐</string>
     <string name="rate_content_description">Google Play</string>
     <string name="license_content_description">GPLv3</string>
     <string name="phone_content_description">电话</string>
