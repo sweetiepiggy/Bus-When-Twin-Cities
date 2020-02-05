@@ -208,6 +208,7 @@
 	    android:padding="@dimen/text_margin"
 	    android:contentDescription="@string/github_content_description"
 	    app:srcCompat="@drawable/ic_octocat"
+	    android:tint="?attr/colorOnSurface"
 	    app:layout_constraintStart_toStartOf="parent"
 	    app:layout_constraintTop_toTopOf="@id/github_button"
 	    app:layout_constraintBottom_toBottomOf="@id/github_button" />
@@ -231,6 +232,7 @@
 	    android:padding="@dimen/text_margin"
 	    android:contentDescription="@string/donate_content_description"
 	    app:srcCompat="@drawable/ic_card_giftcard_black_24dp"
+	    android:tint="?attr/colorOnSurface"
 	    app:layout_constraintStart_toStartOf="parent"
 	    app:layout_constraintTop_toTopOf="@id/donate_button"
 	    app:layout_constraintBottom_toBottomOf="@id/donate_button" />
