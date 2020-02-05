@@ -94,6 +94,7 @@
     <string name="facebook">Like us on Facebook</string>
     <string name="twitter">Follow us on Twitter</string>
     <string name="github">Get source code on GitHub</string>
+    <string name="donate">Buy us a coffee</string>
     <string name="rate">Rate this app on Google\u00A0Play</string>
     <string name="call">Call</string>
     <string name="phone_description">One number to reach all Metro Transit services.</string>
@@ -109,6 +110,7 @@
     <string name="facebook_content_description">Facebook</string>
     <string name="twitter_content_description">Twitter</string>
     <string name="github_content_description">GitHub</string>
+    <string name="donate_content_description">Donate</string>
     <string name="rate_content_description">Google Play</string>
     <string name="license_content_description">GPLv3</string>
     <string name="phone_content_description">Phone</string>
