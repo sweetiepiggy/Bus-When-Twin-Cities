@@ -66,7 +66,7 @@ class AboutActivity : AppCompatActivity() {
         private val FACEBOOK_URL = "https://www.facebook.com/Bus-When-Twin-Cities-2295035200768909/"
         private val TWITTER_URL = "https://twitter.com/sweetiepiggyapp"
         private val GITHUB_URL = "https://github.com/sweetiepiggy"
-        private val DONATE_URL = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JCYU29FB6VQBN&item_name=Simple,+useful,+free+and+open-source+Android+apps&currency_code=USD&source=url"
+        private val DONATE_URL = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JCYU29FB6VQBN&item_name=to+encourage+the+development+of+simple,+useful,+free+and+open-source+apps+for+Minnesotans&currency_code=USD&source=url"
         private val RATE_URL = "https://play.google.com/store/apps/details?id=com.sweetiepiggy.buswhentwincities"
         private val LICENSE_URL = "https://www.gnu.org/licenses/gpl.html"
     }
