@@ -72,6 +72,8 @@
     <string name="remove_favorite">¿Eliminar favorito?</string>
     <string name="remove">eliminar</string>
 
+    <string name="wear_mask">Por favor use una máscara en el autobús</string>
+
     <string name="dismiss">Descartar</string>
     <string name="unknown_host">Incapaz de conectarse a Internet</string>
     <string name="file_not_found">Archivo no encontrado</string>

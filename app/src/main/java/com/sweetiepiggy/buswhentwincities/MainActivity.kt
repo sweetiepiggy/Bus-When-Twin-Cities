@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.sweetiepiggy.buswhentwincities.ui.favoritestopids.FavoriteStopIdsFragment
 
 class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavoriteListener, SearchStopIdFragment.OnSearchStopIdListener, BottomNavigationView.OnNavigationItemSelectedListener {
@@ -80,6 +81,13 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         }
 
         bnv.setOnNavigationItemSelectedListener(this)
+
+        Snackbar.make(findViewById<View>(android.R.id.content), resources.getString(R.string.wear_mask), Snackbar.LENGTH_INDEFINITE).apply {
+            setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
+                          override fun onClick(v: View) {}
+            })
+            show()
+        }
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
