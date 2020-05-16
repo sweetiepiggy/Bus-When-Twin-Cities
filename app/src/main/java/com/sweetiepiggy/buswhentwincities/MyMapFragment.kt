@@ -301,14 +301,19 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     private fun deselectVehicle() {
         mVehicleBlockNumber = null
         mMap?.run {
+            val shownMarkers : MutableList<Marker> = mutableListOf()
             for (marker in mMarkers.values.map { it.first }) {
                 val nexTrip = marker.tag as PresentableNexTrip
                 if ((mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) ||
                         mSelectedShapeId != null) {
                     marker.apply {
                         setZIndex(VEHICLE_Z_INDEX)
-                        alpha = if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
-                            UNSELECTED_MARKER_ALPHA else 1f
+                        if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId) {
+                            alpha = UNSELECTED_MARKER_ALPHA
+                        } else {
+                            alpha = 1f
+                            shownMarkers.add(marker)
+                        }
                     }
                 } else {
                     marker.apply {
@@ -316,6 +321,9 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         alpha = UNSELECTED_MARKER_ALPHA
                     }
                 }
+            }
+            if (mSelectedShapeId != null && shownMarkers.size == 1) {
+                shownMarkers.first().showInfoWindow()
             }
         }
     }
