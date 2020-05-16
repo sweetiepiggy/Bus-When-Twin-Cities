@@ -270,14 +270,22 @@ class MyMapFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallb
     private fun deselectVehicle() {
         mVehicleBlockNumber = null
         mMap?.run {
+            val shownMarkers : MutableList<Marker> = mutableListOf()
             for ((marker, nexTrip) in mMarkers.values) {
                 if ((mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) ||
                         mSelectedShapeId != null) {
-                    marker.alpha = if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId)
-                        UNSELECTED_MARKER_ALPHA else 1f
+                    if (mSelectedShapeId != null && mSelectedShapeId != nexTrip.shapeId) {
+                        marker.alpha = UNSELECTED_MARKER_ALPHA
+                    } else {
+                        marker.alpha = 1f
+                        shownMarkers.add(marker)
+                    }
                 } else {
                     marker.alpha = UNSELECTED_MARKER_ALPHA
                 }
+            }
+            if (mSelectedShapeId != null && shownMarkers.size == 1) {
+                shownMarkers.first().showInfoWindow()
             }
         }
     }
