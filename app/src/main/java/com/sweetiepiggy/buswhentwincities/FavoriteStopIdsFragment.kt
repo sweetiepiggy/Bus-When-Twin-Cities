@@ -33,6 +33,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.sweetiepiggy.buswhentwincities.*
 
 class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavoriteListener {
@@ -155,6 +156,9 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
         }
 
     private fun updateFavoriteStops(favoriteStops: List<FavoriteStopIdsViewModel.FavoriteStop>) {
+        val doRequestReview = mDoUpdateFavoriteStops
+            && favoriteStops.size > 2 && favoriteStops.size > mFavoriteStops.size
+
         if (mDoUpdateFavoriteStops) {
             activity?.findViewById<View>(R.id.progressBar)?.setVisibility(View.INVISIBLE)
             mFavoriteStops.apply {
@@ -165,6 +169,20 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
             mDoUpdateFavoriteStops = false
         }
         updateFavoriteStopIdsMessage()
+
+        val ctxt = context
+        val actvty = activity
+        if (doRequestReview && ctxt != null && actvty != null) {
+            // https://developer.android.com/guide/playcore/in-app-review/kotlin-java
+            ReviewManagerFactory.create(ctxt).apply {
+                requestReviewFlow().addOnCompleteListener { request ->
+                    if (request.isSuccessful) {
+                        launchReviewFlow(actvty, request.result)
+                            .addOnCompleteListener { _ -> }
+                    }
+                }
+            }
+        }
     }
 
     fun updateFavoriteStopIdsMessage() {
