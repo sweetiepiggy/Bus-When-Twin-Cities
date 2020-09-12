@@ -251,12 +251,9 @@ class DbAdapter {
                     CREATE TABLE stop_search_history (
                         stop_id INTEGER PRIMARY KEY,
                         stop_search_datetime DATETIME NOT NULL,
-                        FOREIGN KEY(_id) REFERENCES stops(stop_id)
+                        FOREIGN KEY(stop_id) REFERENCES stops(stop_id)
                     )
                 """)
-                db.execSQL("CREATE INDEX index_shapes ON shapes (shape_id)")
-                db.execSQL("ALTER TABLE nextrips ADD COLUMN shape_id INTEGER")
-                db.execSQL("ALTER TABLE timestop_nextrips ADD COLUMN shape_id INTEGER")
             }
         }
 
