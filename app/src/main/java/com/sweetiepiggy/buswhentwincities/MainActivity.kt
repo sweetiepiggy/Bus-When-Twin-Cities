@@ -209,6 +209,11 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startStopIdActivity(b)
     }
 
+    override fun onStopSearchHistory() {
+        val intent = Intent(this, StopSearchHistoryActivity::class.java)
+        startActivityForResult(intent, ACTIVITY_STOP_SEARCH_HISTORY)
+    }
+
     override fun onSearchRouteId(routeId: String) {
         val intent = Intent(this, BrowseDirectionsActivity::class.java).apply {
             putExtras(Bundle().apply {
@@ -230,7 +235,6 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
         startActivityForResult(intent, ACTIVITY_STOP_ID)
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
@@ -238,6 +242,9 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 // if (resultCode == RESULT_OK) {
                     mFavStopIdsFragment?.refresh()
                 // }
+            }
+            ACTIVITY_STOP_SEARCH_HISTORY -> {
+                mFavStopIdsFragment?.refresh()
             }
             ACTIVITY_BROWSE_ROUTES -> {
                 mFavStopIdsFragment?.refresh()
@@ -314,6 +321,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
 
         private val ACTIVITY_STOP_ID = 0
         private val ACTIVITY_BROWSE_ROUTES = 1
+        private val ACTIVITY_STOP_SEARCH_HISTORY = 2
 
         // delete NexTrips that were due two minutes or more before now
         private val SECONDS_BEFORE_NOW_TO_DELETE = 120

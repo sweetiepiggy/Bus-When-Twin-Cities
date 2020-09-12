@@ -52,6 +52,7 @@
     <!-- <string name="action_search">搜索</string> -->
     <!-- <string name="search_stop_id">按公交站号码搜索</string> -->
     <string name="search_stop_id">显示公交站</string>
+    <string name="show_history">显示历史</string>
     <string name="search_route">显示路线</string>
     <string name="browse_routes">浏览路线</string>
     <string name="action_filter">过滤</string>
@@ -126,6 +127,7 @@
 	</string>
 
     <string name="title_activity_settings">设定</string>
+    <string name="title_activity_stop_search_history">历史</string>
 
     <!-- Preference Titles -->
     <string name="appearance_header">荧幕设置</string>

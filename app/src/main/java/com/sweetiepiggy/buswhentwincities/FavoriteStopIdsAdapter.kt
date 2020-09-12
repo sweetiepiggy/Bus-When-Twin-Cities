@@ -28,8 +28,8 @@ import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 
 class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListener,
-		private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop>) :
-			RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
+        private val mFavStops: MutableList<FavoriteStopIdsViewModel.FavoriteStop>) :
+            RecyclerView.Adapter<FavoriteStopIdsAdapter.FavoriteStopIdsViewHolder>() {
 
     val mItemTouchHelper = ItemTouchHelper(FavoriteStopIdsItemTouchHelperCallback())
 
@@ -63,7 +63,6 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
             menu.add(Menu.NONE, ACTION_EDIT, adapterPosition, R.string.context_menu_edit)
             menu.add(Menu.NONE, ACTION_REMOVE, adapterPosition, R.string.context_menu_remove)
         }
-
     }
 
     init {
@@ -91,15 +90,15 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
     private inner class FavoriteStopIdsItemTouchHelperCallback : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-        	// makeMovementFlags(UP or DOWN, START or END)
-        	makeMovementFlags(UP or DOWN, 0)
+            // makeMovementFlags(UP or DOWN, START or END)
+            makeMovementFlags(UP or DOWN, 0)
 
         override fun isLongPressDragEnabled() = false
 
         override fun isItemViewSwipeEnabled() = false
 
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
-        		target: RecyclerView.ViewHolder): Boolean {
+                target: RecyclerView.ViewHolder): Boolean {
 
             val fromPosition = viewHolder.getAdapterPosition()
             val toPosition = target.getAdapterPosition()
@@ -107,7 +106,7 @@ class FavoriteStopIdsAdapter(private val mFavoriteListener: OnClickFavoriteListe
 
             mFavStops.add(toPosition, mFavStops.removeAt(fromPosition))
             // note: positions in adapter are reversed from positions in database
-			mFavoriteListener.onMoveFavorite(mFavStops.size - fromPosition - 1,
+            mFavoriteListener.onMoveFavorite(mFavStops.size - fromPosition - 1,
                     mFavStops.size - toPosition - 1)
             return true
         }
