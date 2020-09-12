@@ -26,6 +26,8 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.osmdroid.util.GeoPoint
+import java.util.*
+import kotlin.collections.ArrayList
 
 class DbAdapter {
 
@@ -48,6 +50,7 @@ class DbAdapter {
             db.execSQL(DATABASE_CREATE_LAST_TIMESTOP_UPDATE)
             db.execSQL(DATABASE_CREATE_SHAPES)
             db.execSQL(DATABASE_CREATE_SHAPES_INDEX)
+            db.execSQL(DATABASE_CREATE_STOP_SEARCH_HISTORY)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
@@ -236,6 +239,19 @@ class DbAdapter {
                         shape_pt_lat DOUBLE NOT NULL,
                         shape_pt_lon DOUBLE NOT NULL,
                         shape_pt_sequence INTEGER NOT NULL
+                    )
+                """)
+                db.execSQL("CREATE INDEX index_shapes ON shapes (shape_id)")
+                db.execSQL("ALTER TABLE nextrips ADD COLUMN shape_id INTEGER")
+                db.execSQL("ALTER TABLE timestop_nextrips ADD COLUMN shape_id INTEGER")
+            }
+            // create stop search history table, versionCode 70
+            if (oldVer < 11) {
+                db.execSQL("""
+                    CREATE TABLE stop_search_history (
+                        stop_id INTEGER PRIMARY KEY,
+                        stop_search_datetime DATETIME NOT NULL,
+                        FOREIGN KEY(_id) REFERENCES stops(stop_id)
                     )
                 """)
                 db.execSQL("CREATE INDEX index_shapes ON shapes (shape_id)")
@@ -836,6 +852,29 @@ class DbAdapter {
         }
     }
 
+    fun updateStopSearchHistory(stopId: Int) {
+        val cv = ContentValues().apply {
+            put(KEY_STOP_SEARCH_ID, stopId)
+            put(KEY_STOP_SEARCH_DATETIME, unixTime)
+        }
+
+        mDbHelper!!.mDb!!.replace(TABLE_STOP_SEARCH_HISTORY, null, cv)
+    }
+
+    fun fetchStopSearchHistory(): Cursor {
+        return mDbHelper!!.mDb!!.query(TABLE_STOP_SEARCH_HISTORY, null, null,
+                null, null, null, "$KEY_STOP_SEARCH_DATETIME DESC", null)
+    }
+
+    fun deleteStopSearchHistory(stopId: Int) {
+        mDbHelper!!.mDb!!.delete(TABLE_STOP_SEARCH_HISTORY, "$KEY_STOP_SEARCH_ID == ?",
+            arrayOf(stopId.toString()))
+    }
+
+    fun clearStopSearchHistory() {
+        mDbHelper!!.mDb!!.delete(TABLE_STOP_SEARCH_HISTORY, null, arrayOf())
+    }
+
     companion object {
         val KEY_STOP_ID = "stop_id"
         val KEY_TIMESTOP_ID = "timestop_id"
@@ -843,6 +882,8 @@ class DbAdapter {
         val KEY_ROUTE = "route"
         val KEY_ROUTE_DIRECTION = "route_direction"
         val KEY_POSITION = "position"
+        val KEY_STOP_SEARCH_ID = "stop_id"
+        val KEY_STOP_SEARCH_DATETIME = "stop_search_datetime"
 
         private val KEY_IS_ACTUAL = "is_actual"
         private val KEY_BLOCK_NUMBER = "block_number"
@@ -876,13 +917,14 @@ class DbAdapter {
         private val TABLE_LAST_UPDATE = "last_update"
         private val TABLE_LAST_TIMESTOP_UPDATE = "last_timestop_update"
         private val TABLE_SHAPES = "shapes"
+        private val TABLE_STOP_SEARCH_HISTORY = "stop_search_history"
 
         private val INDEX_NEXTRIPS = "index_nextrips"
         private val INDEX_TIMESTOP_NEXTRIPS = "index_timestop_nextrips"
         private val INDEX_SHAPES = "index_shapes"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 10
+        private val DATABASE_VERSION = 11
 
         private val DATABASE_CREATE_FAV_STOPS = """
             CREATE TABLE $TABLE_FAV_STOPS (
@@ -1012,7 +1054,18 @@ class DbAdapter {
             CREATE INDEX $INDEX_SHAPES ON $TABLE_SHAPES ($KEY_SHAPE_ID)
             """
 
+        private val DATABASE_CREATE_STOP_SEARCH_HISTORY = """
+            CREATE TABLE $TABLE_STOP_SEARCH_HISTORY (
+                $KEY_STOP_SEARCH_ID INTEGER PRIMARY KEY,
+                $KEY_STOP_SEARCH_DATETIME DATETIME NOT NULL,
+                FOREIGN KEY ($KEY_STOP_SEARCH_ID) REFERENCES $TABLE_STOPS($KEY_STOP_ID)
+            )
+            """
+
         private fun directionToInt(dir: NexTrip.Direction?): Int? =
             dir?.let { NexTrip.getDirectionId(it) }
+
+        private val unixTime: Long
+            get() = Calendar.getInstance().timeInMillis / 1000L
     }
 }

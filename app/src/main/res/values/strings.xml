@@ -51,6 +51,7 @@
     <!-- <string name="action_search">Search</string> -->
     <!-- <string name="search_stop_id">Search for stop number</string> -->
     <string name="search_stop_id">Show stop</string>
+    <string name="show_history">History</string>
     <string name="search_route">Show route</string>
     <string name="browse_routes">Browse routes</string>
     <string name="action_filter">Filter</string>
@@ -78,6 +79,7 @@
 
     <string name="no_nextrips_found">No upcoming trips</string>
     <string name="no_favorites_found">No favorites here yet</string>
+    <string name="no_history_found">No search history</string>
 
     <string name="main_search_icon_content_description">search for stop number</string>
     <string name="favorite_stop_ids_content_description">favorite stops</string>
@@ -127,6 +129,7 @@
       "GNU General Public License for more details.</string>
 
     <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_stop_search_history">History</string>
 
     <!-- Preference Titles -->
     <string name="appearance_header">Appearance</string>

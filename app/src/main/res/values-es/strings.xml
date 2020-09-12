@@ -52,6 +52,7 @@
     <!-- <string name="action_search">Buscar</string> -->
     <!-- <string name="search_stop_id">Buscar por número de parada</string> -->
     <string name="search_stop_id">Mostrar parada</string>
+    <string name="show_history">Historia</string>
     <string name="search_route">Mostrar ruta</string>
     <string name="browse_routes">Navegar por rutas</string>
     <string name="action_filter">Filtrar</string>
@@ -125,6 +126,7 @@
       "detalles de la Licencia Pública General GNU para obtener una información más detallada.</string>
 
     <string name="title_activity_settings">Configuración</string>
+    <string name="title_activity_stop_search_history">Historia</string>
 
     <!-- Preference Titles -->
     <string name="appearance_header">Apariencia</string>

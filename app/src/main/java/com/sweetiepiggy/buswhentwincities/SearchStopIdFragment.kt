@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -20,6 +20,7 @@
 package com.sweetiepiggy.buswhentwincities
 
 import android.content.Context
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +43,7 @@ class SearchStopIdFragment : Fragment() {
 
     interface OnSearchStopIdListener {
         fun onSearchStopId(stopId: Int)
+        fun onStopSearchHistory()
         fun onSearchRouteId(routeId: String)
         fun onBrowseRoutes()
     }
@@ -79,8 +81,8 @@ class SearchStopIdFragment : Fragment() {
                         (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                             .showSoftInput(stopIdEntry, InputMethodManager.SHOW_IMPLICIT);
                     }
-            		stopIdEntry.setHint(
-                    	if (hasFocus) activity?.resources?.getString(R.string.stop_id_hint) else ""
+                    stopIdEntry.setHint(
+                        if (hasFocus) activity?.resources?.getString(R.string.stop_id_hint) else ""
                     )
                 }
             })
@@ -106,8 +108,8 @@ class SearchStopIdFragment : Fragment() {
                         (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                             .showSoftInput(routeEntry, InputMethodManager.SHOW_IMPLICIT);
                     }
-            		routeEntry.setHint(
-                    	if (hasFocus) activity?.resources?.getString(R.string.route_hint) else ""
+                    routeEntry.setHint(
+                        if (hasFocus) activity?.resources?.getString(R.string.route_hint) else ""
                     )
                 }
             })
@@ -115,6 +117,10 @@ class SearchStopIdFragment : Fragment() {
 
         activity?.findViewById<Button>(R.id.searchStopIdButton)?.setOnClickListener {
             startStopIdActivity()
+        }
+
+        activity?.findViewById<Button>(R.id.stopSearchHistoryButton)?.setOnClickListener {
+            mSearchStopIdListener.onStopSearchHistory()
         }
 
         activity?.findViewById<Button>(R.id.searchRouteButton)?.setOnClickListener {
@@ -135,6 +141,20 @@ class SearchStopIdFragment : Fragment() {
                 try {
                     val stopId = stopIdStr.toInt()
                     stopIdTextInput.error = null
+
+                    context?.let {
+                        object : AsyncTask<Void, Void, Void>() {
+                            override fun doInBackground(vararg params: Void): Void? {
+                                DbAdapter().apply {
+                                    openReadWrite(it)
+                                    updateStopSearchHistory(stopId)
+                                    close()
+                                }
+                                return null
+                            }
+                            override fun onPostExecute(result: Void?) { }
+                        }.execute()
+                    }
                     mSearchStopIdListener.onSearchStopId(stopId)
                 } catch (e: NumberFormatException) {
                     stopIdTextInput.error = resources.getString(R.string.must_be_number)

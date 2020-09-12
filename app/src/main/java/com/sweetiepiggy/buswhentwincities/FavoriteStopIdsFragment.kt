@@ -74,7 +74,7 @@ class FavoriteStopIdsFragment : Fragment(), FavoriteStopIdsAdapter.OnClickFavori
         mModelIsInit = true
 
         mModel.getFavoriteStops().observe(this,
-        	Observer<List<FavoriteStopIdsViewModel.FavoriteStop>>{ updateFavoriteStops(it) })
+            Observer<List<FavoriteStopIdsViewModel.FavoriteStop>>{ updateFavoriteStops(it) })
     }
 
     fun refresh() {

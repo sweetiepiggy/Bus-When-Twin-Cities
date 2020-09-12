@@ -97,8 +97,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                 // reload from the database if it is fresh, otherwise download
                 InitLoadNexTripsTask().execute()
             } else if ((downloadNextTripsTask == null ||
-            			downloadNextTripsTask.status == AsyncTask.Status.FINISHED) &&
-		    			unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
+                        downloadNextTripsTask.status == AsyncTask.Status.FINISHED) &&
+                        unixTime - mLastUpdate >= MIN_SECONDS_BETWEEN_REFRESH) {
                 // refresh displayed times now in case internet connection is slow
                 mNexTrips.value?.let { mNexTrips.value = it }
 
@@ -151,12 +151,12 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
             // fall back to nexTrips from database if they exist
             if (dbNexTrips != null) {
                 mLastUpdate = mDbLastUpdate
-        	    mNexTrips.value = filterOldNexTrips(dbNexTrips, unixTime, mLastUpdate)
+                mNexTrips.value = filterOldNexTrips(dbNexTrips, unixTime, mLastUpdate)
             } else {
                 mNexTrips.value = listOf()
             }
         } else mNexTrips.value?.let { nexTrips ->
-        	mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
+            mNexTrips.value = filterOldNexTrips(nexTrips, unixTime, mLastUpdate)
         }
         mLoadNexTripsErrorListener?.onDownloadError(err)
         mLoadingNexTrips = false
@@ -258,7 +258,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         override fun doInBackground(vararg params: Void): Void? {
             val stopId = mStopId
             val timestop = mTimestop
-        	if (stopId != null || timestop != null) {
+            if (stopId != null || timestop != null) {
                 DbAdapter().run {
                     openReadWrite(mContext)
                     if (stopId != null) {
@@ -420,11 +420,11 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
             for (nexTrip in nexTrips) {
                 if (nexTrip.departureTimeInMillis != null &&
-                		nexTrip.departureTimeInMillis / 1000 >= ignoreCutoffTime) {
+                        nexTrip.departureTimeInMillis / 1000 >= ignoreCutoffTime) {
                     results.add(if (suppressLocations)
-                		NexTrip.suppressLocation(nexTrip)
-                	else
-                		nexTrip)
+                        NexTrip.suppressLocation(nexTrip)
+                    else
+                        nexTrip)
                 }
             }
 
