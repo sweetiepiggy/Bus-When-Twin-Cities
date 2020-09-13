@@ -38,13 +38,12 @@ class StopSearchHistoryAdapter(private val mListener: OnClickListener,
     }
 
     inner class StopSearchHistoryViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnCreateContextMenuListener {
-        var mStopIdTextView: TextView = v.findViewById<TextView>(R.id.stop_id)
-
+        var mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
-            v.findViewById<CardView>(R.id.card_view).setOnClickListener {
+            v.setOnClickListener {
                 mListener.onClick(mSearchedStops[adapterPosition])
             }
-            v.findViewById<CardView>(R.id.card_view).setOnCreateContextMenuListener(this)
+            v.setOnCreateContextMenuListener(this)
         }
 
         override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
@@ -60,12 +59,12 @@ class StopSearchHistoryAdapter(private val mListener: OnClickListener,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopSearchHistoryAdapter.StopSearchHistoryViewHolder {
         val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.searched_stop_id_item, parent, false)
+                .inflate(R.layout.result_item, parent, false)
         return StopSearchHistoryViewHolder(v)
     }
 
     override fun onBindViewHolder(holder: StopSearchHistoryViewHolder, position: Int) {
-        holder.mStopIdTextView.text = mSearchedStops[position].stopId?.toString()
+        holder.mDescriptionTextView.text = mSearchedStops[position].stopId?.toString()
     }
 
     override fun getItemCount(): Int = mSearchedStops.size

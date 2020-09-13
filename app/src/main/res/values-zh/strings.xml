@@ -72,6 +72,8 @@
 
     <string name="remove_favorite">删除收藏夹？</string>
     <string name="remove">删除</string>
+    <string name="clear_search_history">清除搜索历史？</string>
+    <string name="clear">清除</string>
 
     <string name="dismiss">删除</string>
     <string name="unknown_host">无法连接互联网</string>
@@ -80,6 +82,7 @@
 
     <string name="no_nextrips_found">没有即将到来的旅</string>
     <string name="no_favorites_found">这里没有收藏</string>
+    <string name="no_history_found">没有搜寻记录</string>
 
     <string name="main_search_icon_content_description">搜索公交号码</string>
     <string name="favorite_stop_ids_content_description">最喜欢的公交号码</string>
