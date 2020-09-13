@@ -71,6 +71,8 @@
 
     <string name="remove_favorite">Remove favorite?</string>
     <string name="remove">remove</string>
+    <string name="clear_search_history">Clear search history?</string>
+    <string name="clear">clear</string>
 
     <string name="dismiss">Dismiss</string>
     <string name="unknown_host">Unable to connect to the internet</string>

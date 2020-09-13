@@ -25,9 +25,11 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -41,11 +43,12 @@ class StopSearchHistoryActivity : AppCompatActivity(), StopSearchHistoryAdapter.
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stop_search_history)
         setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAdapter = StopSearchHistoryAdapter(this, mHistory)
         findViewById<RecyclerView>(R.id.historyRecyclerView)?.apply {
             layoutManager = LinearLayoutManager(context)
-            // addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             mAdapter.attachToRecyclerView(this)
             adapter = mAdapter
         }
@@ -64,20 +67,26 @@ class StopSearchHistoryActivity : AppCompatActivity(), StopSearchHistoryAdapter.
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             R.id.action_clear_history -> {
-                object : AsyncTask<Void, Void, Void>() {
-                    override fun doInBackground(vararg params: Void): Void? {
-                        DbAdapter().apply {
-                            openReadWrite(this@StopSearchHistoryActivity)
-                            clearStopSearchHistory()
-                            close()
-                        }
-                        return null
+                AlertDialog.Builder(this).apply {
+                    setTitle(resources.getString(R.string.clear_search_history))
+                    setPositiveButton(resources.getString(R.string.clear)) { _, _ ->
+                        object : AsyncTask<Void, Void, Void>() {
+                            override fun doInBackground(vararg params: Void): Void? {
+                                DbAdapter().apply {
+                                    openReadWrite(this@StopSearchHistoryActivity)
+                                    clearStopSearchHistory()
+                                    close()
+                                }
+                                return null
+                            }
+                            override fun onPostExecute(result: Void?) {
+                                mDoUpdateHistory = true
+                                updateHistory(listOf())
+                            }
+                        }.execute()
                     }
-                    override fun onPostExecute(result: Void?) {
-                        mDoUpdateHistory = true
-                        updateHistory(listOf())
-                    }
-                }.execute()
+                    setNegativeButton(android.R.string.cancel) { _, _ -> }
+                }.show()
                 true
             }
             else -> super.onOptionsItemSelected(item)

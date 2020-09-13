@@ -72,6 +72,8 @@
 
     <string name="remove_favorite">¿Eliminar favorito?</string>
     <string name="remove">eliminar</string>
+    <string name="clear_search_history">¿Limpiar historial de búsqueda?</string>
+    <string name="clear">limpiar</string>
 
     <string name="dismiss">Descartar</string>
     <string name="unknown_host">Incapaz de conectarse a Internet</string>
@@ -80,6 +82,7 @@
 
     <string name="no_nextrips_found">No se encontraron viajes próximos</string>
     <string name="no_favorites_found">No hay favoritas aquí todavía</string>
+    <string name="no_history_found">No hay historia</string>
 
     <string name="main_search_icon_content_description">busca tu parada</string>
     <string name="favorite_stop_ids_content_description">paradas favoritas</string>

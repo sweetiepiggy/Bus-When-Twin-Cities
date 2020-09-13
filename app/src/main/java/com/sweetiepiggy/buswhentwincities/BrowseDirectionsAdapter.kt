@@ -61,5 +61,5 @@ class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionLi
     override fun getItemCount(): Int = mDirections.size
 
     override fun getItemId(position: Int): Long =
-    	NexTrip.getDirectionId(mDirections[position]).toLong()
+        NexTrip.getDirectionId(mDirections[position]).toLong()
 }

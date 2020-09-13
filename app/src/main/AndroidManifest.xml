@@ -24,6 +24,8 @@
         <activity
             android:name=".StopSearchHistoryActivity"
             android:label="@string/title_activity_stop_search_history"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".SettingsActivity"
