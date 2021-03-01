@@ -21,6 +21,7 @@ package com.sweetiepiggy.buswhentwincities
 
 import android.os.AsyncTask
 import android.util.JsonReader
+import android.util.JsonToken
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.MalformedURLException
@@ -95,21 +96,25 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
             var vehicleLatitude: Double? = null
             var vehicleLongitude: Double? = null
             while (reader.hasNext()) {
-                when (reader.nextName()) {
-                    "Actual" -> actual = reader.nextBoolean()
-                    "BlockNumber" -> blockNumber = reader.nextInt()
-                    "DepartureText" -> departureText = reader.nextString()
-                    "DepartureTime" -> departureTime = reader.nextString()
-                    "Description" -> description = reader.nextString()
-                    "Gate" -> gate = reader.nextString()
-                    "Route" -> route = reader.nextString()
-                    "RouteDirection" -> routeDirection = reader.nextString()
-                    "Terminal" -> terminal = reader.nextString()
-                    "VehicleHeading" -> vehicleHeading = reader.nextDouble()
-                    "VehicleLatitude" -> vehicleLatitude = reader.nextDouble()
-                    "VehicleLongitude" -> vehicleLongitude = reader.nextDouble()
-                    else -> reader.skipValue()
-                }
+                val name = reader.nextName()
+                if (reader.peek() == JsonToken.NULL)
+                  reader.skipValue()
+                else
+                  when (name) {
+                      "Actual" -> actual = reader.nextBoolean()
+                      "BlockNumber" -> blockNumber = reader.nextInt()
+                      "DepartureText" -> departureText = reader.nextString()
+                      "DepartureTime" -> departureTime = reader.nextString()
+                      "Description" -> description = reader.nextString()
+                      "Gate" -> gate = reader.nextString()
+                      "Route" -> route = reader.nextString()
+                      "RouteDirection" -> routeDirection = reader.nextString()
+                      "Terminal" -> terminal = reader.nextString()
+                      "VehicleHeading" -> vehicleHeading = reader.nextDouble()
+                      "VehicleLatitude" -> vehicleLatitude = reader.nextDouble()
+                      "VehicleLongitude" -> vehicleLongitude = reader.nextDouble()
+                      else -> reader.skipValue()
+                  }
             }
             rawNexTrips.add(RawNexTrip(actual, blockNumber, departureText,
                     departureTime, description, gate, route,

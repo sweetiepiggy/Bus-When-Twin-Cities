@@ -549,10 +549,10 @@ class DbAdapter {
             for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
                 stmt.bindAllArgsAsStrings(arrayOf(
                     stopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
-                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description,
-                    nexTrip.gate, nexTrip.route,
+                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description ?: "",
+                    nexTrip.gate ?: "", nexTrip.route ?: "",
                     directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
-                    nexTrip.terminal, nexTrip.vehicleHeading?.toString() ?: "null",
+                    nexTrip.terminal ?: "", nexTrip.vehicleHeading?.toString() ?: "null",
                     nexTrip.position?.latitude?.toString() ?: "null",
                     nexTrip.position?.longitude?.toString() ?: "null",
                     nexTrip.shapeId?.toString() ?: "null"
@@ -588,10 +588,10 @@ class DbAdapter {
             for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
                 stmt.bindAllArgsAsStrings(arrayOf(
                     timestopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
-                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description,
-                    nexTrip.gate, nexTrip.route,
+                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description ?: "",
+                    nexTrip.gate ?: "", nexTrip.route ?: "",
                     directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
-                    nexTrip.terminal, nexTrip.vehicleHeading?.toString() ?: "null",
+                    nexTrip.terminal ?: "", nexTrip.vehicleHeading?.toString() ?: "null",
                     nexTrip.position?.latitude?.toString() ?: "null",
                     nexTrip.position?.longitude?.toString() ?: "null",
                     nexTrip.shapeId?.toString() ?: "null"
