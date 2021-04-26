@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), FavoriteStopIdsAdapter.OnClickFavorite
                 }
                 is FavoriteStopIdsViewModel.FavoriteStop.FavoriteTimestop -> {
                     putString(StopIdActivity.KEY_ROUTE_ID, favStop.timestop.routeId)
-                    putInt(StopIdActivity.KEY_DIRECTION_ID, NexTrip.getDirectionId(favStop.timestop.direction))
+                    putInt(StopIdActivity.KEY_DIRECTION_ID, favStop.timestop.directionId)
                     putString(StopIdActivity.KEY_TIMESTOP_ID, favStop.timestop.timestopId)
                     putString(StopIdActivity.KEY_STOP_DESC, favStop.stopDesc)
                 }

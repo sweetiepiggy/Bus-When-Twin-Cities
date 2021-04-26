@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -28,12 +28,12 @@ import java.net.*
 import java.util.*
 
 class DownloadDirectionsTask(private val mDownloadedDirectionsListener: OnDownloadedDirectionsListener,
-		                     private val mRouteId: String) : AsyncTask<Void, Int, Void>() {
+                             private val mRouteId: String) : AsyncTask<Void, Int, Void>() {
     private var mError: MetroTransitDownloader.DownloadError? = null
-    private var mDirections: List<NexTrip.Direction>? = null
+    private var mDirections: List<Pair<Int, String>>? = null
 
     interface OnDownloadedDirectionsListener {
-        fun onDownloadedDirections(directions: List<NexTrip.Direction>)
+        fun onDownloadedDirections(directions: List<Pair<Int, String>>)
         fun onDownloadedDirectionsError(err: MetroTransitDownloader.DownloadError)
     }
 
@@ -43,7 +43,7 @@ class DownloadDirectionsTask(private val mDownloadedDirectionsListener: OnDownlo
             mDirections = parseDirections(reader)
             reader.close()
         } catch (e: UnknownHostException) { // probably no internet connection
-        	mError = MetroTransitDownloader.DownloadError.UnknownHost
+            mError = MetroTransitDownloader.DownloadError.UnknownHost
         } catch (e: java.io.FileNotFoundException) {
             mError = MetroTransitDownloader.DownloadError.FileNotFound(e.message)
         } catch (e: java.net.SocketTimeoutException) {
@@ -70,24 +70,24 @@ class DownloadDirectionsTask(private val mDownloadedDirectionsListener: OnDownlo
         }
     }
 
-    private fun parseDirections(reader: JsonReader): List<NexTrip.Direction>? {
-        var directions: MutableList<NexTrip.Direction> = mutableListOf()
+    private fun parseDirections(reader: JsonReader): List<Pair<Int, String>>? {
+        var directions: MutableList<Pair<Int, String>> = mutableListOf()
 
         reader.beginArray()
         while (!isCancelled && reader.hasNext()) {
             reader.beginObject()
-            var text: String? = null
-//            var value: Int? = null
+            var directionId: Int? = null
+            var directionName: String? = null
             while (reader.hasNext()) {
                 when (reader.nextName()) {
-                    "Text"  -> text = reader.nextString()
-//                    "Value" -> value = reader.nextInt()
-                    else          -> reader.skipValue()
+                    "direction_id"   -> directionId = reader.nextInt()
+                    "direction_name" -> directionName = reader.nextString()
+                    else             -> reader.skipValue()
                 }
             }
             reader.endObject()
-            if (text != null) {
-                NexTrip.Direction.from(text)?.let { directions.add(it) }
+            if (directionId != null && directionName != null) {
+                directions.add(Pair(directionId, directionName))
             }
         }
         reader.endArray()

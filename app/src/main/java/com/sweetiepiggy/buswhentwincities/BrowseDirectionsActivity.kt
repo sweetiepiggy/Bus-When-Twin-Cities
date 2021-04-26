@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -64,11 +64,11 @@ class BrowseDirectionsActivity : AppCompatActivity(), BrowseDirectionsAdapter.On
         }
     }
 
-    override fun onClickDirection(routeId: String?, direction: NexTrip.Direction) {
+    override fun onClickDirection(routeId: String?, directionId: Int) {
         val intent = Intent(this, BrowseTimestopsActivity::class.java).apply {
             putExtras(Bundle().apply {
                 routeId?.let { putString(BrowseTimestopsFragment.KEY_ROUTE_ID, it) }
-                putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, NexTrip.getDirectionId(direction))
+                putInt(BrowseTimestopsFragment.KEY_DIRECTION_ID, directionId)
             })
         }
         startActivity(intent)

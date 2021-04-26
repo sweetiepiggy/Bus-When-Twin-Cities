@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -107,7 +107,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                 if (stopId != null) {
                     mDownloadNexTripsTask = DownloadNexTripsTask(this, stopId)
                 } else if (timestop != null) {
-                    mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this, timestop.routeId, timestop.direction, timestop.timestopId)
+                    mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this, timestop.routeId, timestop.directionId, timestop.timestopId)
                 }
                 mDownloadNexTripsTask!!.execute()
             } else {
@@ -127,7 +127,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         val oldNexTrips = mNexTrips.value
         val newNexTrips = nexTrips.map { nexTrip ->
             if (nexTrip.shapeId == null) {
-                val oldNexTrip = oldNexTrips?.find { NexTrip.guessIsSameNexTrip(it, nexTrip) }
+                val oldNexTrip = oldNexTrips?.find { it.tripId == nexTrip.tripId }
                 if (oldNexTrip != null && oldNexTrip.shapeId != null) {
                     NexTrip.setShapeId(nexTrip, oldNexTrip.shapeId)
                 } else {
@@ -194,7 +194,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     val lastUpdate = if (stopId != null) {
                         getLastUpdate(stopId)
                     } else {
-                        getLastTimestopUpdate(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                        getLastTimestopUpdate(timestop!!.timestopId, timestop.routeId, timestop.directionId)
                     }
                     if (lastUpdate != null) {
                         mDbLastUpdate = lastUpdate
@@ -202,7 +202,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                         nexTrips = if (stopId != null) {
                             getNexTrips(stopId, SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
                         } else {
-                            getTimestopNexTrips(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
+                            getTimestopNexTrips(timestop!!.timestopId, timestop.routeId,
+                                    timestop.directionId, SECONDS_BEFORE_NOW_TO_IGNORE, suppressLocations)
                         }
                     }
                     close()
@@ -233,7 +234,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     if (stopId != null) {
                         mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
                     } else if (timestop != null) {
-                        mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this@NexTripsViewModel, timestop.routeId, timestop.direction, timestop.timestopId)
+                        mDownloadNexTripsTask =DownloadTimepointDeparturesTask(this@NexTripsViewModel,
+                                timestop.routeId, timestop.directionId, timestop.timestopId)
                     }
                     mDownloadNexTripsTask!!.execute()
                 }
@@ -264,7 +266,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     if (stopId != null) {
                         updateNexTrips(stopId, nexTrips, mLastUpdate)
                     } else {
-                        updateTimestopNexTrips(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), nexTrips, mLastUpdate)
+                        updateTimestopNexTrips(timestop!!.timestopId, timestop.routeId, timestop.directionId, nexTrips, mLastUpdate)
                     }
                     close()
                 }
@@ -286,7 +288,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     doShowRoutes = if (stopId != null) {
                         getDoShowRoutes(stopId)
                     } else {
-                        getTimestopDoShowRoutes(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                        getTimestopDoShowRoutes(timestop!!.timestopId, timestop.routeId, timestop.directionId)
                     }
                     close()
                 }
@@ -392,7 +394,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     override fun onDownloadedShapeId(nexTrip: NexTrip, shapeId: Int) {
         mNexTrips.value?.let { oldNexTrips ->
             val newNexTrips = oldNexTrips.map { oldNexTrip ->
-                if (NexTrip.guessIsSameNexTrip(nexTrip, oldNexTrip)) {
+                if (nexTrip.tripId == oldNexTrip.tripId) {
                     NexTrip.setShapeId(oldNexTrip, shapeId)
                 } else {
                     oldNexTrip
@@ -419,8 +421,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
             val suppressLocations = (curTime - lastUpdate) >= SECONDS_BEFORE_SUPPRESS_LOCATIONS
 
             for (nexTrip in nexTrips) {
-                if (nexTrip.departureTimeInMillis != null &&
-                        nexTrip.departureTimeInMillis / 1000 >= ignoreCutoffTime) {
+                if (nexTrip.departureTime != null &&
+                        nexTrip.departureTime >= ignoreCutoffTime) {
                     results.add(if (suppressLocations)
                         NexTrip.suppressLocation(nexTrip)
                     else

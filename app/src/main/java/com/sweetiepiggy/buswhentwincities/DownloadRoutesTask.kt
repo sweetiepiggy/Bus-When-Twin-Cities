@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -75,20 +75,20 @@ class DownloadRoutesTask(private val mDownloadedRoutesListener: OnDownloadedRout
         reader.beginArray()
         while (!isCancelled && reader.hasNext()) {
             reader.beginObject()
-            var description: String? = null
-            var providerId: Int? = null
             var routeId: String? = null
+            var agencyId: Int? = null
+            var routeLabel: String? = null
             while (reader.hasNext()) {
                 when (reader.nextName()) {
-                    "Description" -> description = reader.nextString()
-                    "ProviderID"  -> providerId = reader.nextInt()
-                    "Route"       -> routeId = reader.nextString()
+                    "route_id"    -> routeId = reader.nextString()
+                    "agency_id"   -> agencyId = reader.nextInt()
+                    "route_label" -> routeLabel = reader.nextString()
                     else          -> reader.skipValue()
                 }
             }
             reader.endObject()
-            if (description != null && providerId != null && routeId != null) {
-                routes.add(BrowseRoutesViewModel.Route(description, providerId, routeId))
+            if (routeId != null && agencyId != null && routeLabel != null) {
+                routes.add(BrowseRoutesViewModel.Route(routeId, agencyId, routeLabel))
             }
         }
         reader.endArray()

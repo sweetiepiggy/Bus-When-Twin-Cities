@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -146,7 +146,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         mTimestop?.let {
             savedInstanceState.putString(KEY_TIMESTOP_ID, it.timestopId)
             savedInstanceState.putString(KEY_ROUTE_ID, it.routeId)
-            savedInstanceState.putInt(KEY_DIRECTION_ID, NexTrip.getDirectionId(it.direction))
+            savedInstanceState.putInt(KEY_DIRECTION_ID, it.directionId)
         }
     }
 
@@ -157,9 +157,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         if (b.containsKey(KEY_TIMESTOP_ID) && b.containsKey(KEY_ROUTE_ID) && b.containsKey(KEY_DIRECTION_ID)) {
             val timestopId = b.getString(KEY_TIMESTOP_ID)
             val routeId = b.getString(KEY_ROUTE_ID)
-            val direction = NexTrip.Direction.from(b.getInt(KEY_DIRECTION_ID))
-            if (timestopId != null && routeId != null && direction != null) {
-                mTimestop = Timestop(timestopId, routeId, direction)
+            val directionId = b.getInt(KEY_DIRECTION_ID)
+            if (timestopId != null && routeId != null) {
+                mTimestop = Timestop(timestopId, routeId, directionId)
             }
         }
         if (b.containsKey(KEY_STOP_DESC)) {
@@ -192,7 +192,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
 //            StopIdAdapter.ACTION_PIN ->
             StopIdAdapter.ACTION_HIDE -> {
                 val hideNexTrip = mNexTrips[item.order]
-                val routeAndTerminal = Pair(hideNexTrip.route, hideNexTrip.terminal)
+                val routeAndTerminal = Pair(hideNexTrip.routeShortName, hideNexTrip.terminal)
                 val changedRoutes = setOf<Pair<String?, String?>>(routeAndTerminal)
                 mDoShowRoutes[routeAndTerminal] = false
                 mNexTripsModel.setDoShowRoutes(mDoShowRoutes)
@@ -319,7 +319,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                             if (stopId != null) {
                             	deleteFavStop(stopId)
                             } else if (timestop != null) {
-                                deleteFavTimestop(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                                deleteFavTimestop(timestop.timestopId, timestop.routeId, timestop.directionId)
                             }
                             close()
                         }
@@ -351,7 +351,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                                     if (stopId != null) {
                                         createFavStop(stopId, mStopDesc)
                                     } else if (timestop != null) {
-                                        createFavTimestop(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), mStopDesc)
+                                        createFavTimestop(timestop.timestopId, timestop.routeId,
+                                                timestop.directionId, mStopDesc)
                                     }
                                     close()
                                 }
@@ -409,8 +410,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                     Pair(dbHelper.isFavStop(stopId), dbHelper.getStopDesc(stopId))
                 } else {
                     Pair(
-                        dbHelper.isFavTimestop(timestop!!.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction)),
-                        dbHelper.getTimestopDesc(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction))
+                        dbHelper.isFavTimestop(timestop!!.timestopId, timestop.routeId, timestop.directionId),
+                        dbHelper.getTimestopDesc(timestop.timestopId, timestop.routeId, timestop.directionId)
                     )
                 }
                 dbHelper.close()
@@ -441,7 +442,8 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                     if (stopId != null) {
                         updateDoShowRoutes(stopId, doShowRoutes)
                     } else if (timestop != null) {
-                        updateTimestopDoShowRoutes(timestop.timestopId, timestop.routeId, NexTrip.getDirectionId(timestop.direction), doShowRoutes)
+                        updateTimestopDoShowRoutes(timestop.timestopId, timestop.routeId,
+                                timestop.directionId, doShowRoutes)
                     }
                     close()
                 }
@@ -459,7 +461,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         val routeAndTerminalPairs = nexTrips.filter {
             it.routeAndTerminal != null
         }.map {
-            Pair(it.route, it.terminal)
+            Pair(it.routeShortName, it.terminal)
         }.toSet()
         for (routeAndTerminal in routeAndTerminalPairs) {
             if (!mDoShowRoutes.contains(routeAndTerminal)) {
@@ -483,7 +485,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         val routeAndTerminalPairs = mNexTrips.filter {
             it.routeAndTerminal != null
         }.map {
-            Pair(it.route, it.terminal)
+            Pair(it.routeShortName, it.terminal)
         }.toSet()
 
         for (routeAndTerminal in routeAndTerminalPairs) {

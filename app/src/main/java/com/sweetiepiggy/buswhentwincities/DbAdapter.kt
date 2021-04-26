@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -51,6 +51,7 @@ class DbAdapter {
             db.execSQL(DATABASE_CREATE_SHAPES)
             db.execSQL(DATABASE_CREATE_SHAPES_INDEX)
             db.execSQL(DATABASE_CREATE_STOP_SEARCH_HISTORY)
+            db.execSQL(DATABASE_CREATE_VEHICLES)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVer: Int, newVer: Int) {
@@ -255,6 +256,137 @@ class DbAdapter {
                     )
                 """)
             }
+            // MetroTransit NexTripV2, versionCode 74
+            if (oldVer < 12) {
+                val mapRouteDirectionToDirectionId = { routeDirection: Int ->
+                    when(routeDirection) {
+                        1 -> 1 // South
+                        2 -> 0 // East
+                        3 -> 1 // West
+                        4 -> 0 // North
+                        else -> 0
+                    }
+                }
+
+                db.beginTransaction();
+                try {
+                    // fav_timestops: route ->route_id,
+                    //                route_direction -> direction_id
+                    db.execSQL("ALTER TABLE fav_timestops RENAME COLUMN route TO route_id")
+                    db.execSQL("ALTER TABLE fav_timestops RENAME COLUMN route_direction TO direction_id")
+                    val c =  db.query("fav_timestops",
+                        arrayOf("direction_id"),
+                        null, null, null, null, null, null)
+                    val directionIdIndex = c.getColumnIndex("direction_id")
+                    while (c.moveToNext()) {
+                        val directionId = c.getInt(directionIdIndex)
+                        val cv = ContentValues().apply {
+                            put("direction_id", mapRouteDirectionToDirectionId(directionId))
+                        }
+                        db.update("new_fav_stops", cv, null, null)
+                    }
+
+                    // last_timestop_update: route ->route_id,
+                    //                       route_direction -> direction_id
+                    //   just drop/recreate
+                    db.execSQL("DROP TABLE last_timestop_update")
+                    db.execSQL("""
+                        CREATE TABLE last_timestop_update (
+                            timestop_id TEXT NOT NULL,
+                            route_id TEXT NOT NULL,
+                            direction_id INTEGER NOT NULL,
+                            last_update DATETIME,
+                            PRIMARY KEY(timestop_id, route_id, direction_id)
+                        )
+                    """)
+                    // timestop_nextrips: just drop/recreate
+                    db.execSQL("DROP TABLE timestop_nextrips")
+                    db.execSQL("""
+                        CREATE TABLE timestop_nextrips (
+                            timestop_id TEXT NOT NULL,
+                            is_actual BOOLEAN NOT NULL,
+                            trip_id TEXT,
+                            departure_time DATETIME NOT NULL,
+                            description TEXT,
+                            route_id TEXT,
+                            route_short_name TEXT,
+                            direction_enum INTEGER,
+                            terminal TEXT,
+                            schedule_relationship TEXT,
+                            FOREIGN KEY (trip_id) REFERENCES table_vehicles(trip_id)
+                        )
+                    """)
+                    db.execSQL("""
+                        CREATE INDEX index_timestop_nextrips ON timestop_nextrips (timestop_id, direction_enum)
+                    """)
+                    // timestop_filters: route ->route_id,
+                    //                   route_direction -> direction_id
+                    //   just drop/recreate
+                    db.execSQL("DROP TABLE timestop_filters")
+                    db.execSQL("""
+                        CREATE TABLE timestop_filters (
+                            timestop_id TEXT NOT NULL,
+                            route_id TEXT NOT NULL,
+                            direction_id INTEGER NOT NULL,
+                            terminal TEXT,
+                            do_show BOOLEAN NOT NULL,
+                            FOREIGN KEY(timestop_id) REFERENCES fav_timestops(timestop_id),
+                            PRIMARY KEY(timestop_id, route_id, direction_id, terminal)
+                        )
+                    """)
+
+                    // nextrips: just drop/recreate
+                    db.execSQL("DROP TABLE nextrips")
+                    db.execSQL("""
+                        CREATE TABLE nextrips (
+                            stop_id INTEGER NOT NULL,
+                            is_actual BOOLEAN NOT NULL,
+                            trip_id TEXT,
+                            departure_time DATETIME NOT NULL,
+                            description TEXT,
+                            route_id TEXT,
+                            route_short_name TEXT,
+                            direction_enum INTEGER,
+                            terminal TEXT,
+                            schedule_relationship TEXT,
+                            FOREIGN KEY (trip_id) REFERENCES table_vehicles(trip_id)
+                        )
+                    """)
+                    db.execSQL("""
+                        CREATE INDEX index_nextrips ON nextrips (stop_id)
+                    """)
+
+                    // filters: route -> route_id
+                    db.execSQL("ALTER TABLE filters RENAME COLUMN route TO route_id")
+
+                    // stops: removed unused KEY_LAST_UPDATE
+                    db.execSQL("ALTER TABLE stops DROP COLUMN last_update")
+
+                    // vehicles table: create
+                    db.execSQL("""
+                        CREATE TABLE vehicles (
+                            trip_id TEXT PRIMARY KEY,
+                            direction_enum INTEGER,
+                            location_time DATETIME NOT NULL,
+                            route_id TEXT,
+                            terminal TEXT,
+                            latitude DOUBLE,
+                            longitude DOUBLE,
+                            bearing DOUBLE,
+                            odometer DOUBLE,
+                            speed DOUBLE,
+                            shape_id INTEGER,
+                            FOREIGN KEY (shape_id) REFERENCES shapes(shape_id)
+                        )
+                    """)
+                    // fav_stops: no change
+                    // last_update: no change
+                    // shapes: no change
+                    // stop_search_history: no change
+                } finally {
+                    db.endTransaction();
+                }
+            }
         }
 
         fun open() {
@@ -309,7 +441,8 @@ class DbAdapter {
             put(KEY_STOP_DESCRIPTION, stopDescription)
         }
 
-        return mDbHelper!!.mDb!!.update(TABLE_FAV_STOPS, cv, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
+        return mDbHelper!!.mDb!!.update(TABLE_FAV_STOPS, cv, "$KEY_STOP_ID == ?",
+                                        arrayOf(stopId.toString()))
     }
 
     private fun getNewFavPosition(): Int =
@@ -409,11 +542,12 @@ class DbAdapter {
     }
 
     /** @return rowId or -1 if failed */
-    fun createFavTimestop(timestopId: String, routeId: String, routeDirection: Int, stopDescription: String?): Long {
+    fun createFavTimestop(timestopId: String, routeId: String, directionId: Int,
+                          stopDescription: String?): Long {
         val cv = ContentValues().apply {
             put(KEY_TIMESTOP_ID, timestopId)
-            put(KEY_ROUTE, routeId)
-            put(KEY_ROUTE_DIRECTION, routeDirection)
+            put(KEY_ROUTE_ID, routeId)
+            put(KEY_DIRECTION_ID, directionId)
             put(KEY_STOP_DESCRIPTION, stopDescription)
             put(KEY_POSITION, getNewFavPosition())
         }
@@ -430,22 +564,22 @@ class DbAdapter {
         return mDbHelper!!.mDb!!.update(TABLE_FAV_TIMESTOPS, cv, "$KEY_TIMESTOP_ID == ?", arrayOf(timestopId))
     }
 
-    fun deleteFavTimestop(timestopId: String, routeId: String, routeDirection: Int) {
+    fun deleteFavTimestop(timestopId: String, routeId: String, directionId: Int) {
         val db = mDbHelper!!.mDb!!
         db.delete(TABLE_TIMESTOP_FILTERS, "$KEY_TIMESTOP_ID == ?", arrayOf(timestopId))
         val c = db.query(TABLE_FAV_TIMESTOPS, arrayOf(KEY_POSITION),
-                "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
-                arrayOf(timestopId, routeId, routeDirection.toString()), null, null, null, "1")
+                "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+                arrayOf(timestopId, routeId, directionId.toString()), null, null, null, "1")
         if (c.moveToFirst()) {
             deleteFavStopAtPosition(c.getInt(c.getColumnIndex(KEY_POSITION)))
         }
         c.close()
     }
 
-    fun isFavTimestop(timestopId: String, routeId: String, routeDirection: Int): Boolean {
+    fun isFavTimestop(timestopId: String, routeId: String, directionId: Int): Boolean {
         val c = mDbHelper!!.mDb!!.query(TABLE_FAV_TIMESTOPS, arrayOf(KEY_TIMESTOP_ID),
-                "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
-                arrayOf(timestopId, routeId, routeDirection.toString()), null, null, null, "1")
+                "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+                arrayOf(timestopId, routeId, directionId.toString()), null, null, null, "1")
 
         val found = c.moveToFirst()
         c.close()
@@ -460,10 +594,10 @@ class DbAdapter {
         return ret
     }
 
-    fun getTimestopDesc(timestopId: String, routeId: String, routeDirection: Int): String? {
+    fun getTimestopDesc(timestopId: String, routeId: String, directionId: Int): String? {
         val c = mDbHelper!!.mDb!!.query(TABLE_FAV_TIMESTOPS, arrayOf(KEY_STOP_DESCRIPTION),
-            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
-            arrayOf(timestopId.toString(), routeId, routeDirection.toString()), null, null, null, "1")
+            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+            arrayOf(timestopId.toString(), routeId, directionId.toString()), null, null, null, "1")
         val ret = if (c.moveToFirst()) c.getString(c.getColumnIndex(KEY_STOP_DESCRIPTION)) else null
         c.close()
         return ret
@@ -513,20 +647,21 @@ class DbAdapter {
         mDbHelper!!.mDb!!.replace(TABLE_LAST_UPDATE, null, cv)
     }
 
-    fun getLastTimestopUpdate(timestopId: String, routeId: String, routeDirection: Int): Long? {
+    fun getLastTimestopUpdate(timestopId: String, routeId: String, directionId: Int): Long? {
         val c = mDbHelper!!.mDb!!.query(TABLE_LAST_TIMESTOP_UPDATE, arrayOf(KEY_LAST_UPDATE),
-            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
-            arrayOf(timestopId, routeId, routeDirection.toString()), null, null, null, "1");
+            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+            arrayOf(timestopId, routeId, directionId.toString()), null, null, null, "1");
         val ret = if (c.moveToFirst()) c.getLong(c.getColumnIndex(KEY_LAST_UPDATE)) else null
         c.close()
         return ret
     }
 
-    private fun setTimestopLastUpdate(timestopId: String, routeId: String, routeDirection: Int, lastUpdate: Long) {
+    private fun setTimestopLastUpdate(timestopId: String, routeId: String,
+                                      directionId: Int, lastUpdate: Long) {
         val cv = ContentValues().apply {
             put(KEY_TIMESTOP_ID, timestopId)
-            put(KEY_ROUTE, routeId)
-            put(KEY_ROUTE_DIRECTION, routeDirection)
+            put(KEY_ROUTE_ID, routeId)
+            put(KEY_DIRECTION_ID, directionId)
             put(KEY_LAST_UPDATE, lastUpdate)
         }
 
@@ -540,22 +675,18 @@ class DbAdapter {
             db.delete(TABLE_NEXTRIPS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
             val stmt = db.compileStatement("""
                 INSERT INTO $TABLE_NEXTRIPS
-                    ($KEY_STOP_ID, $KEY_IS_ACTUAL, $KEY_BLOCK_NUMBER, $KEY_DEPARTURE_UNIX_TIME,
-                     $KEY_DESCRIPTION, $KEY_GATE, $KEY_ROUTE, $KEY_ROUTE_DIRECTION,
-                     $KEY_TERMINAL, $KEY_VEHICLE_HEADING, $KEY_VEHICLE_LATITUDE,
-                     $KEY_VEHICLE_LONGITUDE, $KEY_SHAPE_ID)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ($KEY_STOP_ID, $KEY_IS_ACTUAL, $KEY_TRIP_ID, $KEY_DEPARTURE_UNIX_TIME,
+                     $KEY_DESCRIPTION, $KEY_ROUTE_ID, $KEY_ROUTE_SHORT_NAME,
+                     $KEY_DIRECTION_ENUM, $KEY_TERMINAL, $KEY_SCHEDULE_RELATIONSHIP)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """)
-            for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
+            for (nexTrip in nexTrips.filter { it.departureTime != null }) {
                 stmt.bindAllArgsAsStrings(arrayOf(
-                    stopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
-                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description ?: "",
-                    nexTrip.gate ?: "", nexTrip.route ?: "",
+                    stopId.toString(), nexTrip.isActual.toString(), nexTrip.tripId ?: "",
+                    nexTrip.departureTime!!.toString(), nexTrip.description ?: "",
+                    nexTrip.routeId ?: "", nexTrip.routeShortName ?: "",
                     directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
-                    nexTrip.terminal ?: "", nexTrip.vehicleHeading?.toString() ?: "null",
-                    nexTrip.position?.latitude?.toString() ?: "null",
-                    nexTrip.position?.longitude?.toString() ?: "null",
-                    nexTrip.shapeId?.toString() ?: "null"
+                    nexTrip.terminal ?: "", nexTrip.scheduleRelationship ?: ""
                 ))
                 stmt.execute()
                 stmt.clearBindings()
@@ -567,83 +698,82 @@ class DbAdapter {
         }
     }
 
-    fun updateTimestopNexTrips(timestopId: String, routeId: String, routeDirection: Int, nexTrips: List<NexTrip>, lastUpdate: Long) {
+    fun updateTimestopNexTrips(timestopId: String, routeId: String,
+                               routeDirectionId: Int, nexTrips: List<NexTrip>,
+                               lastUpdate: Long) {
         val db = mDbHelper!!.mDb!!
         db.beginTransaction();
         try {
-            /* delete without consideration of KEY_ROUTE because the NexTrip
-             * route might not match the route from the GetRoutes operation,
-             * for example: route "901" becomes route "Blue" */
-//            db.delete(TABLE_TIMESTOP_NEXTRIPS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?", arrayOf(timestopId, routeId, routeDirection.toString()))
-            db.delete(TABLE_TIMESTOP_NEXTRIPS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_DIRECTION == ?", arrayOf(timestopId, routeDirection.toString()))
+            // db.delete(TABLE_TIMESTOP_NEXTRIPS,
+            //           "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+            //           arrayOf(timestopId, routeId, routeDirectionId.toString()))
+            db.delete(TABLE_TIMESTOP_NEXTRIPS,
+                      "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ?",
+                      arrayOf(timestopId, routeId))
 
             val stmt = db.compileStatement("""
                 INSERT INTO $TABLE_TIMESTOP_NEXTRIPS
-                    ($KEY_TIMESTOP_ID, $KEY_IS_ACTUAL, $KEY_BLOCK_NUMBER, $KEY_DEPARTURE_UNIX_TIME,
-                     $KEY_DESCRIPTION, $KEY_GATE, $KEY_ROUTE, $KEY_ROUTE_DIRECTION,
-                     $KEY_TERMINAL, $KEY_VEHICLE_HEADING, $KEY_VEHICLE_LATITUDE,
-                     $KEY_VEHICLE_LONGITUDE, $KEY_SHAPE_ID)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ($KEY_TIMESTOP_ID, $KEY_IS_ACTUAL, $KEY_TRIP_ID, $KEY_DEPARTURE_UNIX_TIME,
+                     $KEY_DESCRIPTION, $KEY_ROUTE_ID, $KEY_ROUTE_SHORT_NAME,
+                     $KEY_DIRECTION_ENUM, $KEY_TERMINAL, $KEY_SCHEDULE_RELATIONSHIP)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """)
-            for (nexTrip in nexTrips.filter { it.departureTimeInMillis != null }) {
+            for (nexTrip in nexTrips.filter { it.departureTime != null }) {
                 stmt.bindAllArgsAsStrings(arrayOf(
-                    timestopId.toString(), nexTrip.isActual.toString(), nexTrip.blockNumber.toString(),
-                    (nexTrip.departureTimeInMillis!! / 1000).toString(), nexTrip.description ?: "",
-                    nexTrip.gate ?: "", nexTrip.route ?: "",
+                    timestopId.toString(), nexTrip.isActual.toString(), nexTrip.tripId ?: "",
+                    nexTrip.departureTime!!.toString(), nexTrip.description ?: "",
+                    nexTrip.routeId ?: "", nexTrip.routeShortName ?: "",
                     directionToInt(nexTrip.routeDirection)?.toString() ?: "null",
-                    nexTrip.terminal ?: "", nexTrip.vehicleHeading?.toString() ?: "null",
-                    nexTrip.position?.latitude?.toString() ?: "null",
-                    nexTrip.position?.longitude?.toString() ?: "null",
-                    nexTrip.shapeId?.toString() ?: "null"
+                    nexTrip.terminal ?: "", nexTrip.scheduleRelationship
                 ))
                 stmt.execute()
                 stmt.clearBindings()
             }
-            setTimestopLastUpdate(timestopId, routeId, routeDirection, lastUpdate)
+            setTimestopLastUpdate(timestopId, routeId, routeDirectionId, lastUpdate)
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
     }
 
-    fun getNexTrips(stopId: Int, secondsBeforeNowToIgnore: Int, suppressLocations: Boolean): List<NexTrip> {
+    fun getNexTrips(stopId: Int, secondsBeforeNowToIgnore: Int,
+                    suppressLocations: Boolean): List<NexTrip> {
         val nexTrips: MutableList<NexTrip> = mutableListOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_NEXTRIPS,
-            arrayOf(KEY_IS_ACTUAL, KEY_BLOCK_NUMBER, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
-                KEY_GATE, KEY_ROUTE, KEY_ROUTE_DIRECTION, KEY_TERMINAL, KEY_VEHICLE_HEADING,
-                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE, KEY_SHAPE_ID),
+            arrayOf(KEY_IS_ACTUAL, KEY_TRIP_ID, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
+                    KEY_ROUTE_ID, KEY_ROUTE_SHORT_NAME, KEY_DIRECTION_ENUM,
+                    KEY_TERMINAL, KEY_SCHEDULE_RELATIONSHIP),
             "$KEY_STOP_ID == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
             arrayOf(stopId.toString(), secondsBeforeNowToIgnore.toString()), null, null,
             "$KEY_DEPARTURE_UNIX_TIME ASC", null)
         val isActualIndex = c.getColumnIndex(KEY_IS_ACTUAL)
-        val blockNumberIndex = c.getColumnIndex(KEY_BLOCK_NUMBER)
+        val tripIdIndex = c.getColumnIndex(KEY_TRIP_ID)
         val departureUnixTimeIndex = c.getColumnIndex(KEY_DEPARTURE_UNIX_TIME)
         val descriptionIndex = c.getColumnIndex(KEY_DESCRIPTION)
-        val gateIndex = c.getColumnIndex(KEY_GATE)
-        val routeIndex = c.getColumnIndex(KEY_ROUTE)
-        val routeDirectionIndex = c.getColumnIndex(KEY_ROUTE_DIRECTION)
+        val routeIdIndex = c.getColumnIndex(KEY_ROUTE_ID)
+        val routeShortNameIndex = c.getColumnIndex(KEY_ROUTE_SHORT_NAME)
+        val directionEnumIndex = c.getColumnIndex(KEY_DIRECTION_ENUM)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
-        val vehicleHeadingIndex = c.getColumnIndex(KEY_VEHICLE_HEADING)
-        val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
-        val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
-        val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
+        val scheduleRelationshipIndex = c.getColumnIndex(KEY_SCHEDULE_RELATIONSHIP)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
-            val blockNumber = c.getInt(blockNumberIndex)
-            val departureTimeInMillis = c.getLong(departureUnixTimeIndex) * 1000
+            val tripId = c.getString(tripIdIndex)
+            val departureTime = c.getLong(departureUnixTimeIndex)
             val description = c.getString(descriptionIndex)
-            val gate = c.getString(gateIndex)
-            val route = c.getString(routeIndex)
-            val routeDirection = NexTrip.Direction.from(c.getInt(routeDirectionIndex))
+            val routeId = c.getString(routeIdIndex)
+            val routeShortName = c.getString(routeShortNameIndex)
+            val routeDirection = NexTrip.Direction.from(c.getInt(directionEnumIndex))
             val terminal = c.getString(terminalIndex)
-            val vehicleHeading = c.getDouble(vehicleHeadingIndex)
-            val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
-            val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
-            val rawShapeId = c.getInt(shapeIdIndex)
+            val scheduleRelationship = c.getString(scheduleRelationshipIndex)
+            val vehicleHeading: Double? = null
+            val vehicleLatitude: Double? = null
+            val vehicleLongitude: Double? = null
+            val rawShapeId: Int? = 0
             val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
-                NexTrip(isActual, blockNumber, departureTimeInMillis, description,
-                        gate, route, routeDirection, terminal, vehicleHeading,
+                NexTrip(isActual, tripId, departureTime, description,
+                        routeId, routeShortName, routeDirection,
+                        terminal, scheduleRelationship, vehicleHeading,
                         vehicleLatitude, vehicleLongitude, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
@@ -653,48 +783,45 @@ class DbAdapter {
         return nexTrips
     }
 
-    fun getTimestopNexTrips(timestopId: String, routeId: String, routeDirection: Int, secondsBeforeNowToIgnore: Int, suppressLocations: Boolean): List<NexTrip> {
+    fun getTimestopNexTrips(timestopId: String, routeId: String,
+                            routeDirectionId: Int, secondsBeforeNowToIgnore: Int,
+                            suppressLocations: Boolean): List<NexTrip> {
         val nexTrips: MutableList<NexTrip> = mutableListOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_TIMESTOP_NEXTRIPS,
-            arrayOf(KEY_IS_ACTUAL, KEY_BLOCK_NUMBER, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
-                KEY_GATE, KEY_ROUTE, KEY_ROUTE_DIRECTION, KEY_TERMINAL, KEY_VEHICLE_HEADING,
-                KEY_VEHICLE_LATITUDE, KEY_VEHICLE_LONGITUDE, KEY_SHAPE_ID),
-            /* query without consideration of KEY_ROUTE because the NexTrip
-             * route might not match the route from the GetRoutes operation,
-             * for example: route "901" becomes route "Blue" */
-//            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
-            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_DIRECTION == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
-            arrayOf(timestopId, routeDirection.toString(), secondsBeforeNowToIgnore.toString()), null, null,
+            arrayOf(KEY_IS_ACTUAL, KEY_TRIP_ID, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
+                KEY_ROUTE_ID, KEY_ROUTE_SHORT_NAME, KEY_DIRECTION_ENUM,
+                KEY_TERMINAL, KEY_SCHEDULE_RELATIONSHIP),
+            "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ENUM == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
+            arrayOf(timestopId, routeDirectionId.toString(), secondsBeforeNowToIgnore.toString()), null, null,
             "$KEY_DEPARTURE_UNIX_TIME ASC", null)
         val isActualIndex = c.getColumnIndex(KEY_IS_ACTUAL)
-        val blockNumberIndex = c.getColumnIndex(KEY_BLOCK_NUMBER)
+        val tripIdIndex = c.getColumnIndex(KEY_TRIP_ID)
         val departureUnixTimeIndex = c.getColumnIndex(KEY_DEPARTURE_UNIX_TIME)
         val descriptionIndex = c.getColumnIndex(KEY_DESCRIPTION)
-        val gateIndex = c.getColumnIndex(KEY_GATE)
-        val routeIndex = c.getColumnIndex(KEY_ROUTE)
-        val routeDirectionIndex = c.getColumnIndex(KEY_ROUTE_DIRECTION)
+        val routeIdIndex = c.getColumnIndex(KEY_ROUTE_ID)
+        val routeShortNameIndex = c.getColumnIndex(KEY_ROUTE_SHORT_NAME)
+        val directionEnumIndex = c.getColumnIndex(KEY_DIRECTION_ENUM)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
-        val vehicleHeadingIndex = c.getColumnIndex(KEY_VEHICLE_HEADING)
-        val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
-        val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
-        val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
+        val scheduleRelationshipIndex = c.getColumnIndex(KEY_SCHEDULE_RELATIONSHIP)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
-            val blockNumber = c.getInt(blockNumberIndex)
-            val departureTimeInMillis = c.getLong(departureUnixTimeIndex) * 1000
+            val tripId = c.getString(tripIdIndex)
+            val departureTime = c.getLong(departureUnixTimeIndex)
             val description = c.getString(descriptionIndex)
-            val gate = c.getString(gateIndex)
-            val route = c.getString(routeIndex)
-            val dbRouteDirection = NexTrip.Direction.from(c.getInt(routeDirectionIndex))
+            val routeId = c.getString(routeIdIndex)
+            val routeShortName = c.getString(routeShortNameIndex)
+            val routeDirection = NexTrip.Direction.from(c.getInt(directionEnumIndex))
             val terminal = c.getString(terminalIndex)
-            val vehicleHeading = c.getDouble(vehicleHeadingIndex)
-            val vehicleLatitude = c.getDouble(vehicleLatitudeIndex)
-            val vehicleLongitude = c.getDouble(vehicleLongitudeIndex)
-            val rawShapeId = c.getInt(shapeIdIndex)
+            val scheduleRelationship = c.getString(scheduleRelationshipIndex)
+            val vehicleHeading : Double? = null
+            val vehicleLatitude : Double? = null
+            val vehicleLongitude : Double? = null
+            val rawShapeId = 0
             val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
-                NexTrip(isActual, blockNumber, departureTimeInMillis, description,
-                        gate, route, dbRouteDirection, terminal, vehicleHeading,
+                NexTrip(isActual, tripId, departureTime, description,
+                        routeId, routeShortName, routeDirection,
+                        terminal, scheduleRelationship, vehicleHeading,
                         vehicleLatitude, vehicleLongitude, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
@@ -704,16 +831,17 @@ class DbAdapter {
         return nexTrips
     }
 
-    fun updateDoShowRoutes(stopId: Int, doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
+    fun updateDoShowRoutes(stopId: Int, doShowRoutes: Map<Pair<String?, String?>,
+                           Boolean>) {
         val db = mDbHelper!!.mDb!!
         db.beginTransaction();
         try {
             db.delete(TABLE_FILTERS, "$KEY_STOP_ID == ?", arrayOf(stopId.toString()))
-            for ((routeAndTerminal, doShow) in doShowRoutes) {
+            for ((routeIdAndTerminal, doShow) in doShowRoutes) {
                 val cv = ContentValues().apply {
                     put(KEY_STOP_ID, stopId)
-                    put(KEY_ROUTE, routeAndTerminal.first)
-                    put(KEY_TERMINAL, routeAndTerminal.second)
+                    put(KEY_ROUTE_ID, routeIdAndTerminal.first)
+                    put(KEY_TERMINAL, routeIdAndTerminal.second)
                     put(KEY_DO_SHOW, doShow)
                 }
                 db.insert(TABLE_FILTERS, null, cv)
@@ -727,49 +855,52 @@ class DbAdapter {
     fun getDoShowRoutes(stopId: Int): Map<Pair<String?, String?>, Boolean> {
         val doShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_FILTERS,
-            arrayOf(KEY_ROUTE, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_STOP_ID == ?",
+            arrayOf(KEY_ROUTE_ID, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_STOP_ID == ?",
             arrayOf(stopId.toString()), null, null, null, null)
-        val routeIndex = c.getColumnIndex(KEY_ROUTE)
+        val routeIdIndex = c.getColumnIndex(KEY_ROUTE_ID)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val doShowIndex = c.getColumnIndex(KEY_DO_SHOW)
         while (c.moveToNext()) {
-            val route = c.getString(routeIndex)
+            val routeId = c.getString(routeIdIndex)
             val terminal = c.getString(terminalIndex)
             val doShow = c.getInt(doShowIndex) != 0
-            doShowRoutes[Pair(route, terminal)] = doShow
+            doShowRoutes[Pair(routeId, terminal)] = doShow
         }
         c.close()
         return doShowRoutes
     }
 
-    fun getTimestopDoShowRoutes(timestopId: String, routeId: String, routeDirection: Int): Map<Pair<String?, String?>, Boolean> {
+    fun getTimestopDoShowRoutes(timestopId: String, routeId: String,
+                                directionId: Int): Map<Pair<String?, String?>, Boolean> {
         val doShowRoutes: MutableMap<Pair<String?, String?>, Boolean> = mutableMapOf()
         val c = mDbHelper!!.mDb!!.query(TABLE_TIMESTOP_FILTERS,
-            arrayOf(KEY_ROUTE, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?",
-            arrayOf(timestopId, routeId, routeDirection.toString()), null, null, null, null)
-        val routeIndex = c.getColumnIndex(KEY_ROUTE)
+            arrayOf(KEY_ROUTE_ID, KEY_TERMINAL, KEY_DO_SHOW), "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?",
+            arrayOf(timestopId, routeId, directionId.toString()), null, null, null, null)
+        val routeIdIndex = c.getColumnIndex(KEY_ROUTE_ID)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val doShowIndex = c.getColumnIndex(KEY_DO_SHOW)
         while (c.moveToNext()) {
-            val route = c.getString(routeIndex)
+            val routeId = c.getString(routeIdIndex)
             val terminal = c.getString(terminalIndex)
             val doShow = c.getInt(doShowIndex) != 0
-            doShowRoutes[Pair(route, terminal)] = doShow
+            doShowRoutes[Pair(routeId, terminal)] = doShow
         }
         c.close()
         return doShowRoutes
     }
 
-    fun updateTimestopDoShowRoutes(timestopId: String, routeId: String, routeDirection: Int, doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
+    fun updateTimestopDoShowRoutes(timestopId: String, routeId: String,
+                                   directionId: Int,
+                                   doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         val db = mDbHelper!!.mDb!!
         db.beginTransaction();
         try {
-            db.delete(TABLE_TIMESTOP_FILTERS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE == ? AND $KEY_ROUTE_DIRECTION == ?", arrayOf(timestopId, routeId, routeDirection.toString()))
-            for ((routeAndTerminal, doShow) in doShowRoutes) {
+            db.delete(TABLE_TIMESTOP_FILTERS, "$KEY_TIMESTOP_ID == ? AND $KEY_ROUTE_ID == ? AND $KEY_DIRECTION_ID == ?", arrayOf(timestopId, routeId, directionId.toString()))
+            for ((routeIdAndTerminal, doShow) in doShowRoutes) {
                 val cv = ContentValues().apply {
                     put(KEY_TIMESTOP_ID, timestopId)
-                    put(KEY_ROUTE, routeAndTerminal.first)
-                    put(KEY_TERMINAL, routeAndTerminal.second)
+                    put(KEY_ROUTE_ID, routeIdAndTerminal.first)
+                    put(KEY_TERMINAL, routeIdAndTerminal.second)
                     put(KEY_DO_SHOW, doShow)
                 }
                 db.insert(TABLE_FILTERS, null, cv)
@@ -795,7 +926,8 @@ class DbAdapter {
     fun getStop(stopId: Int): Stop? {
         var stop: Stop? = null
         val c = mDbHelper!!.mDb!!.query(TABLE_STOPS,
-            arrayOf(KEY_STOP_NAME, KEY_STOP_DESC, KEY_STOP_LAT, KEY_STOP_LON, KEY_WHEELCHAIR_BOARDING),
+            arrayOf(KEY_STOP_NAME, KEY_STOP_DESC, KEY_STOP_LAT, KEY_STOP_LON,
+                    KEY_WHEELCHAIR_BOARDING),
             "$KEY_STOP_ID == ?", arrayOf(stopId.toString()), null, null, null, "1")
         if (c.moveToNext()) {
             val stopName = c.getString(c.getColumnIndex(KEY_STOP_NAME))
@@ -876,21 +1008,24 @@ class DbAdapter {
         val KEY_STOP_ID = "stop_id"
         val KEY_TIMESTOP_ID = "timestop_id"
         val KEY_STOP_DESCRIPTION = "stop_description"
-        val KEY_ROUTE = "route"
-        val KEY_ROUTE_DIRECTION = "route_direction"
+        val KEY_ROUTE_ID = "route_id"
+        val KEY_ROUTE_SHORT_NAME = "route_short_name"
         val KEY_POSITION = "position"
         val KEY_STOP_SEARCH_ID = "stop_id"
         val KEY_STOP_SEARCH_DATETIME = "stop_search_datetime"
+        val KEY_DIRECTION_ID = "direction_id"
+        val KEY_DIRECTION_ENUM = "direction_enum"
 
         private val KEY_IS_ACTUAL = "is_actual"
-        private val KEY_BLOCK_NUMBER = "block_number"
+        private val KEY_TRIP_ID = "trip_id"
         private val KEY_DEPARTURE_UNIX_TIME = "departure_time"
         private val KEY_DESCRIPTION = "description"
-        private val KEY_GATE = "gate"
         private val KEY_TERMINAL = "terminal"
-        private val KEY_VEHICLE_HEADING = "vehicle_heading"
-        private val KEY_VEHICLE_LATITUDE = "vehicle_latitude"
-        private val KEY_VEHICLE_LONGITUDE = "vehicle_longitude"
+        private val KEY_VEHICLE_BEARING = "bearing"
+        private val KEY_VEHICLE_LATITUDE = "latitude"
+        private val KEY_VEHICLE_LONGITUDE = "longitude"
+        private val KEY_VEHICLE_ODOMETER = "odometer"
+        private val KEY_VEHICLE_SPEED = "speed"
         private val KEY_DO_SHOW = "do_show"
         private val KEY_STOP_NAME = "stop_name"
         private val KEY_STOP_DESC = "stop_desc"
@@ -901,6 +1036,8 @@ class DbAdapter {
         private val KEY_SHAPE_PT_LAT = "shape_pt_lat"
         private val KEY_SHAPE_PT_LON = "shape_pt_lon"
         private val KEY_SHAPE_PT_SEQUENCE = "shape_pt_sequence"
+        private val KEY_LOCATION_TIME = "location_time"
+        private val KEY_SCHEDULE_RELATIONSHIP = "schedule_relationship"
 
         private val KEY_LAST_UPDATE = "last_update"
 
@@ -915,13 +1052,14 @@ class DbAdapter {
         private val TABLE_LAST_TIMESTOP_UPDATE = "last_timestop_update"
         private val TABLE_SHAPES = "shapes"
         private val TABLE_STOP_SEARCH_HISTORY = "stop_search_history"
+        private val TABLE_VEHICLES = "vehicles"
 
         private val INDEX_NEXTRIPS = "index_nextrips"
         private val INDEX_TIMESTOP_NEXTRIPS = "index_timestop_nextrips"
         private val INDEX_SHAPES = "index_shapes"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 11
+        private val DATABASE_VERSION = 12
 
         private val DATABASE_CREATE_FAV_STOPS = """
             CREATE TABLE $TABLE_FAV_STOPS (
@@ -934,34 +1072,34 @@ class DbAdapter {
         private val DATABASE_CREATE_FAV_TIMESTOPS = """
             CREATE TABLE $TABLE_FAV_TIMESTOPS (
                 $KEY_TIMESTOP_ID TEXT NOT NULL,
-                $KEY_ROUTE TEXT NOT NULL,
-                $KEY_ROUTE_DIRECTION INTEGER NOT NULL,
+                $KEY_ROUTE_ID TEXT NOT NULL,
+                $KEY_DIRECTION_ID INTEGER NOT NULL,
                 $KEY_STOP_DESCRIPTION TEXT,
                 $KEY_POSITION INTEGER,
-                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_ROUTE_DIRECTION)
+                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE_ID, $KEY_DIRECTION_ID)
             )
             """
 
         private val DATABASE_CREATE_FILTERS = """
             CREATE TABLE $TABLE_FILTERS (
                 $KEY_STOP_ID INTEGER NOT NULL,
-                $KEY_ROUTE TEXT,
+                $KEY_ROUTE_ID TEXT,
                 $KEY_TERMINAL TEXT,
                 $KEY_DO_SHOW BOOLEAN NOT NULL,
                 FOREIGN KEY($KEY_STOP_ID) REFERENCES $TABLE_FAV_STOPS($KEY_STOP_ID),
-                PRIMARY KEY($KEY_STOP_ID, $KEY_ROUTE, $KEY_TERMINAL)
+                PRIMARY KEY($KEY_STOP_ID, $KEY_ROUTE_ID, $KEY_TERMINAL)
             )
             """
 
         private val DATABASE_CREATE_TIMESTOP_FILTERS = """
             CREATE TABLE $TABLE_TIMESTOP_FILTERS (
                 $KEY_TIMESTOP_ID TEXT NOT NULL,
-                $KEY_ROUTE TEXT NOT NULL,
-                $KEY_ROUTE_DIRECTION INTEGER NOT NULL,
+                $KEY_ROUTE_ID TEXT NOT NULL,
+                $KEY_DIRECTION_ID INTEGER NOT NULL,
                 $KEY_TERMINAL TEXT,
                 $KEY_DO_SHOW BOOLEAN NOT NULL,
                 FOREIGN KEY($KEY_TIMESTOP_ID) REFERENCES $TABLE_FAV_TIMESTOPS($KEY_TIMESTOP_ID),
-                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_ROUTE_DIRECTION, $KEY_TERMINAL)
+                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE_ID, $KEY_DIRECTION_ID, $KEY_TERMINAL)
             )
             """
 
@@ -969,17 +1107,15 @@ class DbAdapter {
             CREATE TABLE $TABLE_NEXTRIPS (
                 $KEY_STOP_ID INTEGER NOT NULL,
                 $KEY_IS_ACTUAL BOOLEAN NOT NULL,
-                $KEY_BLOCK_NUMBER INTEGER,
+                $KEY_TRIP_ID TEXT,
                 $KEY_DEPARTURE_UNIX_TIME DATETIME NOT NULL,
                 $KEY_DESCRIPTION TEXT,
-                $KEY_GATE TEXT,
-                $KEY_ROUTE TEXT,
-                $KEY_ROUTE_DIRECTION INTEGER,
+                $KEY_ROUTE_ID TEXT,
+                $KEY_ROUTE_SHORT_NAME TEXT,
+                $KEY_DIRECTION_ENUM INTEGER,
                 $KEY_TERMINAL TEXT,
-                $KEY_VEHICLE_HEADING DOUBLE,
-                $KEY_VEHICLE_LATITUDE DOUBLE,
-                $KEY_VEHICLE_LONGITUDE DOUBLE,
-                $KEY_SHAPE_ID INTEGER
+                $KEY_SCHEDULE_RELATIONSHIP TEXT,
+                FOREIGN KEY ($KEY_TRIP_ID) REFERENCES $TABLE_VEHICLES($KEY_TRIP_ID)
             )
             """
 
@@ -987,17 +1123,15 @@ class DbAdapter {
             CREATE TABLE $TABLE_TIMESTOP_NEXTRIPS (
                 $KEY_TIMESTOP_ID TEXT NOT NULL,
                 $KEY_IS_ACTUAL BOOLEAN NOT NULL,
-                $KEY_BLOCK_NUMBER INTEGER,
+                $KEY_TRIP_ID TEXT,
                 $KEY_DEPARTURE_UNIX_TIME DATETIME NOT NULL,
                 $KEY_DESCRIPTION TEXT,
-                $KEY_GATE TEXT,
-                $KEY_ROUTE TEXT,
-                $KEY_ROUTE_DIRECTION INTEGER,
+                $KEY_ROUTE_ID TEXT,
+                $KEY_ROUTE_SHORT_NAME TEXT,
+                $KEY_DIRECTION_ENUM INTEGER,
                 $KEY_TERMINAL TEXT,
-                $KEY_VEHICLE_HEADING DOUBLE,
-                $KEY_VEHICLE_LATITUDE DOUBLE,
-                $KEY_VEHICLE_LONGITUDE DOUBLE,
-                $KEY_SHAPE_ID INTEGER
+                $KEY_SCHEDULE_RELATIONSHIP TEXT,
+                FOREIGN KEY ($KEY_TRIP_ID) REFERENCES $TABLE_VEHICLES($KEY_TRIP_ID)
             )
             """
 
@@ -1006,7 +1140,7 @@ class DbAdapter {
             """
 
         private val DATABASE_CREATE_TIMESTOP_NEXTRIPS_INDEX = """
-            CREATE INDEX $INDEX_TIMESTOP_NEXTRIPS ON $TABLE_TIMESTOP_NEXTRIPS ($KEY_TIMESTOP_ID, $KEY_ROUTE_DIRECTION)
+            CREATE INDEX $INDEX_TIMESTOP_NEXTRIPS ON $TABLE_TIMESTOP_NEXTRIPS ($KEY_TIMESTOP_ID, $KEY_DIRECTION_ENUM)
             """
 
         private val DATABASE_CREATE_STOPS = """
@@ -1016,8 +1150,7 @@ class DbAdapter {
                 $KEY_STOP_DESC TEXT,
                 $KEY_STOP_LAT DOUBLE NOT NULL,
                 $KEY_STOP_LON DOUBLE NOT NULL,
-                $KEY_WHEELCHAIR_BOARDING INTEGER,
-                $KEY_LAST_UPDATE DATETIME
+                $KEY_WHEELCHAIR_BOARDING INTEGER
             )
             """
 
@@ -1031,10 +1164,10 @@ class DbAdapter {
         private val DATABASE_CREATE_LAST_TIMESTOP_UPDATE = """
             CREATE TABLE $TABLE_LAST_TIMESTOP_UPDATE (
                 $KEY_TIMESTOP_ID TEXT NOT NULL,
-                $KEY_ROUTE TEXT NOT NULL,
-                $KEY_ROUTE_DIRECTION INTEGER NOT NULL,
+                $KEY_ROUTE_ID TEXT NOT NULL,
+                $KEY_DIRECTION_ID INTEGER NOT NULL,
                 $KEY_LAST_UPDATE DATETIME,
-                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE, $KEY_ROUTE_DIRECTION)
+                PRIMARY KEY($KEY_TIMESTOP_ID, $KEY_ROUTE_ID, $KEY_DIRECTION_ID)
             )
             """
 
@@ -1059,8 +1192,25 @@ class DbAdapter {
             )
             """
 
+        private val DATABASE_CREATE_VEHICLES = """
+            CREATE TABLE $TABLE_VEHICLES (
+                $KEY_TRIP_ID TEXT PRIMARY KEY,
+                $KEY_DIRECTION_ENUM INTEGER,
+                $KEY_LOCATION_TIME DATETIME NOT NULL,
+                $KEY_ROUTE_ID TEXT,
+                $KEY_TERMINAL TEXT,
+                $KEY_VEHICLE_LATITUDE DOUBLE,
+                $KEY_VEHICLE_LONGITUDE DOUBLE,
+                $KEY_VEHICLE_BEARING DOUBLE,
+                $KEY_VEHICLE_ODOMETER DOUBLE,
+                $KEY_VEHICLE_SPEED DOUBLE,
+                $KEY_SHAPE_ID INTEGER,
+                FOREIGN KEY ($KEY_SHAPE_ID) REFERENCES $TABLE_SHAPES($KEY_SHAPE_ID)
+            )
+            """
+
         private fun directionToInt(dir: NexTrip.Direction?): Int? =
-            dir?.let { NexTrip.getDirectionId(it) }
+            dir?.let { NexTrip.getDirectionEnumId(it) }
 
         private val unixTime: Long
             get() = Calendar.getInstance().timeInMillis / 1000L

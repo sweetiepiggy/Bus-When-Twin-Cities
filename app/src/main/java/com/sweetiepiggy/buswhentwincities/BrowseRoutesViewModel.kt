@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -28,7 +28,7 @@ class BrowseRoutesViewModel : ViewModel(), DownloadRoutesTask.OnDownloadedRoutes
     private var mDownloadErrorListener: OnDownloadErrorListener? = null
     private var mRefreshingListener: OnChangeRefreshingListener? = null
 
-    data class Route(val description: String, val providerId: Int, val routeId: String)
+    data class Route(val routeId: String, val agencyId: Int, val routeLabel: String)
 
     private val mRoutes: MutableLiveData<List<Route>> by lazy {
         MutableLiveData<List<Route>>().also { loadRoutes() }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -84,8 +84,8 @@ class NexTripsFragment : Fragment() {
     }
 
     fun updateNexTrips(nexTrips: List<NexTrip>) {
-        val timeInMillis = Calendar.getInstance().timeInMillis
-        val newNexTrips = nexTrips.map { PresentableNexTrip(it, timeInMillis, context!!) }
+        val time = Calendar.getInstance().timeInMillis / 1000
+        val newNexTrips = nexTrips.map { PresentableNexTrip(it, time, context!!) }
 
         val nexTripChanges = NexTripChange.getNexTripChanges(mNexTrips, newNexTrips, mDoShowRoutes)
 
@@ -111,7 +111,7 @@ class NexTripsFragment : Fragment() {
     fun onChangeHiddenRoutes(changedRoutes: Set<Pair<String?, String?>>) {
         val itemChanges = mutableListOf<NexTripChange.ItemChanged>()
         for ((idx, nexTrip) in mNexTrips.listIterator().withIndex()) {
-            if (changedRoutes.contains(Pair(nexTrip.route, nexTrip.terminal))) {
+            if (changedRoutes.contains(Pair(nexTrip.routeShortName, nexTrip.terminal))) {
                 itemChanges.add(NexTripChange.ItemChanged(idx))
             }
         }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -28,7 +28,7 @@ import java.net.*
 import java.util.*
 
 class DownloadTimestopsTask(private val mDownloadedTimestopsListener: OnDownloadedTimestopsListener,
-		                     private val mRouteId: String, private val mDirection: NexTrip.Direction) : AsyncTask<Void, Int, Void>() {
+		                     private val mRouteId: String, private val mDirectionId: Int) : AsyncTask<Void, Int, Void>() {
     private var mError: MetroTransitDownloader.DownloadError? = null
     private var mTimestops: List<BrowseTimestopsViewModel.Timestop>? = null
 
@@ -39,7 +39,7 @@ class DownloadTimestopsTask(private val mDownloadedTimestopsListener: OnDownload
 
     override fun doInBackground(vararg params: Void): Void? {
         try {
-            val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetStops(mRouteId, mDirection))
+            val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetStops(mRouteId, mDirectionId))
             mTimestops = parseTimestops(reader)
             reader.close()
         } catch (e: UnknownHostException) { // probably no internet connection
@@ -80,8 +80,8 @@ class DownloadTimestopsTask(private val mDownloadedTimestopsListener: OnDownload
             var timestopId: String? = null
             while (reader.hasNext()) {
                 when (reader.nextName()) {
-                    "Text"  -> description = reader.nextString()
-                    "Value" -> timestopId = reader.nextString()
+                    "description"  -> description = reader.nextString()
+                    "place_code" -> timestopId = reader.nextString()
                     else    -> reader.skipValue()
                 }
             }

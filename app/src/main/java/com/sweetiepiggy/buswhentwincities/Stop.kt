@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -20,6 +20,6 @@
 package com.sweetiepiggy.buswhentwincities
 
 data class Stop(val stopId: Int, val stopName: String, val stopDesc: String?,
-			val stopLat: Double, val stopLon: Double, val wheelchairBoarding: Int?)
+            val stopLat: Double, val stopLon: Double, val wheelchairBoarding: Int?)
 
-data class Timestop(val timestopId: String, val routeId: String, val direction: NexTrip.Direction)
+data class Timestop(val timestopId: String, val routeId: String, val directionId: Int)

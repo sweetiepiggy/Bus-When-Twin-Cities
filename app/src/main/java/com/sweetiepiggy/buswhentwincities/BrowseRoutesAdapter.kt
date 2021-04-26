@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -50,11 +50,11 @@ class BrowseRoutesAdapter(private val mRouteListener: OnClickRouteListener,
     }
 
     override fun onBindViewHolder(holder: BrowseRoutesViewHolder, position: Int) {
-        val expectedPrefix = "${mRoutes[position].routeId} - "
-        holder.mRouteIdTextView.text = if (mRoutes[position].description.startsWith(expectedPrefix)) {
+        val expectedPrefix = "Route "
+        holder.mRouteIdTextView.text = if (mRoutes[position].routeLabel.startsWith(expectedPrefix)) {
             mRoutes[position].routeId
         } else ""
-        holder.mDescriptionTextView.text = mRoutes[position].description.removePrefix(expectedPrefix)
+        holder.mDescriptionTextView.text = mRoutes[position].routeLabel
     }
 
     override fun getItemCount(): Int = mRoutes.size

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -34,7 +34,8 @@ import androidx.recyclerview.widget.RecyclerView
 class BrowseDirectionsFragment : Fragment() {
 
     private var mRouteId: String? = null
-    private val mDirections: MutableList<NexTrip.Direction> = ArrayList<NexTrip.Direction>()
+    private val mDirections: MutableList<Pair<Int, String>> =
+        ArrayList<Pair<Int, String>>()
     private lateinit var mAdapter: BrowseDirectionsAdapter
     private lateinit var mClickDirectionListener: BrowseDirectionsAdapter.OnClickDirectionListener
     private lateinit var mDownloadErrorListener: OnDownloadErrorListener
@@ -76,7 +77,7 @@ class BrowseDirectionsFragment : Fragment() {
             setDownloadErrorListener(mDownloadErrorListener)
             setChangeRefreshingListener(mRefreshingListener)
         }
-        model.getDirections().observe(this, Observer<List<NexTrip.Direction>>{
+        model.getDirections().observe(this, Observer<List<Pair<Int, String>>>{
             updateDirections(it)
         })
     }
@@ -92,7 +93,7 @@ class BrowseDirectionsFragment : Fragment() {
         }
     }
 
-    private fun updateDirections(directions: List<NexTrip.Direction>) {
+    private fun updateDirections(directions: List<Pair<Int, String>>) {
         mDirections.apply {
             clear()
             addAll(directions)

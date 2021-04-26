@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -115,7 +115,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         holder.minimalDescriptionTextView.text = nexTrip.description
         holder.minimalDepartureTextTextView.text = nexTrip.departureText
 
-        if (mDoShowRoutes.get(Pair(nexTrip.route, nexTrip.terminal)) ?: true) {
+        if (mDoShowRoutes.get(Pair(nexTrip.routeShortName, nexTrip.terminal)) ?: true) {
             holder.minimalView.visibility = View.GONE
             holder.fullView.visibility = View.VISIBLE
         } else {

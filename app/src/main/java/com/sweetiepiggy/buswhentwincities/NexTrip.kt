@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -28,17 +28,17 @@ import java.lang.Math.abs
 import java.util.*
 
 // the raw data as it comes
-data class RawNexTrip(val isActual: Boolean, val blockNumber: Int?, val departureText: String?,
-              val departureTime: String?, val description: String?, val gate: String?,
-              val route: String?, val routeDirection: String?, val terminal: String?,
-              val vehicleHeading: Double?, val vehicleLatitude: Double?,
-              val vehicleLongitude: Double?)
+data class RawNexTrip(val isActual: Boolean, val tripId: String?, val departureText: String?,
+              val departureTime: Long?, val description: String?, val routeId: String?,
+              val routeShortName: String?, val directionId: Int?, val directionText: String?,
+              val terminal: String?, val scheduleRelationship: String?)
 
 // processed data, replace String with Int/enum, etc.
-class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInMillis: Long?,
-			val description: String?, val gate: String?, val route: String?,
-			val routeDirection: Direction?, val terminal: String?, val vehicleHeading: Double?,
-        	vehicleLatitude: Double?, vehicleLongitude: Double?, val shapeId: Int?,
+class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Long?,
+            val description: String?, val routeId: String?, val routeShortName: String?,
+            val routeDirection: Direction?, val terminal: String?,
+            val scheduleRelationship: String?, val vehicleHeading: Double?,
+            vehicleLatitude: Double?, vehicleLongitude: Double?, val shapeId: Int?,
             val locationSuppressed: Boolean = false) {
 
     val position: LatLng? = vehicleLatitude?.let { latitude ->
@@ -50,26 +50,30 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
     }
 
     val routeAndTerminal: String?
-    	get() = route?.let { it + (terminal ?: "") }
+        get() = routeShortName?.let { it + (terminal ?: "") }
 
     enum class Direction {
         SOUTH, EAST, WEST, NORTH;
         companion object {
             fun from(strDirection: String?): Direction? =
-            	when(strDirection) {
-                    "SOUTHBOUND" -> SOUTH
-                    "EASTBOUND"  -> EAST
-                    "WESTBOUND"  -> WEST
-                    "NORTHBOUND" -> NORTH
+                when(strDirection?.toUpperCase()) {
+                    "SB" -> SOUTH
+                    "EB" -> EAST
+                    "WB" -> WEST
+                    "NB" -> NORTH
+                    "Southbound" -> SOUTH
+                    "Eastbound" -> EAST
+                    "Westbound" -> WEST
+                    "Northbound" -> NORTH
                     else -> null
                 }
-            fun from(directionId: Int?): Direction? =
-            	when(directionId) {
+            fun from(directionEnumId: Int?): Direction? =
+                when(directionEnumId) {
                     SOUTH_ID -> SOUTH
                     EAST_ID  -> EAST
                     WEST_ID  -> WEST
                     NORTH_ID -> NORTH
-                    else -> null
+                    else     -> null
                 }
         }
     }
@@ -78,61 +82,50 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
         BUS, LIGHTRAIL, TRAIN
     }
 
-    fun minutesUntilDeparture(timeInMillis: Long): Long? =
-    	departureTimeInMillis?.let { (it - timeInMillis) / 1000 / 60 }
+    fun minutesUntilDeparture(time: Long): Long? =
+        departureTime?.let { (it - time) / 60 }
 
     companion object {
         val MINUTES_BEFORE_TO_SHOW_LOC = 30
 
-        fun from(rawNexTrip: RawNexTrip, timeInMillis: Long): NexTrip {
+        fun from(rawNexTrip: RawNexTrip, time: Long): NexTrip {
             // if we're not given departureTime then try to compute it from departureText
-            val departureTimeInMillis: Long? = parseDepartureTime(rawNexTrip.departureTime) ?:
-    	    	parseDepartureText(rawNexTrip.departureText, timeInMillis)
+            val departureTime: Long? = rawNexTrip.departureTime ?:
+                parseDepartureText(rawNexTrip.departureText, time)
 
-        	return NexTrip(
-                rawNexTrip.isActual, rawNexTrip.blockNumber, departureTimeInMillis,
-                rawNexTrip.description, rawNexTrip.gate, rawNexTrip.route,
-                Direction.from(rawNexTrip.routeDirection), rawNexTrip.terminal,
-                rawNexTrip.vehicleHeading, rawNexTrip.vehicleLatitude, rawNexTrip.vehicleLongitude,
-                null
+            return NexTrip(
+                rawNexTrip.isActual, rawNexTrip.tripId, rawNexTrip.departureTime,
+                rawNexTrip.description, rawNexTrip.routeId, rawNexTrip.routeShortName,
+                Direction.from(rawNexTrip.directionText),
+                rawNexTrip.terminal, rawNexTrip.scheduleRelationship,
+                null, null, null, null
             )
         }
 
         fun suppressLocation(nexTrip: NexTrip): NexTrip {
             val locationSuppressed = nexTrip.position != null || nexTrip.locationSuppressed
-        	return NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
-        		           nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
-        		           nexTrip.terminal, null, null, null, nexTrip.shapeId, locationSuppressed)
+            return NexTrip(nexTrip.isActual, nexTrip.tripId, nexTrip.departureTime,
+                           nexTrip.description, nexTrip.routeId, nexTrip.routeShortName,
+                           nexTrip.routeDirection,
+                           nexTrip.terminal, nexTrip.scheduleRelationship,
+                           null, null, null, nexTrip.shapeId, locationSuppressed)
         }
 
         fun setShapeId(nexTrip: NexTrip, shapeId: Int): NexTrip =
-        	NexTrip(nexTrip.isActual, nexTrip.blockNumber, nexTrip.departureTimeInMillis,
-        		    nexTrip.description, nexTrip.gate, nexTrip.route, nexTrip.routeDirection,
-        		    nexTrip.terminal, nexTrip.vehicleHeading, nexTrip.position?.latitude,
+            NexTrip(nexTrip.isActual, nexTrip.tripId, nexTrip.departureTime,
+                    nexTrip.description, nexTrip.routeId, nexTrip.routeShortName,
+                    nexTrip.routeDirection,
+                    nexTrip.terminal, nexTrip.scheduleRelationship,
+                    nexTrip.vehicleHeading, nexTrip.position?.latitude,
                     nexTrip.position?.longitude, shapeId, nexTrip.locationSuppressed)
 
-        /** @return departure time in millis since 1970 */
-        private fun parseDepartureTime(departureTime: String?): Long? =
-            if (departureTime != null && departureTime.startsWith("/Date(")) {
-                val timezoneIdx0 = departureTime.indexOf('-', 6)
-                val timezoneIdx = if (timezoneIdx0 >= 0) timezoneIdx0 else departureTime.indexOf('+', 6)
-                try {
-                    departureTime.substring(6, timezoneIdx).toLong()
-                } catch (e: NumberFormatException) {
-                    null
-                }
-            } else {
-                null
-            }
-
-        /** @return departure time in millis since 1970 */
-        private fun parseDepartureText(departureText: String?, timeInMillis: Long): Long? =
-        	if (departureText != null && departureText.endsWith(" Min")) {
+        /** @return departure time in seconds since 1970 */
+        private fun parseDepartureText(departureText: String?, time: Long): Long? =
+            if (departureText != null && departureText.endsWith(" Min")) {
                 try {
                     val minutesUntilDeparture =
-                    	departureText.substring(0, departureText.length - 4).toInt()
-                    val millisUntilDeparture = minutesUntilDeparture * 60 * 1000
-                    timeInMillis + millisUntilDeparture
+                        departureText.substring(0, departureText.length - 4).toInt()
+                    time + minutesUntilDeparture * 60
                 } catch (e: NumberFormatException) {
                     null
                 }
@@ -147,31 +140,18 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
         private fun distanceBetween(pos1: LatLng, pos2: LatLng): Float? {
             var results: FloatArray = floatArrayOf(0f)
             Location.distanceBetween(pos1.latitude, pos1.longitude,
-        		pos2.latitude, pos2.longitude, results)
+                pos2.latitude, pos2.longitude, results)
             return results[0]
         }
 
         private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
 
-        fun guessIsSameNexTrip(a: NexTrip, b: NexTrip) =
-        	a.blockNumber == b.blockNumber &&
-                // blockNumber is not unique, but hopefully it is unique per 20 minutes,
-                //   and hopefully departure time doesn't change by more than 20 minutes
-        		(abs(a.departureTimeInMillis!! - b.departureTimeInMillis!!) < 20 * 60 * 1000)
-
-        fun getDirectionId(dir: NexTrip.Direction): Int =
-	    	when(dir) {
-        	    NexTrip.Direction.SOUTH -> SOUTH_ID
-        	    NexTrip.Direction.EAST  -> EAST_ID
-        	    NexTrip.Direction.WEST  -> WEST_ID
-        	    NexTrip.Direction.NORTH -> NORTH_ID
-            }
-        fun getGtfsDirectionId(dir: NexTrip.Direction): Int =
-	    	when(dir) {
-        	    NexTrip.Direction.SOUTH -> 1
-        	    NexTrip.Direction.EAST  -> 0
-        	    NexTrip.Direction.WEST  -> 1
-        	    NexTrip.Direction.NORTH -> 0
+        fun getDirectionEnumId(dir: NexTrip.Direction): Int =
+            when(dir) {
+                NexTrip.Direction.SOUTH -> SOUTH_ID
+                NexTrip.Direction.EAST  -> EAST_ID
+                NexTrip.Direction.WEST  -> WEST_ID
+                NexTrip.Direction.NORTH -> NORTH_ID
             }
 
         private val SOUTH_ID = 1
@@ -182,31 +162,29 @@ class NexTrip(val isActual: Boolean, val blockNumber: Int?, val departureTimeInM
 }
 
 // processed data for presentation
-class PresentableNexTrip(val nexTrip: NexTrip, timeInMillis: Long, context: Context) {
-
+class PresentableNexTrip(val nexTrip: NexTrip, time: Long, context: Context) {
     val isActual: Boolean = nexTrip.isActual
-    val blockNumber: Int? = nexTrip.blockNumber
+    val tripId: String? = nexTrip.tripId
     val description: String? = nexTrip.description
-    val route: String? = nexTrip.route
+    val routeShortName: String? = nexTrip.routeShortName
     val terminal: String? = nexTrip.terminal
-    val routeAndTerminal: String? = route?.let { it + (terminal ?: "") }
+    val routeAndTerminal: String? = routeShortName?.let { it + (terminal ?: "") }
     val routeDirection: NexTrip.Direction? = nexTrip.routeDirection
     val routeDirectionStr: String? = translateDirection(nexTrip.routeDirection, context.resources)
     val routeDirectionBoundStr: String? = translateDirectionBound(nexTrip.routeDirection, context.resources)
     val position: LatLng? = nexTrip.position
-    val departureTimeInMillis: Long? = nexTrip.departureTimeInMillis
-    val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(timeInMillis)
+    val minutesUntilDeparture: Long? = nexTrip.minutesUntilDeparture(time)
     val shapeId: Int? = nexTrip.shapeId
     val locationSuppressed: Boolean = nexTrip.locationSuppressed
 
     val departureText: String?
-	val departureTime: String?
+    val departureTime: String?
 
     init {
-        if (nexTrip.departureTimeInMillis == null) {
+        if (nexTrip.departureTime == null) {
             departureText = null
             departureTime = null
-        } else if (nexTrip.departureTimeInMillis < 0 || minutesUntilDeparture!! < 0) {
+        } else if (nexTrip.departureTime < 0 || minutesUntilDeparture!! < 0) {
             departureText = context.resources.getString(R.string.past_due)
             departureTime = null
         } else if (minutesUntilDeparture < 60) {
@@ -214,15 +192,15 @@ class PresentableNexTrip(val nexTrip: NexTrip, timeInMillis: Long, context: Cont
                  context.resources.getString(R.string.due)
             else
                  minutesUntilDeparture.toString() + " " + context.resources.getString(R.string.minutes)
-            departureTime = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTimeInMillis))
+            departureTime = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime))
         } else {
-            departureText = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTimeInMillis))
+            departureText = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime))
             departureTime = null
          }
     }
 
     fun getVehicle(): NexTrip.Vehicle =
-        when (route) {
+        when (routeShortName) {
             "Blue"  -> NexTrip.Vehicle.LIGHTRAIL
             "Grn"   -> NexTrip.Vehicle.LIGHTRAIL
             "Nstar" -> NexTrip.Vehicle.TRAIN
@@ -230,11 +208,8 @@ class PresentableNexTrip(val nexTrip: NexTrip, timeInMillis: Long, context: Cont
         }
 
     companion object {
-        fun guessIsSameNexTrip(a: PresentableNexTrip, b: PresentableNexTrip) =
-            NexTrip.guessIsSameNexTrip(a.nexTrip, b.nexTrip)
-
         fun translateDirection(dir: NexTrip.Direction?, resources: Resources): String? =
-        	when (dir) {
+            when (dir) {
                 NexTrip.Direction.SOUTH -> resources.getString(R.string.south)
                 NexTrip.Direction.EAST  -> resources.getString(R.string.east)
                 NexTrip.Direction.WEST  -> resources.getString(R.string.west)
@@ -243,15 +218,21 @@ class PresentableNexTrip(val nexTrip: NexTrip, timeInMillis: Long, context: Cont
             }
 
         fun translateDirectionBound(dir: NexTrip.Direction?, resources: Resources): String? =
-        	when (dir) {
+            when (dir) {
                 NexTrip.Direction.SOUTH -> resources.getString(R.string.southbound)
                 NexTrip.Direction.EAST  -> resources.getString(R.string.eastbound)
                 NexTrip.Direction.WEST  -> resources.getString(R.string.westbound)
                 NexTrip.Direction.NORTH -> resources.getString(R.string.northbound)
                 else -> null
             }
-    }
 
-    override fun toString(): String =
-      "($departureText, $departureTime, $isActual, $blockNumber, $description, $routeAndTerminal, $routeDirection, $departureTimeInMillis)"
+        fun translateDirectionBound(dir: String?, resources: Resources): String? =
+            when (NexTrip.Direction.from(dir)) {
+                NexTrip.Direction.SOUTH -> resources.getString(R.string.southbound)
+                NexTrip.Direction.EAST  -> resources.getString(R.string.eastbound)
+                NexTrip.Direction.WEST  -> resources.getString(R.string.westbound)
+                NexTrip.Direction.NORTH -> resources.getString(R.string.northbound)
+                else -> dir
+            }
+    }
 }

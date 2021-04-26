@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -94,19 +94,19 @@ class FavoriteStopIdsViewModel(application: Application) : AndroidViewModel(appl
 
             val c1 = dbHelper.fetchFavTimestops()
             val timestopIdIndex = c1.getColumnIndex(DbAdapter.KEY_TIMESTOP_ID)
-            val routeIdIndex = c1.getColumnIndex(DbAdapter.KEY_ROUTE)
-            val directionIdIndex = c1.getColumnIndex(DbAdapter.KEY_ROUTE_DIRECTION)
+            val routeIdIndex = c1.getColumnIndex(DbAdapter.KEY_ROUTE_ID)
+            val directionIdIndex = c1.getColumnIndex(DbAdapter.KEY_DIRECTION_ID)
             val stopDescIndex1 = c1.getColumnIndex(DbAdapter.KEY_STOP_DESCRIPTION)
             val positionIndex1 = c1.getColumnIndex(DbAdapter.KEY_POSITION)
             while (c1.moveToNext()) {
                 val timestopId = c1.getString(timestopIdIndex)
                 val routeId = c1.getString(routeIdIndex)
-                val direction = NexTrip.Direction.from(c1.getInt(directionIdIndex))
+                val directionId = c1.getInt(directionIdIndex)
                 val stopDesc = c1.getString(stopDescIndex1)
                 val position = c1.getInt(positionIndex1)
-                if (timestopId != null && routeId != null && direction != null) {
+                if (timestopId != null && routeId != null) {
                     favoriteStops.add(FavoriteStop.FavoriteTimestop(
-                        Timestop(timestopId, routeId, direction), stopDesc, position))
+                        Timestop(timestopId, routeId, directionId), stopDesc, position))
                 }
             }
             c1.close()

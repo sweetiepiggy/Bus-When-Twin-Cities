@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -35,7 +35,7 @@ import javax.net.ssl.TrustManagerFactory
 class MetroTransitDownloader() {
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class,
-			IllegalStateException::class)
+            IllegalStateException::class)
     fun openJsonReader(operation: NexTripOperation): JsonReader {
         val urlConnection = (getMetroTransitUrl(operation).openConnection() as HttpsURLConnection).apply {
             // trust svc.metrotransit.org server certificate on Android 4.1 - 4.4
@@ -51,7 +51,7 @@ class MetroTransitDownloader() {
                     setCertificateEntry("ca", ca)
                 }
                 val tmf =
-                	TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
                         init(keyStore)
                     }
                 val context = SSLContext.getInstance("TLS").apply {
@@ -75,28 +75,28 @@ class MetroTransitDownloader() {
         object GetProviders: NexTripOperation()
         object GetRoutes: NexTripOperation()
         data class GetDirections(val routeId: String): NexTripOperation()
-        data class GetStops(val routeId: String, val direction: NexTrip.Direction): NexTripOperation()
+        data class GetStops(val routeId: String, val directionId: Int): NexTripOperation()
         data class GetDepartures(val stopId: Int): NexTripOperation()
-        data class GetTimepointDepartures(val routeId: String, val direction: NexTrip.Direction,
-        		val timestopId: String): NexTripOperation()
-        data class GetVehicleLocations(val route: Int): NexTripOperation()
+        data class GetTimepointDepartures(val routeId: String, val directionId: Int,
+                val timestopId: String): NexTripOperation()
+        data class GetVehicleLocations(val routeId: Int): NexTripOperation()
     }
 
     private fun getMetroTransitUrl(operation: NexTripOperation): URL =
-	    URL(NEXTRIP_URL +
-        	when(operation) {
-                is NexTripOperation.GetProviders -> "Providers"
-                is NexTripOperation.GetRoutes -> "Routes"
-                is NexTripOperation.GetDirections -> "Directions/${operation.routeId}"
-                is NexTripOperation.GetStops -> "Stops/${operation.routeId}/${NexTrip.getDirectionId(operation.direction)}"
+        URL(NEXTRIP_URL +
+            when(operation) {
+                is NexTripOperation.GetProviders -> "agencies"
+                is NexTripOperation.GetRoutes -> "routes"
+                is NexTripOperation.GetDirections -> "directions/${operation.routeId}"
+                is NexTripOperation.GetStops -> "stops/${operation.routeId}/${operation.directionId}"
                 is NexTripOperation.GetDepartures -> "${operation.stopId}"
-                is NexTripOperation.GetTimepointDepartures -> "${operation.routeId}/${NexTrip.getDirectionId(operation.direction)}/${operation.timestopId}"
-                is NexTripOperation.GetVehicleLocations -> "VehicleLocations/${operation.route}"
+                is NexTripOperation.GetTimepointDepartures -> "${operation.routeId}/${operation.directionId}/${operation.timestopId}"
+                is NexTripOperation.GetVehicleLocations -> "vehicles/${operation.routeId}"
             } + "?format=json"
-		)
+        )
 
     companion object {
-        private val NEXTRIP_URL = "https://svc.metrotransit.org/NexTrip/"
+        private val NEXTRIP_URL = "https://svc.metrotransit.org/nextripv2/"
         private val SERVER_CERTIFICATE =
 // $ openssl s_client -showcerts -connect svc.metrotransit.org:443
 //  """-----BEGIN CERTIFICATE-----

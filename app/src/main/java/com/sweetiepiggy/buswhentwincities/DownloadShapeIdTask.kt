@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2020-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -73,71 +73,54 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
     }
 
     @Throws(MalformedURLException::class, UnsupportedEncodingException::class, IOException::class,
-			IllegalStateException::class)
+            IllegalStateException::class)
     private fun downloadShapeId(nexTrip: NexTrip): Int?  {
-        var possibleShapeIds: Set<Int> = setOf()
+        var shapeId: Int? = null
 
-        if (nexTrip.blockNumber != null && nexTrip.departureTimeInMillis != null &&
-                nexTrip.routeDirection != null && nexTrip.description != null) {
-            val dt = nexTrip.departureTimeInMillis / 1000
-            val dir = NexTrip.getGtfsDirectionId(nexTrip.routeDirection)
-            val tripsUrl = ((if (mUseHttps) "https://" else "http://")
-                             + TRIPS_URL
-                             + "?block_id=${nexTrip.blockNumber}"
-                             + "&departure_time=$dt"
-                             + "&direction_id=$dir"
-                             + "&description=" + URLEncoder.encode(nexTrip.description, "UTF-8")
-                             + (mStopId?.let { "&stop_id=$it" } ?: ""))
-            val urlConnection = URL(tripsUrl).openConnection()
+        nexTrip.tripId?.let { tripId ->
+            val tripUrl = ((if (mUseHttps) "https://" else "http://")
+                             + TRIPS_URL + "/tripId")
+            val urlConnection = URL(tripUrl).openConnection()
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
             try {
-                possibleShapeIds = parseTrips(reader)
+                shapeId = parseTrip(reader)
             } finally {
                 reader.close()
             }
         }
 
-        return if (possibleShapeIds.size == 1) possibleShapeIds.first() else null
+        return shapeId
     }
 
     @Throws(IOException::class, IllegalStateException::class)
-    private fun parseTrips(reader: JsonReader): Set<Int> {
-        val possibleShapeIds: MutableSet<Int> = mutableSetOf()
-
-        reader.beginArray()
-        while (!isCancelled && reader.hasNext()) {
-            reader.beginObject()
-            // var tripId: String? = null
-            // var blockId: Int? = null
-            // var directionId: Int? = null
-            // var routeId: String? = null
-            // var serviceId: String? = null
-            var shapeId: Int? = null
-            // var tripHeadsign: String? = null
-            // var wheelchairAccessible: Int? = null
-            while (reader.hasNext()) {
-                val n = reader.nextName()
-                when (n) {
-                    // "_id" -> tripId = reader.nextString()
-                    // "block_id" -> blockId = reader.nextInt()
-                    // "direction_id" -> directionId = reader.nextInt()
-                    // "route_id" -> routeId = reader.nextString()
-                    // "service_id" -> serviceId = reader.nextString()
-                    "shape_id" -> shapeId = reader.nextInt()
-                    // "trip_headsign" -> tripHeadsign = reader.nextString()
-                    // "wheelchair_accessible" -> wheelchairAccessible = reader.nextInt()
-                    else -> reader.skipValue()
-                }
-            }
-            reader.endObject()
-            if (shapeId != null) {
-                possibleShapeIds.add(shapeId)
+    private fun parseTrip(reader: JsonReader): Int? {
+        reader.beginObject()
+        // var tripId: String? = null
+        // var blockId: Int? = null
+        // var directionId: Int? = null
+        // var routeId: String? = null
+        // var serviceId: String? = null
+        var shapeId: Int? = null
+        // var tripHeadsign: String? = null
+        // var wheelchairAccessible: Int? = null
+        while (reader.hasNext()) {
+            val n = reader.nextName()
+            when (n) {
+                // "_id" -> tripId = reader.nextString()
+                // "block_id" -> blockId = reader.nextInt()
+                // "direction_id" -> directionId = reader.nextInt()
+                // "route_id" -> routeId = reader.nextString()
+                // "service_id" -> serviceId = reader.nextString()
+                "shape_id" -> shapeId = reader.nextInt()
+                // "trip_headsign" -> tripHeadsign = reader.nextString()
+                // "wheelchair_accessible" -> wheelchairAccessible = reader.nextInt()
+                else -> reader.skipValue()
             }
         }
-        reader.endArray()
+        reader.endObject()
 
-        return possibleShapeIds
+        return shapeId
     }
 
     companion object {

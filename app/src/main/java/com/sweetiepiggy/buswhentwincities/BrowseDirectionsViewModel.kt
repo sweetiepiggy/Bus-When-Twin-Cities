@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -29,11 +29,11 @@ class BrowseDirectionsViewModel(private val mRouteId: String?) : ViewModel(), Do
     private var mDownloadErrorListener: OnDownloadErrorListener? = null
     private var mRefreshingListener: OnChangeRefreshingListener? = null
 
-    private val mDirections: MutableLiveData<List<NexTrip.Direction>> by lazy {
-        MutableLiveData<List<NexTrip.Direction>>().also { loadDirections() }
+    private val mDirections: MutableLiveData<List<Pair<Int, String>>> by lazy {
+        MutableLiveData<List<Pair<Int, String>>>().also { loadDirections() }
     }
 
-    fun getDirections(): LiveData<List<NexTrip.Direction>> = mDirections
+    fun getDirections(): LiveData<List<Pair<Int, String>>> = mDirections
 
     fun setDownloadErrorListener(downloadErrorListener: OnDownloadErrorListener) {
         mDownloadErrorListener = downloadErrorListener
@@ -48,7 +48,7 @@ class BrowseDirectionsViewModel(private val mRouteId: String?) : ViewModel(), Do
         mRouteId?.let { DownloadDirectionsTask(this, it).execute() }
     }
 
-    override fun onDownloadedDirections(directions: List<NexTrip.Direction>) {
+    override fun onDownloadedDirections(directions: List<Pair<Int, String>>) {
         mDirections.value = directions
         mRefreshingListener?.setRefreshing(false)
     }

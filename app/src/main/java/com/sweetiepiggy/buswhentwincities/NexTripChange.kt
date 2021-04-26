@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2020 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -60,7 +60,7 @@ sealed class NexTripChange {
                         // origNexTrip doesn't exist in the new list
                         removes.add(NexTripChange.ItemRemoved(origIdx - removeCnt))
                         removeCnt += 1
-                    } else if (!PresentableNexTrip.guessIsSameNexTrip(origNexTrip, newNexTrip)) {
+                    } else if (origNexTrip.tripId != newNexTrip.tripId) {
                         // this is not the NexTrip we are looking for, come back to it later
                         dumpOrig.add(IndexedValue(origIdx, origNexTrip))
                     } else {
@@ -69,7 +69,7 @@ sealed class NexTripChange {
                         }
                         // origNexTrip is still in list, make note if it changed
                         if (!nexTripsAppearSame(origNexTrip, newNexTrip,
-                        		!(doShowRoutes.get(Pair(origNexTrip.route, origNexTrip.terminal)) ?: true))) {
+                                !(doShowRoutes.get(Pair(origNexTrip.routeShortName, origNexTrip.terminal)) ?: true))) {
                             changes.add(NexTripChange.ItemChanged(newIdx))
                         }
                         if (newItr.hasNext()) {
@@ -132,16 +132,16 @@ sealed class NexTripChange {
                     groupedRemoves.add(if (itemCount == 1)
                         NexTripChange.ItemRemoved(posStart)
                     else
-                		NexTripChange.ItemRangeRemoved(posStart, itemCount))
+                        NexTripChange.ItemRangeRemoved(posStart, itemCount))
                     posStart = remove.pos
                     itemCount = 1
                 }
             }
 
             groupedRemoves.add(if (itemCount == 1)
-            	NexTripChange.ItemRemoved(posStart)
+                NexTripChange.ItemRemoved(posStart)
             else
-            	NexTripChange.ItemRangeRemoved(posStart, itemCount))
+                NexTripChange.ItemRangeRemoved(posStart, itemCount))
 
             return groupedRemoves
         }
@@ -215,31 +215,31 @@ sealed class NexTripChange {
                     groupedChanges.add(if (itemCount == 1)
                         NexTripChange.ItemChanged(posStart)
                     else
-                		NexTripChange.ItemRangeChanged(posStart, itemCount))
+                        NexTripChange.ItemRangeChanged(posStart, itemCount))
                     posStart = change.pos
                     itemCount = 1
                 }
             }
 
             groupedChanges.add(if (itemCount == 1)
-            	NexTripChange.ItemChanged(posStart)
+                NexTripChange.ItemChanged(posStart)
             else
-            	NexTripChange.ItemRangeChanged(posStart, itemCount))
+                NexTripChange.ItemRangeChanged(posStart, itemCount))
 
             return groupedChanges
         }
 
         private fun nexTripsAppearSame(nexTrip1: PresentableNexTrip, nexTrip2: PresentableNexTrip,
-    			                       isHidden: Boolean): Boolean {
+                                       isHidden: Boolean): Boolean {
             val ret = nexTrip1.departureText == nexTrip2.departureText &&
-        	nexTrip1.description == nexTrip2.description &&
-        	(isHidden ||
-        	    (nexTrip1.departureTime == nexTrip2.departureTime &&
+            nexTrip1.description == nexTrip2.description &&
+            (isHidden ||
+                (nexTrip1.departureTime == nexTrip2.departureTime &&
                 nexTrip1.isActual == nexTrip2.isActual &&
                 nexTrip1.routeDirection == nexTrip2.routeDirection &&
-	            nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
+                nexTrip1.routeAndTerminal == nexTrip2.routeAndTerminal &&
                 nexTrip1.locationSuppressed == nexTrip2.locationSuppressed &&
-    		    (nexTrip1.position == null) == (nexTrip2.position == null)))
+                (nexTrip1.position == null) == (nexTrip2.position == null)))
             return ret
 }
         }

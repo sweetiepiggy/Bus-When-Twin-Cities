@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -47,11 +47,8 @@ class BrowseTimestopsViewModel(private val mRouteId: String?, private val mDirec
 
     private fun loadTimestops() {
         mRefreshingListener?.setRefreshing(true)
-        mRouteId?.let { routeId ->
-            NexTrip.Direction.from(mDirectionId)?.let { direction ->
-                DownloadTimestopsTask(this, routeId, direction).execute()
-            }
-        }
+        if (mRouteId != null && mDirectionId != null)
+            DownloadTimestopsTask(this, mRouteId, mDirectionId).execute()
     }
 
     override fun onDownloadedTimestops(timestops: List<Timestop>) {

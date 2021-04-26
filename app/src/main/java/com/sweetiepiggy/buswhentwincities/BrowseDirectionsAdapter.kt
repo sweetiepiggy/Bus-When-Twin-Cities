@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -28,18 +28,19 @@ import androidx.recyclerview.widget.RecyclerView
 
 class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionListener,
                               private val mCtxt: Context, private val mRouteId: String?,
-                              private val mDirections: MutableList<NexTrip.Direction>) :
+                              private val mDirections: MutableList<Pair<Int, String>>) :
             RecyclerView.Adapter<BrowseDirectionsAdapter.BrowseDirectionsViewHolder>() {
 
     interface OnClickDirectionListener {
-        fun onClickDirection(routeId: String?, direction: NexTrip.Direction)
+        fun onClickDirection(routeId: String?, directionId: Int)
     }
 
     inner class BrowseDirectionsViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         val mDescriptionTextView: TextView = v.findViewById<TextView>(R.id.description)
         init {
             v.setOnClickListener {
-                mDirectionListener.onClickDirection(mRouteId, mDirections[adapterPosition])
+                mDirectionListener.onClickDirection(mRouteId,
+                                                    mDirections[adapterPosition].first)
             }
         }
     }
@@ -55,11 +56,13 @@ class BrowseDirectionsAdapter(private val mDirectionListener: OnClickDirectionLi
     }
 
     override fun onBindViewHolder(holder: BrowseDirectionsViewHolder, position: Int) {
-        holder.mDescriptionTextView.text = PresentableNexTrip.translateDirectionBound(mDirections[position], mCtxt.resources)
+        holder.mDescriptionTextView.text =
+            PresentableNexTrip.translateDirectionBound(mDirections[position].second,
+                                                       mCtxt.resources)
     }
 
     override fun getItemCount(): Int = mDirections.size
 
     override fun getItemId(position: Int): Long =
-        NexTrip.getDirectionId(mDirections[position]).toLong()
+        mDirections[position].first.toLong()
 }
