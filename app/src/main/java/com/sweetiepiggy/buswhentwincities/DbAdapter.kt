@@ -918,7 +918,7 @@ class DbAdapter {
             put(KEY_STOP_DESC, stop.stopDesc)
             put(KEY_STOP_LAT, stop.stopLat)
             put(KEY_STOP_LON, stop.stopLon)
-            put(KEY_WHEELCHAIR_BOARDING, stop.wheelchairBoarding)
+//            put(KEY_WHEELCHAIR_BOARDING, stop.wheelchairBoarding)
         }
         mDbHelper!!.mDb!!.insert(TABLE_STOPS, null, cv)
     }
@@ -934,8 +934,9 @@ class DbAdapter {
             val stopDesc = c.getString(c.getColumnIndex(KEY_STOP_DESC))
             val stopLat = c.getDouble(c.getColumnIndex(KEY_STOP_LAT))
             val stopLon = c.getDouble(c.getColumnIndex(KEY_STOP_LON))
-            val wheelchairBoarding = c.getInt(c.getColumnIndex(KEY_WHEELCHAIR_BOARDING))
-            stop = Stop(stopId, stopName, stopDesc, stopLat, stopLon, wheelchairBoarding)
+//            val wheelchairBoarding = c.getInt(c.getColumnIndex(KEY_WHEELCHAIR_BOARDING))
+//            stop = Stop(stopId, stopName, stopDesc, stopLat, stopLon, wheelchairBoarding)
+            stop = Stop(stopId, stopName, stopLat, stopLon, stopDesc)
         }
         c.close()
         return stop

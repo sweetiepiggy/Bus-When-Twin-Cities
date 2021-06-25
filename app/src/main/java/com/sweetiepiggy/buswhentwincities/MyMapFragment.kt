@@ -171,8 +171,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             updateDoShowRoutes(it)
             if (!mDoShowRoutesInitDone) {
                 mDoShowRoutesInitDone = true
-                mModel.getStop().observe(this, Observer<Stop?>{
-                    mStop = it
+//                mModel.getStop().observe(this, Observer<Stop?>{
+//                    mStop = it
                     mStop?.let { stop ->
                         mMap?.addMarker(MarkerOptions()
                                 .position(LatLng(stop.stopLat, stop.stopLon))
@@ -186,7 +186,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     mModel.getShapes().observe(this, Observer<Map<Int, List<LatLng>>>{
                         updateShapes(it)
                     })
-                })
+//                })
             }
         })
 

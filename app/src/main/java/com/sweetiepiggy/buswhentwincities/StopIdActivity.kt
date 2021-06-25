@@ -83,7 +83,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         title = makeTitle(mStopId, mStopDesc)
 
         mNexTripsModel = ViewModelProvider(this,
-        	NexTripsViewModel.NexTripsViewModelFactory(mStopId, mTimestop, applicationContext)
+            NexTripsViewModel.NexTripsViewModelFactory(mStopId, mTimestop, applicationContext)
         ).get(NexTripsViewModel::class.java)
         mNexTripsModel.setLoadNexTripsErrorListener(this)
         mNexTripsModel.setChangeRefreshingListener(this)
@@ -94,15 +94,15 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                 mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
                     updateRoutes(it)
                 })
-                mNexTripsModel.getStop().observe(this, Observer<Stop?>{
-                    mStop = it
-                    mStop?.let { stop ->
-                        if (mStopDesc == null) {
-                            title = makeTitle(mStopId, stop.stopName)
-                            mStopDesc = stop.stopName
-                        }
-                    }
-                })
+//                mNexTripsModel.getStop().observe(this, Observer<Stop?>{
+//                    mStop = it
+//                    mStop?.let { stop ->
+//                        if (mStopDesc == null) {
+//                            title = makeTitle(mStopId, stop.stopName)
+//                            mStopDesc = stop.stopName
+//                        }
+//                    }
+//                })
             }
         })
 
@@ -227,9 +227,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         } else {
             // mNexTripsFragment?.updateNexTrips(mNexTrips)
             Snackbar.make(findViewById<View>(R.id.coordinator_layout), message ?: "", LENGTH_LONG)
-            	.setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
+                .setAction(resources.getString(R.string.dismiss), object : View.OnClickListener {
                     override fun onClick(v: View) {}
-        		}).show()
+                }).show()
         }
     }
 
@@ -257,7 +257,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                         val route1 = p1.first!!.toInt()
                         val route2 = p2.first!!.toInt()
                         return if (route1 != route2) {
-                        	route1.compareTo(route2)
+                            route1.compareTo(route2)
                         } else {
                             (p1.second ?: "").compareTo(p2.second ?: "")
                         }
@@ -271,7 +271,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             }.toTypedArray()
             val routeAndTerminalsDoShow = routeAndTerminalPairs.map { mDoShowRoutes[it]!! }.toBooleanArray()
             setMultiChoiceItems(routeAndTerminals, routeAndTerminalsDoShow,
-            	DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
+                DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
                     routeAndTerminalsDoShow[which] = isChecked
                 })
             setPositiveButton(android.R.string.ok) { _, _ ->
@@ -317,7 +317,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                         DbAdapter().apply {
                             openReadWrite(applicationContext)
                             if (stopId != null) {
-                            	deleteFavStop(stopId)
+                                deleteFavStop(stopId)
                             } else if (timestop != null) {
                                 deleteFavTimestop(timestop.timestopId, timestop.routeId, timestop.directionId)
                             }
@@ -428,7 +428,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
             }
 
             mMenu?.findItem(R.id.action_favorite)?.icon = getDrawable(applicationContext,
-        		if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
+                if (isFavorite) IS_FAV_ICON else IS_NOT_FAV_ICON)
         }
     }
 
@@ -515,9 +515,9 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
 
     private fun makeTitle(stopId: Int?, stopDesc: String?): String =
         if (stopDesc.isNullOrEmpty())
-        	resources.getString(R.string.stop_number) + (stopId?.toString() ?: "")
+            resources.getString(R.string.stop_number) + (stopId?.toString() ?: "")
         else
-    	    stopDesc + (stopId?.let { " (#" + it.toString() + ")" } ?: "")
+            stopDesc + (stopId?.let { " (#" + it.toString() + ")" } ?: "")
 
     companion object {
         val KEY_STOP_ID = "stopId"

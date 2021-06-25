@@ -28,9 +28,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
 
-class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadStopTask.OnDownloadedStopListener, DownloadShapeIdTask.OnDownloadedShapeIdListener, DownloadShapeTask.OnDownloadedShapeListener {
+class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timestop?, private val mContext: Context) : ViewModel(), DownloadNexTripsTask.OnDownloadedNexTripsListener, DownloadShapeIdTask.OnDownloadedShapeIdListener, DownloadShapeTask.OnDownloadedShapeListener {
     private var mDownloadNexTripsTask: AsyncTask<Void, Int, Void>? = null
-    private var mDownloadStopTask: DownloadStopTask? = null
     private var mLoadNexTripsErrorListener: OnDownloadErrorListener? = null
     private var mRefreshingListener: OnChangeRefreshingListener? = null
     private var mLastUpdate: Long = 0
@@ -52,10 +51,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         }
     }
 
-    private val mStop: MutableLiveData<Stop?> by lazy {
-        MutableLiveData<Stop?>().also { LoadStopTask().execute() }
-    }
-
     /** map from shapeId to shape */
     private val mShapes: MutableLiveData<Map<Int, List<LatLng>>> by lazy {
         MutableLiveData<Map<Int, List<LatLng>>>().also { LoadShapesTask().execute() }
@@ -71,8 +66,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
     fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
         mDoShowRoutes.value = doShowRoutes
     }
-
-    fun getStop(): LiveData<Stop?> = mStop
 
     fun getShapes(): LiveData<Map<Int, List<LatLng>>> = mShapes
     fun findShapeId(nexTrip: NexTrip) {
@@ -165,7 +158,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
     override fun onCleared() {
         mDownloadNexTripsTask?.cancel(true)
-        mDownloadStopTask?.cancel(true)
         super.onCleared()
     }
 
@@ -299,34 +291,6 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         override fun onPostExecute(result: Map<Pair<String?, String?>, Boolean>) {
             mDoShowRoutes.value = result
         }
-    }
-
-    private inner class LoadStopTask(): AsyncTask<Void, Void, Stop?>() {
-        override fun doInBackground(vararg params: Void): Stop? {
-            var stop: Stop? = null
-            mStopId?.let { stopId ->
-                DbAdapter().apply {
-                    open(mContext)
-                    stop = getStop(stopId)
-                    close()
-                }
-            }
-            return stop
-        }
-
-        override fun onPostExecute(result: Stop?) {
-            if (result == null && mStopId != null) {
-                mDownloadStopTask = DownloadStopTask(this@NexTripsViewModel, mStopId)
-                mDownloadStopTask!!.execute()
-            } else {
-                mStop.value = result
-            }
-        }
-    }
-
-    override fun onDownloadedStop(stop: Stop) {
-        mStop.value = stop
-        StoreStopInDbTask(stop).execute()
     }
 
     private inner class StoreStopInDbTask(private val stop: Stop): AsyncTask<Void, Void, Void>() {

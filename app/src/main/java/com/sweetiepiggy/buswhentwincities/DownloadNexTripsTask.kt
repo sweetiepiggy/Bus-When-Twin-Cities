@@ -41,11 +41,14 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
 
     override fun doInBackground(vararg params: Void): Void? {
         var rawNexTrips: List<RawNexTrip>? = null
+        var stops: List<Stop>? = null
 
         try {
             val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetDepartures(mStopId))
-            rawNexTrips = parseNexTrips(reader)
+            val rawNexTripsAndStops = parseNexTrips(reader)
             reader.close()
+            rawNexTrips = rawNexTripsAndStops.first
+            stops = rawNexTripsAndStops.second
         } catch (e: UnknownHostException) { // probably no internet connection
             mError = MetroTransitDownloader.DownloadError.UnknownHost
         } catch (e: java.io.FileNotFoundException) {
@@ -77,13 +80,38 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
         }
     }
 
-    private fun parseNexTrips(reader: JsonReader): List<RawNexTrip> {
+    private fun parseNexTrips(reader: JsonReader): Pair<List<RawNexTrip>, List<Stop>> {
         val rawNexTrips: MutableList<RawNexTrip> = mutableListOf()
+        var stops: MutableList<Stop> = mutableListOf()
 
         reader.beginObject()
         while (!isCancelled() && reader.hasNext()) {
             when (reader.nextName()) {
-                "stops" -> reader.skipValue()
+                "stops" -> {
+                    reader.beginArray()
+                    while (!isCancelled() && reader.hasNext()) {
+                        reader.beginObject()
+                        var stopId: Int? = null
+                        var stopLat: Double? = null
+                        var stopLon: Double? = null
+                        var stopDesc: String? = null
+                        while (reader.hasNext()) {
+                            val n = reader.nextName()
+                            when (n) {
+                                "stop_id" -> stopId = reader.nextInt()
+                                "latitude" -> stopLat = reader.nextDouble()
+                                "longitude" -> stopLon = reader.nextDouble()
+                                "description" -> stopDesc = reader.nextString()
+                                else -> reader.skipValue()
+                            }
+                        }
+                        if (stopId != null && stopLat != null && stopLon != null) {
+                            stops.add(Stop(stopId, null, stopLat, stopLon, stopDesc))
+                        }
+                        reader.endObject()
+                    }
+                    reader.endArray()
+                }
                 "alerts" -> reader.skipValue()
                 "departures" -> {
                     reader.beginArray()
@@ -134,7 +162,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
         }
         reader.endObject()
 
-        return rawNexTrips
+        return Pair(rawNexTrips, stops)
     }
 
 }

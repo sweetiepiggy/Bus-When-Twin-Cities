@@ -19,7 +19,7 @@
 
 package com.sweetiepiggy.buswhentwincities
 
-data class Stop(val stopId: Int, val stopName: String, val stopDesc: String?,
-            val stopLat: Double, val stopLon: Double, val wheelchairBoarding: Int?)
+data class Stop(val stopId: Int, val stopName: String?, val stopLat: Double, val stopLon: Double,
+                val stopDesc: String?)
 
 data class Timestop(val timestopId: String, val routeId: String, val directionId: Int)
