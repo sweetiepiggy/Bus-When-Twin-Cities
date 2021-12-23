@@ -33,9 +33,11 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
                            private val mStopId: Int) : AsyncTask<Void, Int, Void>() {
     private var mError: MetroTransitDownloader.DownloadError? = null
     private var mNexTrips: List<NexTrip>? = null
+    private var mStop: Stop? = null
 
     interface OnDownloadedNexTripsListener {
         fun onDownloadedNexTrips(nexTrips: List<NexTrip>)
+        fun onDownloadedStop(stop: Stop)
         fun onDownloadedNexTripsError(err: MetroTransitDownloader.DownloadError)
     }
 
@@ -65,9 +67,13 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
             mError = MetroTransitDownloader.DownloadError.OtherDownloadError(e.message)
         }
 
-        if (!isCancelled() && rawNexTrips != null) {
-            val time = Calendar.getInstance().timeInMillis / 1000
-            mNexTrips = rawNexTrips.map { NexTrip.from(it, time) }
+        if (!isCancelled()) {
+            if (rawNexTrips != null) {
+                val time = Calendar.getInstance().timeInMillis / 1000
+                mNexTrips = rawNexTrips.map { NexTrip.from(it, time) }
+            }
+            if (stops != null && stops.size == 1)
+                mStop = stops[0]
         }
 
         return null
@@ -77,6 +83,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
         if (!isCancelled) {
             mError?.let { mDownloadedListener.onDownloadedNexTripsError(it) }
             mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it) }
+            mStop?.let { mDownloadedListener.onDownloadedStop(it) }
         }
     }
 

@@ -140,7 +140,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         private val STOP_Z_INDEX = 4f
 
         private fun drawableToBitmap(context: Context, id: Int): BitmapDescriptor =
-            BitmapDescriptorFactory.fromBitmap(getDrawable(context, id)?.toBitmap())
+            BitmapDescriptorFactory.fromBitmap(getDrawable(context, id)?.toBitmap()!!)
 
     }
 
@@ -536,7 +536,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                             flat(true)
                             anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
                         }
-                    ).apply {
+                    )?.apply {
                         val routeAndTerminal = Pair(nexTrip.routeShortName, nexTrip.terminal)
                         if (mVehicleTripId != null ||
                                 (mSelectedShapeId == null &&
@@ -549,7 +549,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                             setZIndex(VEHICLE_Z_INDEX)
                         }
                     }
-                }.apply {
+                }?.apply {
                     tag = nexTrip
                     title = "${nexTrip.routeAndTerminal} (${nexTrip.departureText})"
                     snippet = nexTrip.description
@@ -558,7 +558,8 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                         showInfoWindow()
                     }
                 }
-                mMarkers[nexTrip.tripId] = Pair(marker, nexTrip.position!!)
+                if (marker != null)
+                    mMarkers[nexTrip.tripId] = Pair(marker, nexTrip.position!!)
             }
         }
     }

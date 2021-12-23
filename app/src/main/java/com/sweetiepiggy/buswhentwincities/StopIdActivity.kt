@@ -94,15 +94,15 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
                 mNexTripsModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
                     updateRoutes(it)
                 })
-//                mNexTripsModel.getStop().observe(this, Observer<Stop?>{
-//                    mStop = it
-//                    mStop?.let { stop ->
-//                        if (mStopDesc == null) {
-//                            title = makeTitle(mStopId, stop.stopName)
-//                            mStopDesc = stop.stopName
-//                        }
-//                    }
-//                })
+                mNexTripsModel.getStop().observe(this, Observer<Stop?>{
+                    mStop = it
+                    mStop?.let { stop ->
+                        if (mStopDesc == null) {
+                            title = makeTitle(mStopId, stop.stopName ?: stop.stopDesc)
+                            mStopDesc = stop.stopName ?: stop.stopDesc
+                        }
+                    }
+                })
             }
         })
 
@@ -308,7 +308,7 @@ class StopIdActivity : AppCompatActivity(), StopIdAdapter.OnClickMapListener, On
         if (mIsFavorite ?: false) {
             mIsFavorite = false
             item.icon = getDrawable(this, IS_NOT_FAV_ICON)
-            title = makeTitle(mStopId, mStop?.stopName ?: mStopDesc)
+            title = makeTitle(mStopId, mStop?.stopName ?: mStop?.stopDesc ?: mStopDesc)
             val stopId = mStopId
             val timestop = mTimestop
             if (stopId != null || timestop != null) {

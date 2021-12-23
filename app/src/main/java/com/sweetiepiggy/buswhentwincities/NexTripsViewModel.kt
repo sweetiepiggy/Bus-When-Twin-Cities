@@ -45,6 +45,10 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         MutableLiveData<List<NexTrip>>().also { loadNexTrips() }
     }
 
+    private val mStop: MutableLiveData<Stop> by lazy {
+        MutableLiveData<Stop>()// .also { loadNexTrips() }
+    }
+
     private val mDoShowRoutes: MutableLiveData<Map<Pair<String?, String?>, Boolean>> by lazy {
         MutableLiveData<Map<Pair<String?, String?>, Boolean>>().also {
             LoadDoShowRoutesTask().execute()
@@ -61,6 +65,8 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
 
     fun getNexTrips(): LiveData<List<NexTrip>> = mNexTrips
     fun nexTripsLoaded() = mNexTripsLoaded
+
+    fun getStop(): LiveData<Stop> = mStop
 
     fun getDoShowRoutes(): LiveData<Map<Pair<String?, String?>, Boolean>> = mDoShowRoutes
     fun setDoShowRoutes(doShowRoutes: Map<Pair<String?, String?>, Boolean>) {
@@ -135,6 +141,10 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         mRefreshingListener?.setRefreshing(false)
         StoreNexTripsInDbTask(newNexTrips).execute()
         mLoadingNexTrips = false
+    }
+
+    override fun onDownloadedStop(stop: Stop) {
+        mStop.value = stop
     }
 
     override fun onDownloadedNexTripsError(err: MetroTransitDownloader.DownloadError) {

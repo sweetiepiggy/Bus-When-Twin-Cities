@@ -739,13 +739,22 @@ class DbAdapter {
     fun getNexTrips(stopId: Int, secondsBeforeNowToIgnore: Int,
                     suppressLocations: Boolean): List<NexTrip> {
         val nexTrips: MutableList<NexTrip> = mutableListOf()
-        val c = mDbHelper!!.mDb!!.query(TABLE_NEXTRIPS,
-            arrayOf(KEY_IS_ACTUAL, KEY_TRIP_ID, KEY_DEPARTURE_UNIX_TIME, KEY_DESCRIPTION,
-                    KEY_ROUTE_ID, KEY_ROUTE_SHORT_NAME, KEY_DIRECTION_ENUM,
-                    KEY_TERMINAL, KEY_SCHEDULE_RELATIONSHIP),
-            "$KEY_STOP_ID == ? AND $KEY_DEPARTURE_UNIX_TIME >= strftime(\"%s\", 'now') - ?",
-            arrayOf(stopId.toString(), secondsBeforeNowToIgnore.toString()), null, null,
-            "$KEY_DEPARTURE_UNIX_TIME ASC", null)
+        val c = mDbHelper!!.mDb!!.rawQuery("""
+                        SELECT $KEY_IS_ACTUAL, $TABLE_NEXTRIPS.$KEY_TRIP_ID,
+                                $KEY_DEPARTURE_UNIX_TIME, $KEY_DESCRIPTION,
+                                $TABLE_NEXTRIPS.$KEY_ROUTE_ID, $KEY_ROUTE_SHORT_NAME,
+                                $TABLE_NEXTRIPS.$KEY_DIRECTION_ENUM,
+                                $TABLE_NEXTRIPS.$KEY_TERMINAL, $KEY_SCHEDULE_RELATIONSHIP,
+                                $KEY_VEHICLE_LATITUDE, $KEY_VEHICLE_LONGITUDE,
+                                $KEY_VEHICLE_BEARING, $KEY_SHAPE_ID
+                        FROM $TABLE_NEXTRIPS
+                        LEFT JOIN $TABLE_VEHICLES ON
+                                $TABLE_NEXTRIPS.$KEY_TRIP_ID = $TABLE_VEHICLES.$KEY_TRIP_ID
+                        WHERE $KEY_STOP_ID == ? AND
+                                $KEY_DEPARTURE_UNIX_TIME >= strftime("%s", 'now') - ?
+                        ORDER BY $KEY_DEPARTURE_UNIX_TIME ASC
+""",
+                        arrayOf(stopId.toString(), secondsBeforeNowToIgnore.toString()));
         val isActualIndex = c.getColumnIndex(KEY_IS_ACTUAL)
         val tripIdIndex = c.getColumnIndex(KEY_TRIP_ID)
         val departureUnixTimeIndex = c.getColumnIndex(KEY_DEPARTURE_UNIX_TIME)
@@ -755,6 +764,10 @@ class DbAdapter {
         val directionEnumIndex = c.getColumnIndex(KEY_DIRECTION_ENUM)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val scheduleRelationshipIndex = c.getColumnIndex(KEY_SCHEDULE_RELATIONSHIP)
+        val vehicleBearingIndex = c.getColumnIndex(KEY_VEHICLE_BEARING)
+        val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
+        val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
+        val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
             val tripId = c.getString(tripIdIndex)
@@ -765,15 +778,15 @@ class DbAdapter {
             val routeDirection = NexTrip.Direction.from(c.getInt(directionEnumIndex))
             val terminal = c.getString(terminalIndex)
             val scheduleRelationship = c.getString(scheduleRelationshipIndex)
-            val vehicleHeading: Double? = null
-            val vehicleLatitude: Double? = null
-            val vehicleLongitude: Double? = null
-            val rawShapeId: Int? = 0
+            val vehicleBearing: Double? = c.getDouble(vehicleBearingIndex)
+            val vehicleLatitude: Double? = c.getDouble(vehicleLatitudeIndex)
+            val vehicleLongitude: Double? = c.getDouble(vehicleLongitudeIndex)
+            val rawShapeId: Int? = c.getInt(shapeIdIndex)
             val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
                 NexTrip(isActual, tripId, departureTime, description,
                         routeId, routeShortName, routeDirection,
-                        terminal, scheduleRelationship, vehicleHeading,
+                        terminal, scheduleRelationship, vehicleBearing,
                         vehicleLatitude, vehicleLongitude, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
