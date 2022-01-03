@@ -54,7 +54,7 @@ class NexTripsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.nextrips_fragment, container, false)
-		mResultsRecyclerView = v.findViewById<RecyclerView>(R.id.results_recycler_view)!!
+        mResultsRecyclerView = v.findViewById<RecyclerView>(R.id.results_recycler_view)!!
         mSwipeRefreshLayout = v.findViewById<SwipeRefreshLayout>(R.id.swiperefresh)!!
         return v
     }

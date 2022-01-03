@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -79,7 +79,7 @@ class MetroTransitDownloader() {
         data class GetDepartures(val stopId: Int): NexTripOperation()
         data class GetTimepointDepartures(val routeId: String, val directionId: Int,
                 val timestopId: String): NexTripOperation()
-        data class GetVehicleLocations(val routeId: Int): NexTripOperation()
+        data class GetVehicles(val routeId: String): NexTripOperation()
     }
 
     private fun getMetroTransitUrl(operation: NexTripOperation): URL =
@@ -91,7 +91,7 @@ class MetroTransitDownloader() {
                 is NexTripOperation.GetStops -> "stops/${operation.routeId}/${operation.directionId}"
                 is NexTripOperation.GetDepartures -> "${operation.stopId}"
                 is NexTripOperation.GetTimepointDepartures -> "${operation.routeId}/${operation.directionId}/${operation.timestopId}"
-                is NexTripOperation.GetVehicleLocations -> "vehicles/${operation.routeId}"
+                is NexTripOperation.GetVehicles -> "vehicles/${operation.routeId}"
             } + "?format=json"
         )
 

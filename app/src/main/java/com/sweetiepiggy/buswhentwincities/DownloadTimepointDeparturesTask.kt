@@ -69,7 +69,7 @@ class DownloadTimepointDeparturesTask(private val mDownloadedListener: DownloadN
     override fun onPostExecute(result: Void?) {
         if (!isCancelled) {
             mError?.let { mDownloadedListener.onDownloadedNexTripsError(it) }
-            mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it) }
+            mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it, listOf()) }
         }
     }
 

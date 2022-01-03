@@ -53,7 +53,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         init {
             fullView.setOnClickListener {
                 /* FIXME: adapterPosition can be out of mNexTrips array bounds,
-                	maybe race condition when calling setNexTrips() / notifyAdapter() ? */
+                    maybe race condition when calling setNexTrips() / notifyAdapter() ? */
                 val nexTrip = mNexTrips[adapterPosition]
 //                if (doShowLocation(nexTrip)) {
                     mClickMapListener!!.onClickMap(nexTrip)
@@ -70,7 +70,7 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopIdAdapter.StopIdViewHolder =
-    	StopIdViewHolder(
+        StopIdViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.stop_id_item, parent, false)
         )
 
@@ -83,9 +83,9 @@ class StopIdAdapter(private val mCtxt: Context) : RecyclerView.Adapter<StopIdAda
         holder.departureTextTextView.text = nexTrip.departureText
         holder.departureTimeTextView.text = nexTrip.departureTime
         holder.scheduledTextView.text =
-        	mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
+            mCtxt.resources.getString(if (nexTrip.isActual) R.string.real_time else R.string.scheduled)
         holder.departureTimeTextView.visibility =
-        	if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
+            if (nexTrip.departureTime == null) View.GONE else View.VISIBLE
         val gpsImage = if (nexTrip.isActual ||
                            (nexTrip.position != null && (nexTrip.minutesUntilDeparture?.let {
                                 it < NexTrip.MINUTES_BEFORE_TO_SHOW_LOC

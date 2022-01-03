@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -13,7 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+n    You should have received a copy of the GNU General Public License
     along with Bus When? (Twin Cities); if not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -27,6 +27,40 @@ import com.google.android.gms.maps.model.LatLng
 import java.lang.Math.abs
 import java.util.*
 
+data class RawVehicle(val tripId: String, val directionId: Int, val directionText: String?,
+                      val locationTime: Int?, val routeId: String, val terminal: String?,
+                      val latitude: Double, val longitude: Double,
+                      val bearing: Double?, val odometer: Double?, val speed: Double?)
+
+class Vehicle(val tripId: String, latitude: Double, longitude: Double,
+              val bearing: Double?, val odometer: Double?, val speed: Double?) {
+    // latitude/longitude are not nullable but they may be set to 0/0 if
+    // invalid; we set position to null in that case
+    val position: LatLng? =
+        LatLng(latitude, longitude).let {
+            if (distanceBetweenIsSmall(it, ORIGIN_LAT_LNG)) null else it
+        }
+
+    companion object {
+        fun from(rv: RawVehicle): Vehicle =
+            Vehicle(rv.tripId, rv.latitude, rv.longitude, rv.bearing,
+                    rv.odometer, rv.speed)
+
+        fun distanceBetweenIsSmall(pos1: LatLng?, pos2: LatLng?): Boolean =
+            (pos1 == pos2) || (distanceBetween(pos1!!, pos2!!)?.let { it < 1 } ?: false)
+
+        /** @return distance in meters between the two positions */
+        private fun distanceBetween(pos1: LatLng, pos2: LatLng): Float? {
+            var results: FloatArray = floatArrayOf(0f)
+            Location.distanceBetween(pos1.latitude, pos1.longitude,
+                pos2.latitude, pos2.longitude, results)
+            return results[0]
+        }
+
+        private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
+    }
+}
+
 // the raw data as it comes
 data class RawNexTrip(val isActual: Boolean, val tripId: String?, val departureText: String?,
               val departureTime: Long?, val description: String?, val routeId: String?,
@@ -37,17 +71,9 @@ data class RawNexTrip(val isActual: Boolean, val tripId: String?, val departureT
 class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Long?,
             val description: String?, val routeId: String?, val routeShortName: String?,
             val routeDirection: Direction?, val terminal: String?,
-            val scheduleRelationship: String?, val vehicleHeading: Double?,
-            vehicleLatitude: Double?, vehicleLongitude: Double?, val shapeId: Int?,
-            val locationSuppressed: Boolean = false) {
-
-    val position: LatLng? = vehicleLatitude?.let { latitude ->
-        vehicleLongitude?.let { longitude ->
-            LatLng(latitude, longitude).let {
-                if (distanceBetweenIsSmall(it, ORIGIN_LAT_LNG)) null else it
-            }
-        }
-    }
+            val scheduleRelationship: String?, val vehicle: Vehicle?,
+            val shapeId: Int?, val locationSuppressed: Boolean = false) {
+    val position: LatLng? = vehicle?.position
 
     val routeAndTerminal: String?
         get() = routeShortName?.let { it + (terminal ?: "") }
@@ -56,7 +82,7 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
         SOUTH, EAST, WEST, NORTH;
         companion object {
             fun from(strDirection: String?): Direction? =
-                when(strDirection?.toUpperCase()) {
+                when(strDirection?.uppercase()) {
                     "SB" -> SOUTH
                     "EB" -> EAST
                     "WB" -> WEST
@@ -78,7 +104,7 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
         }
     }
 
-    enum class Vehicle {
+    enum class VehicleKind {
         BUS, LIGHTRAIL, TRAIN
     }
 
@@ -94,11 +120,11 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
                 parseDepartureText(rawNexTrip.departureText, time)
 
             return NexTrip(
-                rawNexTrip.isActual, rawNexTrip.tripId, rawNexTrip.departureTime,
+                rawNexTrip.isActual, rawNexTrip.tripId, departureTime,
                 rawNexTrip.description, rawNexTrip.routeId, rawNexTrip.routeShortName,
                 Direction.from(rawNexTrip.directionText),
                 rawNexTrip.terminal, rawNexTrip.scheduleRelationship,
-                null, null, null, null
+                null, null
             )
         }
 
@@ -108,7 +134,7 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
                            nexTrip.description, nexTrip.routeId, nexTrip.routeShortName,
                            nexTrip.routeDirection,
                            nexTrip.terminal, nexTrip.scheduleRelationship,
-                           null, null, null, nexTrip.shapeId, locationSuppressed)
+                           null, nexTrip.shapeId, locationSuppressed)
         }
 
         fun setShapeId(nexTrip: NexTrip, shapeId: Int): NexTrip =
@@ -116,8 +142,14 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
                     nexTrip.description, nexTrip.routeId, nexTrip.routeShortName,
                     nexTrip.routeDirection,
                     nexTrip.terminal, nexTrip.scheduleRelationship,
-                    nexTrip.vehicleHeading, nexTrip.position?.latitude,
-                    nexTrip.position?.longitude, shapeId, nexTrip.locationSuppressed)
+                    nexTrip.vehicle, shapeId, nexTrip.locationSuppressed)
+
+        fun setVehicle(nexTrip: NexTrip, vehicle: Vehicle): NexTrip =
+            NexTrip(nexTrip.isActual, nexTrip.tripId, nexTrip.departureTime,
+                    nexTrip.description, nexTrip.routeId, nexTrip.routeShortName,
+                    nexTrip.routeDirection,
+                    nexTrip.terminal, nexTrip.scheduleRelationship,
+                    vehicle, nexTrip.shapeId, nexTrip.locationSuppressed)
 
         /** @return departure time in seconds since 1970 */
         private fun parseDepartureText(departureText: String?, time: Long): Long? =
@@ -132,19 +164,6 @@ class NexTrip(val isActual: Boolean, val tripId: String?, val departureTime: Lon
             } else {
                 null
             }
-
-        fun distanceBetweenIsSmall(pos1: LatLng?, pos2: LatLng?): Boolean =
-            (pos1 == pos2) || (distanceBetween(pos1!!, pos2!!)?.let { it < 1 } ?: false)
-
-        /** @return distance in meters between the two positions */
-        private fun distanceBetween(pos1: LatLng, pos2: LatLng): Float? {
-            var results: FloatArray = floatArrayOf(0f)
-            Location.distanceBetween(pos1.latitude, pos1.longitude,
-                pos2.latitude, pos2.longitude, results)
-            return results[0]
-        }
-
-        private val ORIGIN_LAT_LNG: LatLng = LatLng(0.0, 0.0)
 
         fun getDirectionEnumId(dir: NexTrip.Direction): Int =
             when(dir) {
@@ -199,12 +218,12 @@ class PresentableNexTrip(val nexTrip: NexTrip, time: Long, context: Context) {
          }
     }
 
-    fun getVehicle(): NexTrip.Vehicle =
+    fun getVehicleKind(): NexTrip.VehicleKind =
         when (routeShortName) {
-            "Blue"  -> NexTrip.Vehicle.LIGHTRAIL
-            "Grn"   -> NexTrip.Vehicle.LIGHTRAIL
-            "Nstar" -> NexTrip.Vehicle.TRAIN
-            else    -> NexTrip.Vehicle.BUS
+            "Blue"  -> NexTrip.VehicleKind.LIGHTRAIL
+            "Grn"   -> NexTrip.VehicleKind.LIGHTRAIL
+            "Nstar" -> NexTrip.VehicleKind.TRAIN
+            else    -> NexTrip.VehicleKind.BUS
         }
 
     companion object {

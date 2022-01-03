@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -349,7 +349,9 @@ class DbAdapter {
                             direction_enum INTEGER,
                             terminal TEXT,
                             schedule_relationship TEXT,
-                            FOREIGN KEY (trip_id) REFERENCES table_vehicles(trip_id)
+                            shape_id INTEGER,
+                            FOREIGN KEY (trip_id) REFERENCES table_vehicles(trip_id),
+                            FOREIGN KEY (shape_id) REFERENCES shapes(shape_id)
                         )
                     """)
                     db.execSQL("""
@@ -374,9 +376,7 @@ class DbAdapter {
                             longitude DOUBLE,
                             bearing DOUBLE,
                             odometer DOUBLE,
-                            speed DOUBLE,
-                            shape_id INTEGER,
-                            FOREIGN KEY (shape_id) REFERENCES shapes(shape_id)
+                            speed DOUBLE
                         )
                     """)
                     // fav_stops: no change
@@ -746,7 +746,8 @@ class DbAdapter {
                                 $TABLE_NEXTRIPS.$KEY_DIRECTION_ENUM,
                                 $TABLE_NEXTRIPS.$KEY_TERMINAL, $KEY_SCHEDULE_RELATIONSHIP,
                                 $KEY_VEHICLE_LATITUDE, $KEY_VEHICLE_LONGITUDE,
-                                $KEY_VEHICLE_BEARING, $KEY_SHAPE_ID
+                                $KEY_VEHICLE_BEARING, $KEY_VEHICLE_ODOMETER, $KEY_VEHICLE_SPEED,
+                                $KEY_SHAPE_ID
                         FROM $TABLE_NEXTRIPS
                         LEFT JOIN $TABLE_VEHICLES ON
                                 $TABLE_NEXTRIPS.$KEY_TRIP_ID = $TABLE_VEHICLES.$KEY_TRIP_ID
@@ -764,9 +765,11 @@ class DbAdapter {
         val directionEnumIndex = c.getColumnIndex(KEY_DIRECTION_ENUM)
         val terminalIndex = c.getColumnIndex(KEY_TERMINAL)
         val scheduleRelationshipIndex = c.getColumnIndex(KEY_SCHEDULE_RELATIONSHIP)
-        val vehicleBearingIndex = c.getColumnIndex(KEY_VEHICLE_BEARING)
         val vehicleLatitudeIndex = c.getColumnIndex(KEY_VEHICLE_LATITUDE)
         val vehicleLongitudeIndex = c.getColumnIndex(KEY_VEHICLE_LONGITUDE)
+        val vehicleBearingIndex = c.getColumnIndex(KEY_VEHICLE_BEARING)
+        val vehicleOdometerIndex = c.getColumnIndex(KEY_VEHICLE_ODOMETER)
+        val vehicleSpeedIndex = c.getColumnIndex(KEY_VEHICLE_SPEED)
         val shapeIdIndex = c.getColumnIndex(KEY_SHAPE_ID)
         while (c.moveToNext()) {
             val isActual = c.getInt(isActualIndex) != 0
@@ -778,16 +781,22 @@ class DbAdapter {
             val routeDirection = NexTrip.Direction.from(c.getInt(directionEnumIndex))
             val terminal = c.getString(terminalIndex)
             val scheduleRelationship = c.getString(scheduleRelationshipIndex)
-            val vehicleBearing: Double? = c.getDouble(vehicleBearingIndex)
             val vehicleLatitude: Double? = c.getDouble(vehicleLatitudeIndex)
             val vehicleLongitude: Double? = c.getDouble(vehicleLongitudeIndex)
+            val vehicleBearing: Double? = c.getDouble(vehicleBearingIndex)
+            val vehicleOdometer: Double? = c.getDouble(vehicleOdometerIndex)
+            val vehicleSpeed: Double? = c.getDouble(vehicleSpeedIndex)
+            val vehicle = vehicleLatitude?.let { latitude ->
+                vehicleLongitude?.let { longitude ->
+                    Vehicle(tripId, latitude, longitude, vehicleBearing, vehicleOdometer, vehicleSpeed)
+                }
+            }
             val rawShapeId: Int? = c.getInt(shapeIdIndex)
             val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
                 NexTrip(isActual, tripId, departureTime, description,
                         routeId, routeShortName, routeDirection,
-                        terminal, scheduleRelationship, vehicleBearing,
-                        vehicleLatitude, vehicleLongitude, shapeId).let {
+                        terminal, scheduleRelationship, vehicle, shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
             )
@@ -826,16 +835,14 @@ class DbAdapter {
             val routeDirection = NexTrip.Direction.from(c.getInt(directionEnumIndex))
             val terminal = c.getString(terminalIndex)
             val scheduleRelationship = c.getString(scheduleRelationshipIndex)
-            val vehicleHeading : Double? = null
-            val vehicleLatitude : Double? = null
-            val vehicleLongitude : Double? = null
+            val vehicle : Vehicle? = null
             val rawShapeId = 0
             val shapeId = if (rawShapeId == 0) null else rawShapeId
             nexTrips.add(
                 NexTrip(isActual, tripId, departureTime, description,
                         routeId, routeShortName, routeDirection,
-                        terminal, scheduleRelationship, vehicleHeading,
-                        vehicleLatitude, vehicleLongitude, shapeId).let {
+                        terminal, scheduleRelationship, vehicle,
+                        shapeId).let {
                     if (suppressLocations) NexTrip.suppressLocation(it) else it
                 }
             )
@@ -1129,7 +1136,9 @@ class DbAdapter {
                 $KEY_DIRECTION_ENUM INTEGER,
                 $KEY_TERMINAL TEXT,
                 $KEY_SCHEDULE_RELATIONSHIP TEXT,
-                FOREIGN KEY ($KEY_TRIP_ID) REFERENCES $TABLE_VEHICLES($KEY_TRIP_ID)
+                $KEY_SHAPE_ID INTEGER,
+                FOREIGN KEY ($KEY_TRIP_ID) REFERENCES $TABLE_VEHICLES($KEY_TRIP_ID),
+                FOREIGN KEY ($KEY_SHAPE_ID) REFERENCES $TABLE_SHAPES($KEY_SHAPE_ID)
             )
             """
 
@@ -1217,9 +1226,7 @@ class DbAdapter {
                 $KEY_VEHICLE_LONGITUDE DOUBLE,
                 $KEY_VEHICLE_BEARING DOUBLE,
                 $KEY_VEHICLE_ODOMETER DOUBLE,
-                $KEY_VEHICLE_SPEED DOUBLE,
-                $KEY_SHAPE_ID INTEGER,
-                FOREIGN KEY ($KEY_SHAPE_ID) REFERENCES $TABLE_SHAPES($KEY_SHAPE_ID)
+                $KEY_VEHICLE_SPEED DOUBLE
             )
             """
 

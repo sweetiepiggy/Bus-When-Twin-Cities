@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -79,49 +79,49 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
     /** set of tripIds */
     private val mFindingShapeIdFor: MutableSet<String> = mutableSetOf()
     private val mBusIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_24px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_directions_bus_24px)
     }
     private val mBusSouthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_south_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_directions_bus_south_30px)
     }
     private val mBusEastIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_east_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_directions_bus_east_36px)
     }
     private val mBusWestIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_west_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_directions_bus_west_36px)
     }
     private val mBusNorthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_directions_bus_north_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_directions_bus_north_30px)
     }
     private val mTrainIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_train_24px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_train_24px)
     }
     private val mTrainSouthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_train_south_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_train_south_30px)
     }
     private val mTrainEastIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_train_east_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_train_east_36px)
     }
     private val mTrainWestIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_train_west_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_train_west_36px)
     }
     private val mTrainNorthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_train_north_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_train_north_30px)
     }
     private val mLightrailIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_24px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_lightrail_24px)
     }
     private val mLightrailSouthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_south_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_lightrail_south_30px)
     }
     private val mLightrailEastIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_east_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_lightrail_east_36px)
     }
     private val mLightrailWestIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_west_36px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_lightrail_west_36px)
     }
     private val mLightrailNorthIcon: BitmapDescriptor by lazy {
-        drawableToBitmap(context!!, R.drawable.ic_baseline_lightrail_north_30px)
+        drawableToBitmap(requireContext(), R.drawable.ic_baseline_lightrail_north_30px)
     }
     private var mColorRoute = R.color.colorRoute
     private var mColorRouteUnselected = R.color.colorRouteUnselected
@@ -158,35 +158,35 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             loadState(savedInstanceState)
         }
 
-        if (PreferenceManager.getDefaultSharedPreferences(context!!).getBoolean("map_always_light", false)) {
+        if (PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("map_always_light", false)) {
             mColorRoute = R.color.colorRouteAlwaysLight
             mColorRouteUnselected = R.color.colorRouteUnselectedAlwaysLight
         }
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         mModel = activity?.run {
             ViewModelProvider(this).get(NexTripsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-        mModel.getDoShowRoutes().observe(this, Observer<Map<Pair<String?, String?>, Boolean>>{
+        mModel.getDoShowRoutes().observe(viewLifecycleOwner, Observer<Map<Pair<String?, String?>, Boolean>>{
             updateDoShowRoutes(it)
             if (!mDoShowRoutesInitDone) {
                 mDoShowRoutesInitDone = true
-//                mModel.getStop().observe(this, Observer<Stop?>{
-//                    mStop = it
+               mModel.getStop().observe(this, Observer<Stop?>{
+                   mStop = it
                     mStop?.let { stop ->
                         mMap?.addMarker(MarkerOptions()
                                 .position(LatLng(stop.stopLat, stop.stopLon))
                                 .title(resources.getString(R.string.stop_number) + stop.stopId.toString())
                                 .snippet(stop.stopName)
-                                .icon(drawableToBitmap(context!!, R.drawable.ic_stop))
+                                .icon(drawableToBitmap(requireContext(), R.drawable.ic_stop))
                     )}
-                    mModel.getNexTrips().observe(this, Observer<List<NexTrip>>{
+                    mModel.getNexTrips().observe(viewLifecycleOwner, Observer<List<NexTrip>>{
                         updateNexTrips(it)
                     })
-                    mModel.getShapes().observe(this, Observer<Map<Int, List<LatLng>>>{
+                    mModel.getShapes().observe(viewLifecycleOwner, Observer<Map<Int, List<LatLng>>>{
                         updateShapes(it)
                     })
-//                })
+               })
             }
         })
 
@@ -212,15 +212,15 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             setIndoorEnabled(false)
             // see: https://developers.google.com/maps/documentation/android-sdk/styling
             val isNightMode = (resources.configuration.uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES
-            val mapstyle = if (isNightMode && !PreferenceManager.getDefaultSharedPreferences(context!!).getBoolean("map_always_light", false)) {
+            val mapstyle = if (isNightMode && !PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean("map_always_light", false)) {
                 R.raw.mapstyle_night
             } else {
                 R.raw.mapstyle_default
             }
-            setMapStyle(MapStyleOptions.loadRawResourceStyle(context!!, mapstyle))
+            setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), mapstyle))
             moveCamera(CameraUpdateFactory.newLatLngZoom(TWIN_CITIES_LATLNG, TWIN_CITIES_ZOOM))
         }
-        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
             // initialize camera only if we previously thought we initialized the
             // camera but the map wasn't ready
@@ -335,7 +335,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     position(LatLng(it.stopLat, it.stopLon))
                     title(resources.getString(R.string.stop_number) + it.stopId.toString())
                     snippet(it.stopName)
-                    icon(drawableToBitmap(context!!, R.drawable.ic_stop))
+                    icon(drawableToBitmap(requireContext(), R.drawable.ic_stop))
                     zIndex(STOP_Z_INDEX)
                 }
             )// ?.apply {
@@ -445,7 +445,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
         nexTripsWithActualPosition.forEach {
             if (!mVisibleNexTrips!!.contains(it.tripId)) {
                 mVisibleNexTrips!![it.tripId] =
-                    PresentableNexTrip(it, timeInMillis / 1000, context!!)
+                    PresentableNexTrip(it, timeInMillis / 1000, requireContext())
             }
         }
         if (mVisibleNexTrips != null) {
@@ -477,7 +477,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                     mRouteLines[shapeId] = addPolyline(
                         PolylineOptions().apply {
                             addAll(shape)
-                            color(ContextCompat.getColor(context!!, color))
+                            color(ContextCompat.getColor(requireContext(), color))
                             startCap(RoundCap())
                             endCap(RoundCap())
                             zIndex(zIndex)
@@ -524,14 +524,14 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
             for (nexTrip in mVisibleNexTrips!!.values) {
                 val marker = if (mMarkers.containsKey(nexTrip.tripId)) {
                     mMarkers[nexTrip.tripId]!!.first.apply {
-                        if (!NexTrip.distanceBetweenIsSmall(mMarkers[nexTrip.tripId]!!.second, nexTrip.position)) {
+                        if (!Vehicle.distanceBetweenIsSmall(mMarkers[nexTrip.tripId]!!.second, nexTrip.position)) {
                             AnimationUtil.animateMarkerTo(this, nexTrip.position!!)
                         }
                     }
                 } else {
                     addMarker(
                         MarkerOptions().apply {
-                            icon(getIcon(nexTrip.getVehicle(), nexTrip.routeDirection))
+                            icon(getIcon(nexTrip.getVehicleKind(), nexTrip.routeDirection))
                             position(nexTrip.position!!)
                             flat(true)
                             anchor(0.5f, getBusIconAnchorVertical(nexTrip.routeDirection))
@@ -587,7 +587,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
                 val zIndex = if (wantShapeId == shapeId)
                     ROUTE_Z_INDEX else UNSELECTED_ROUTE_Z_INDEX
                 routeLine.apply {
-                    setColor(ContextCompat.getColor(context!!, color))
+                    setColor(ContextCompat.getColor(requireContext(), color))
                     setZIndex(zIndex)
                 }
             }
@@ -631,7 +631,7 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 //         override fun doInBackground(vararg params: Void): List<LatLng>? {
 //             var shape: List<LatLng>? = null
 //             DbAdapter().run {
-//                 open(context!!)
+//                 open(requireContext())
 // //                shape = getShape(shapeId)
 //                 close()
 //             }
@@ -648,11 +648,11 @@ class MyMapFragment : Fragment(), OnMapReadyCallback, ActivityCompat.OnRequestPe
 //         }
 //     }
 
-    private fun getIcon(vehicle: NexTrip.Vehicle, direction: NexTrip.Direction?): BitmapDescriptor =
+    private fun getIcon(vehicle: NexTrip.VehicleKind, direction: NexTrip.Direction?): BitmapDescriptor =
         when (vehicle) {
-            NexTrip.Vehicle.BUS       -> getBusIcon(direction)
-            NexTrip.Vehicle.LIGHTRAIL -> getLightrailIcon(direction)
-            NexTrip.Vehicle.TRAIN     -> getTrainIcon(direction)
+            NexTrip.VehicleKind.BUS       -> getBusIcon(direction)
+            NexTrip.VehicleKind.LIGHTRAIL -> getLightrailIcon(direction)
+            NexTrip.VehicleKind.TRAIN     -> getTrainIcon(direction)
         }
 
     private fun getTrainIcon(direction: NexTrip.Direction?): BitmapDescriptor =

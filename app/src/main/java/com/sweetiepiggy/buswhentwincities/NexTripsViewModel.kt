@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019-2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -121,14 +121,33 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
         }
     }
 
-    override fun onDownloadedNexTrips(nexTrips: List<NexTrip>) {
+    override fun onDownloadedNexTrips(nexTrips: List<NexTrip>, vehicles: List<Vehicle>) {
         mLastUpdate = unixTime
         val oldNexTrips = mNexTrips.value
-        val newNexTrips = nexTrips.map { nexTrip ->
+        // add shapeIds to the newly-downloaded nexTrips if the shapeId was
+        // already known
+        val nexTripsWithShapeIds = nexTrips.map { nexTrip ->
             if (nexTrip.shapeId == null) {
                 val oldNexTrip = oldNexTrips?.find { it.tripId == nexTrip.tripId }
                 if (oldNexTrip != null && oldNexTrip.shapeId != null) {
                     NexTrip.setShapeId(nexTrip, oldNexTrip.shapeId)
+                } else {
+                    nexTrip
+                }
+            } else {
+                nexTrip
+            }
+        }
+        // add vehicle info to the newly-downloaded nexTrips if the vehicle info
+        // is in the given list of vehicles or if it was already known
+        val newNexTrips = nexTripsWithShapeIds.map { nexTrip ->
+            val newVehicle = vehicles.find { it.tripId == nexTrip.tripId }
+            if (newVehicle != null) {
+                NexTrip.setVehicle(nexTrip, newVehicle)
+            } else if (nexTrip.vehicle == null) {
+                val oldNexTrip = oldNexTrips?.find { it.tripId == nexTrip.tripId }
+                if (oldNexTrip != null && oldNexTrip.vehicle != null) {
+                    NexTrip.setVehicle(nexTrip, oldNexTrip.vehicle)
                 } else {
                     nexTrip
                 }
@@ -236,7 +255,7 @@ class NexTripsViewModel(private val mStopId: Int?, private val mTimestop: Timest
                     if (stopId != null) {
                         mDownloadNexTripsTask = DownloadNexTripsTask(this@NexTripsViewModel, stopId)
                     } else if (timestop != null) {
-                        mDownloadNexTripsTask =DownloadTimepointDeparturesTask(this@NexTripsViewModel,
+                        mDownloadNexTripsTask = DownloadTimepointDeparturesTask(this@NexTripsViewModel,
                                 timestop.routeId, timestop.directionId, timestop.timestopId)
                     }
                     mDownloadNexTripsTask!!.execute()

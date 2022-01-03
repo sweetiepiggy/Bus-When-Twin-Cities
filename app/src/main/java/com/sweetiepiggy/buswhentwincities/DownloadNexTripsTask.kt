@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -34,9 +34,10 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
     private var mError: MetroTransitDownloader.DownloadError? = null
     private var mNexTrips: List<NexTrip>? = null
     private var mStop: Stop? = null
+    private var mVehicles: List<Vehicle> = listOf()
 
     interface OnDownloadedNexTripsListener {
-        fun onDownloadedNexTrips(nexTrips: List<NexTrip>)
+        fun onDownloadedNexTrips(nexTrips: List<NexTrip>, vehicles: List<Vehicle>)
         fun onDownloadedStop(stop: Stop)
         fun onDownloadedNexTripsError(err: MetroTransitDownloader.DownloadError)
     }
@@ -44,6 +45,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
     override fun doInBackground(vararg params: Void): Void? {
         var rawNexTrips: List<RawNexTrip>? = null
         var stops: List<Stop>? = null
+        val rawVehicles: MutableList<RawVehicle> = mutableListOf()
 
         try {
             val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetDepartures(mStopId))
@@ -51,6 +53,15 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
             reader.close()
             rawNexTrips = rawNexTripsAndStops.first
             stops = rawNexTripsAndStops.second
+
+            val routeIds = rawNexTrips.map { it.routeId }.toSet()
+            for (routeId in routeIds) {
+                if (routeId != null) {
+                    val vehiclesReader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetVehicles(routeId))
+                    rawVehicles.addAll(parseVehicles(vehiclesReader))
+                    vehiclesReader.close()
+                }
+            }
         } catch (e: UnknownHostException) { // probably no internet connection
             mError = MetroTransitDownloader.DownloadError.UnknownHost
         } catch (e: java.io.FileNotFoundException) {
@@ -72,8 +83,10 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
                 val time = Calendar.getInstance().timeInMillis / 1000
                 mNexTrips = rawNexTrips.map { NexTrip.from(it, time) }
             }
-            if (stops != null && stops.size == 1)
+            if (stops != null && stops.size == 1){
                 mStop = stops[0]
+            }
+            mVehicles = rawVehicles.map { Vehicle.from(it) }
         }
 
         return null
@@ -82,7 +95,7 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
     override fun onPostExecute(result: Void?) {
         if (!isCancelled) {
             mError?.let { mDownloadedListener.onDownloadedNexTripsError(it) }
-            mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it) }
+            mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it, mVehicles) }
             mStop?.let { mDownloadedListener.onDownloadedStop(it) }
         }
     }
@@ -172,4 +185,54 @@ class DownloadNexTripsTask(private val mDownloadedListener: OnDownloadedNexTrips
         return Pair(rawNexTrips, stops)
     }
 
+    private fun parseVehicles(reader: JsonReader): List<RawVehicle> {
+        val rawVehicles: MutableList<RawVehicle> = mutableListOf()
+
+        reader.beginArray()
+        while (!isCancelled() && reader.hasNext()) {
+            reader.beginObject()
+            var tripId: String? = null
+            var directionId: Int? = null
+            var directionText: String? = null
+            var locationTime: Int? = null
+            var routeId: String? = null
+            var terminal: String? = null
+            var latitude: Double? = null
+            var longitude: Double? = null
+            var bearing: Double? = null
+            var odometer: Double? = null
+            var speed: Double? = null
+            while (reader.hasNext()) {
+                val name = reader.nextName()
+                if (reader.peek() == JsonToken.NULL)
+                    reader.skipValue()
+                else
+                    when (name) {
+                        "trip_id" -> tripId = reader.nextString()
+                        "direction_id" -> directionId = reader.nextInt()
+                        "direction" -> directionText = reader.nextString()
+                        "location_time" -> locationTime = reader.nextInt()
+                        "route_id" -> routeId = reader.nextString()
+                        "terminal" -> terminal = reader.nextString()
+                        "latitude" -> latitude = reader.nextDouble()
+                        "longitude" -> longitude = reader.nextDouble()
+                        "bearing" -> bearing = reader.nextDouble()
+                        "odometer" -> odometer = reader.nextDouble()
+                        "speed" -> speed = reader.nextDouble()
+                        else -> reader.skipValue()
+                    }
+            }
+            if (tripId != null && directionId != null && routeId != null
+                && latitude != null && longitude != null) {
+                rawVehicles.add(RawVehicle(tripId, directionId, directionText,
+                                           locationTime, routeId, terminal,
+                                           latitude, longitude, bearing,
+                                           odometer, speed))
+            }
+            reader.endObject()
+        }
+        reader.endArray()
+
+        return rawVehicles
+    }
 }
