@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019,2021 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2021-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -31,16 +31,17 @@ import java.util.*
 
 class DownloadTimepointDeparturesTask(private val mDownloadedListener: DownloadNexTripsTask.OnDownloadedNexTripsListener,
                                       private val mRouteId: String, private val mDirectionId: Int,
-	                                  private val mTimestopId: String) : AsyncTask<Void, Int, Void>() {
+                                      private val mTimestopId: String) : AsyncTask<Void, Int, Void>(),
+                                      DownloadNexTripsTask.OnDownloadedNexTripsListener {
     private var mError: MetroTransitDownloader.DownloadError? = null
-    private var mNexTrips: List<NexTrip>? = null
+    private var mStop: Stop? = null
 
     override fun doInBackground(vararg params: Void): Void? {
-        var rawNexTrips: List<RawNexTrip>? = null
+        var stops: List<Stop>? = null
 
         try {
             val reader = MetroTransitDownloader().openJsonReader(MetroTransitDownloader.NexTripOperation.GetTimepointDepartures(mRouteId, mDirectionId, mTimestopId))
-            rawNexTrips = parseNexTrips(reader)
+            stops = parseNexTrips(reader)
             reader.close()
         } catch (e: UnknownHostException) { // probably no internet connection
             mError = MetroTransitDownloader.DownloadError.UnknownHost
@@ -58,9 +59,8 @@ class DownloadTimepointDeparturesTask(private val mDownloadedListener: DownloadN
             mError = MetroTransitDownloader.DownloadError.OtherDownloadError(e.message)
         }
 
-        if (!isCancelled() && rawNexTrips != null) {
-            val time = Calendar.getInstance().timeInMillis / 1000
-            mNexTrips = rawNexTrips.map { NexTrip.from(it, time) }
+        if (!isCancelled() && stops != null && stops.size == 1) {
+            mStop = stops[0]
         }
 
         return null
@@ -69,68 +69,62 @@ class DownloadTimepointDeparturesTask(private val mDownloadedListener: DownloadN
     override fun onPostExecute(result: Void?) {
         if (!isCancelled) {
             mError?.let { mDownloadedListener.onDownloadedNexTripsError(it) }
-            mNexTrips?.let { mDownloadedListener.onDownloadedNexTrips(it, listOf()) }
+            mStop?.let {
+                mDownloadedListener.onDownloadedStop(it)
+                DownloadNexTripsTask(this, it.stopId).execute()
+            }
         }
     }
 
-    private fun parseNexTrips(reader: JsonReader): List<RawNexTrip> {
-        val rawNexTrips: MutableList<RawNexTrip> = mutableListOf()
+    override fun onDownloadedNexTrips(nexTrips: List<NexTrip>, vehicles: List<Vehicle>) {
+        mDownloadedListener.onDownloadedNexTrips(nexTrips, vehicles)
+    }
+
+    override fun onDownloadedStop(stop: Stop) {
+    }
+
+    override fun onDownloadedNexTripsError(err: MetroTransitDownloader.DownloadError) {
+        mDownloadedListener.onDownloadedNexTripsError(err)
+    }
+
+    private fun parseNexTrips(reader: JsonReader): List<Stop> {
+        var stops: MutableList<Stop> = mutableListOf()
 
         reader.beginObject()
         while (!isCancelled() && reader.hasNext()) {
             when (reader.nextName()) {
-                "stops" -> reader.skipValue()
-                "alerts" -> reader.skipValue()
-                "departures" -> {
+                "stops" -> {
                     reader.beginArray()
                     while (!isCancelled() && reader.hasNext()) {
                         reader.beginObject()
-                        var isActual: Boolean = false
-                        var tripId: String? = null
-                        var departureText: String? = null
-                        var departureTime: Long? = null
-                        var description: String? = null
-                        var routeId: String? = null
-                        var routeShortName: String? = null
-                        var directionId: Int? = null
-                        var directionText: String? = null
-                        var terminal: String? = null
-                        var scheduleRelationship: String? = null
+                        var stopId: Int? = null
+                        var stopLat: Double? = null
+                        var stopLon: Double? = null
+                        var stopDesc: String? = null
                         while (reader.hasNext()) {
-                            val name = reader.nextName()
-                            if (reader.peek() == JsonToken.NULL)
-                                reader.skipValue()
-                            else
-                                when (name) {
-                                    "actual" -> isActual = reader.nextBoolean()
-                                    "trip_id" -> tripId = reader.nextString()
-                                    "stop_id" -> reader.skipValue()
-                                    "departure_text" -> departureText = reader.nextString()
-                                    "departure_time" -> departureTime = reader.nextLong()
-                                    "description" -> description = reader.nextString()
-                                    "route_id" -> routeId = reader.nextString()
-                                    "route_short_name" -> routeShortName = reader.nextString()
-                                    "direction_id" -> directionId = reader.nextInt()
-                                    "direction_text" -> directionText = reader.nextString()
-                                    "terminal" -> terminal = reader.nextString()
-                                    "schedule_relationship" -> scheduleRelationship = reader.nextString()
-                                    else -> reader.skipValue()
-                                }
+                            val n = reader.nextName()
+                            when (n) {
+                                "stop_id" -> stopId = reader.nextInt()
+                                "latitude" -> stopLat = reader.nextDouble()
+                                "longitude" -> stopLon = reader.nextDouble()
+                                "description" -> stopDesc = reader.nextString()
+                                else -> reader.skipValue()
+                            }
                         }
-                        rawNexTrips.add(RawNexTrip(isActual, tripId, departureText,
-                                                   departureTime, description, routeId, routeShortName,
-                                                   directionId, directionText, terminal,
-                                                   scheduleRelationship))
+                        if (stopId != null && stopLat != null && stopLon != null) {
+                            stops.add(Stop(stopId, null, stopLat, stopLon, stopDesc))
+                        }
                         reader.endObject()
                     }
                     reader.endArray()
                 }
+                "alerts" -> reader.skipValue()
+                "departures" -> reader.skipValue()
                 else -> reader.skipValue()
             }
         }
         reader.endObject()
 
-        return rawNexTrips
+        return stops
     }
-
 }
