@@ -211,9 +211,9 @@ class PresentableNexTrip(val nexTrip: NexTrip, time: Long, context: Context) {
                  context.resources.getString(R.string.due)
             else
                  minutesUntilDeparture.toString() + " " + context.resources.getString(R.string.minutes)
-            departureTime = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime))
+            departureTime = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime*1000))
         } else {
-            departureText = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime))
+            departureText = DateFormat.getTimeFormat(context).format(Date(nexTrip.departureTime*1000))
             departureTime = null
          }
     }
