@@ -362,7 +362,8 @@ class DbAdapter {
                     db.execSQL("ALTER TABLE filters RENAME COLUMN route TO route_id")
 
                     // stops: removed unused KEY_LAST_UPDATE
-                    db.execSQL("ALTER TABLE stops DROP COLUMN last_update")
+                    // not supported? syntax error near "DROP"
+                    //db.execSQL("ALTER TABLE stops DROP COLUMN last_update")
 
                     // vehicles table: create
                     db.execSQL("""
