@@ -283,7 +283,7 @@ class DbAdapter {
                         val cv = ContentValues().apply {
                             put("direction_id", mapRouteDirectionToDirectionId(directionId))
                         }
-                        db.update("new_fav_stops", cv, null, null)
+                        db.update("fav_timestops", cv, null, null)
                     }
 
                     // last_timestop_update: route ->route_id,
