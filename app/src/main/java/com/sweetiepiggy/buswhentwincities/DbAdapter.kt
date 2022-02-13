@@ -256,7 +256,7 @@ class DbAdapter {
                     )
                 """)
             }
-            // MetroTransit NexTripV2, versionCode 74
+            // MetroTransit NexTripV2, versionCode 78
             if (oldVer < 13) {
                 val mapRouteDirectionToDirectionId = { routeDirection: Int ->
                     when(routeDirection) {
@@ -272,8 +272,24 @@ class DbAdapter {
                 try {
                     // fav_timestops: route ->route_id,
                     //                route_direction -> direction_id
-                    db.execSQL("ALTER TABLE fav_timestops RENAME COLUMN route TO route_id")
-                    db.execSQL("ALTER TABLE fav_timestops RENAME COLUMN route_direction TO direction_id")
+                    db.execSQL("DROP TABLE IF EXISTS new_fav_timestops")
+                    db.execSQL("""
+                               CREATE TABLE new_fav_timestops (
+                                   timestop_id TEXT NOT NULL,
+                                   route_id TEXT,
+                                   direction_id INTEGER NOT NULL,
+                                   stop_description TEXT,
+                                   position INTEGER,
+                                   PRIMARY KEY(timestop_id, route_id, direction_id)
+                               )
+                               """)
+                    db.execSQL("""
+                               INSERT INTO new_fav_timestops (timestop_id, route_id, direction_id, stop_description, position)
+                               SELECT timestop_id, route, route_direction, stop_description, position from fav_timestops
+                               """)
+                    db.execSQL("DROP TABLE fav_timestops")
+                    db.execSQL("ALTER TABLE new_fav_timestops RENAME TO fav_timestops")
+
                     val c =  db.query("fav_timestops",
                         arrayOf("direction_id"),
                         null, null, null, null, null, null)
@@ -359,7 +375,23 @@ class DbAdapter {
                     """)
 
                     // filters: route -> route_id
-                    db.execSQL("ALTER TABLE filters RENAME COLUMN route TO route_id")
+                    db.execSQL("DROP TABLE IF EXISTS new_filters")
+                    db.execSQL("""
+                               CREATE TABLE filters (
+                                   stop_id INTEGER NOT NULL,
+                                   route_id TEXT,
+                                   terminal TEXT,
+                                   do_show BOOLEAN NOT NULL,
+                                   FOREIGN KEY(stop_id) REFERENCES fav_stops(stop_id),
+                                   PRIMARY KEY(stop_id, route_id, terminal)
+                               )
+                               """)
+                    db.execSQL("""
+                               INSERT INTO new_filters (stop_id, route_id, terminal, do_show)
+                               SELECT stop_id, route, terminal, do_show from fav_timestops
+                               """)
+                    db.execSQL("DROP TABLE filters")
+                    db.execSQL("ALTER TABLE new_filters RENAME TO filters")
 
                     // stops: removed unused KEY_LAST_UPDATE
                     // not supported? syntax error near "DROP"
