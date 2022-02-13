@@ -256,7 +256,7 @@ class DbAdapter {
                     )
                 """)
             }
-            // MetroTransit NexTripV2, versionCode 78
+            // MetroTransit NexTripV2, versionCode 79
             if (oldVer < 13) {
                 val mapRouteDirectionToDirectionId = { routeDirection: Int ->
                     when(routeDirection) {
@@ -377,7 +377,7 @@ class DbAdapter {
                     // filters: route -> route_id
                     db.execSQL("DROP TABLE IF EXISTS new_filters")
                     db.execSQL("""
-                               CREATE TABLE filters (
+                               CREATE TABLE new_filters (
                                    stop_id INTEGER NOT NULL,
                                    route_id TEXT,
                                    terminal TEXT,
@@ -388,7 +388,7 @@ class DbAdapter {
                                """)
                     db.execSQL("""
                                INSERT INTO new_filters (stop_id, route_id, terminal, do_show)
-                               SELECT stop_id, route, terminal, do_show from fav_timestops
+                               SELECT stop_id, route, terminal, do_show from filters
                                """)
                     db.execSQL("DROP TABLE filters")
                     db.execSQL("ALTER TABLE new_filters RENAME TO filters")
