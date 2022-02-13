@@ -257,7 +257,7 @@ class DbAdapter {
                 """)
             }
             // MetroTransit NexTripV2, versionCode 74
-            if (oldVer < 12) {
+            if (oldVer < 13) {
                 val mapRouteDirectionToDirectionId = { routeDirection: Int ->
                     when(routeDirection) {
                         1 -> 1 // South
@@ -384,6 +384,7 @@ class DbAdapter {
                     // last_update: no change
                     // shapes: no change
                     // stop_search_history: no change
+                    db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
                 }
@@ -1081,7 +1082,7 @@ class DbAdapter {
         private val INDEX_SHAPES = "index_shapes"
 
         private val DATABASE_NAME = "buswhen.db"
-        private val DATABASE_VERSION = 12
+        private val DATABASE_VERSION = 13
 
         private val DATABASE_CREATE_FAV_STOPS = """
             CREATE TABLE $TABLE_FAV_STOPS (
