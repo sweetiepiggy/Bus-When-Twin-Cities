@@ -79,7 +79,7 @@ class DownloadShapeIdTask(private val mDownloadedListener: OnDownloadedShapeIdLi
 
         nexTrip.tripId?.let { tripId ->
             val tripUrl = ((if (mUseHttps) "https://" else "http://")
-                             + TRIPS_URL + "/tripId")
+                             + TRIPS_URL + "/${tripId}")
             val urlConnection = URL(tripUrl).openConnection()
             val reader = JsonReader(InputStreamReader(urlConnection.inputStream, "utf-8"))
 
