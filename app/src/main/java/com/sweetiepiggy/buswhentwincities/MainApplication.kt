@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+    Copyright (C) 2019,2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
     This file is part of Bus When? (Twin Cities).
 
@@ -22,10 +22,14 @@ package com.sweetiepiggy.buswhentwincities
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.preference.PreferenceManager
+import com.google.android.gms.maps.MapsInitializer
+import com.google.android.gms.maps.MapsInitializer.Renderer
+import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
-class MainApplication : Application() {
+class MainApplication : Application(), OnMapsSdkInitializedCallback {
     override fun onCreate() {
         super.onCreate()
+        MapsInitializer.initialize(applicationContext, Renderer.LATEST, this)
 
         // see: https://developer.android.com/guide/topics/ui/settings/use-saved-values
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -36,5 +40,11 @@ class MainApplication : Application() {
         }
     }
 
+    override fun onMapsSdkInitialized(renderer: MapsInitializer.Renderer) {
+        when (renderer) {
+            Renderer.LATEST -> android.util.Log.d("onMapsSdkInitialized", "latest renderer is used")
+            Renderer.LEGACY -> android.util.Log.d("onMapsSdkInitialized", "legacy renderer is used")
+        }
+    }
 }
 
