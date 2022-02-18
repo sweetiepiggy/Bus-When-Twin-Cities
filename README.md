@@ -1,10 +1,3 @@
-master:
-[![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=master)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
-next:
-[![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=next)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
-feature/osmdroid:
-[![Build Status](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities.svg?branch=feature/osmdroid)](https://travis-ci.com/sweetiepiggy/Bus-When-Twin-Cities)
-
 # Bus When? (Twin Cities)
 
 Check bus arrival times in the Minneapolis–Saint Paul metro area. Enter the
