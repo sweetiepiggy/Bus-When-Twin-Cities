@@ -27,7 +27,7 @@ https://developer.android.com/training/basics/first
 
 ## License
 
-Copyright (C) 2019 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
+Copyright (C) 2019-2022 Sweetie Piggy Apps <sweetiepiggyapps@gmail.com>
 
 Bus When? (Twin Cities) is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
