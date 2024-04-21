@@ -1,14 +1,14 @@
 # Bus When? (Twin Cities) Privacy Policy
 
-Bus When? (Twin Cities) does not collect any personal data from our users.
-
-However, Google does collect information about you when you use Google Play and
-Google Maps. You should review Google's privacy policy at https://policies.google.com/privacy/.
-Some of the information collected by Google is visible to us as it is to any
-other app developer, such as the total number of installs of our app in a given day
-by device model, language, country, etc.
+Bus When? (Twin Cities) uses Google Admob to display ads. The Google
+Mobile Ads SDK collects and shares the following data types
+automatically for advertising, analytics, and fraud prevention
+purposes: IP address, user product interactions, diagnostic
+information, and device and account identifiers. For more information,
+see
+https://developers.google.com/admob/android/privacy/play-data-disclosure#data_collected_and_shared_automatically
 
 Bus When? (Twin Cities) accesses the Metro Transit website to obtain bus arrival
-information. The Metropolitan Council might collect information about you when
-your device accesses their website. You should review their privacy policy at
+information. The Metropolitan Council may collect information about you when
+your device accesses their website. Review their privacy policy at
 https://metrocouncil.org/privacy-policy.aspx
